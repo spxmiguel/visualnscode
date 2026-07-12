@@ -19,6 +19,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
+    "prepare": "node scripts/setup-git-hooks.mjs",
+    "security:audit": "node scripts/audit-repository.mjs",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
     "test:watch": "vitest",

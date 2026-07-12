@@ -45,6 +45,17 @@ Tipos comuns: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci` e
 mensagens genéricas como `update`, `fix` ou `changes`. O repositório deve continuar funcional após
 cada commit.
 
+## Segurança antes do push
+
+O script `pnpm security:audit` verifica os arquivos rastreados em busca de nomes sensíveis e padrões conhecidos de credenciais. O hook versionado em `.githooks/pre-push` executa essa auditoria automaticamente após `pnpm install` configurar o repositório.
+
+Antes de qualquer publicação:
+
+1. revise `git status` e `git diff --cached`;
+2. execute `pnpm security:audit`;
+3. confirme que arquivos locais, bancos, tokens e credenciais estão cobertos pelo `.gitignore`;
+4. se um segredo já entrou no histórico, revogue-o e remova-o de todo o histórico antes do push.
+
 ## Segurança
 
 Não abra issue pública para vulnerabilidades. Siga [SECURITY.md](./SECURITY.md). Qualquer nova
