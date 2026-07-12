@@ -20,6 +20,69 @@ import type {
   WorkflowRunResult,
 } from '@visualnscode/agents/browser';
 
+export interface FileEntry {
+  readonly name: string;
+  readonly path: string;
+  readonly type: 'file' | 'dir';
+  readonly size?: number;
+  readonly modified?: string;
+}
+
+export interface SecretMatch {
+  readonly type: string;
+  readonly line: number;
+  readonly redacted: string;
+}
+
+export type CommandClassification = 'safe' | 'confirm' | 'dangerous' | 'blocked';
+
+export interface GitFileStatus {
+  readonly path: string;
+  readonly staged: boolean;
+  readonly status: string;
+}
+
+export interface GitLogEntry {
+  readonly hash: string;
+  readonly shortHash: string;
+  readonly subject: string;
+  readonly author: string;
+  readonly date: string;
+}
+
+export interface GitBranch {
+  readonly name: string;
+  readonly current: boolean;
+  readonly remote: boolean;
+}
+
+export interface CheckpointSummary {
+  readonly id: string;
+  readonly workspacePath: string;
+  readonly createdAt: string;
+  readonly label: string;
+}
+
+export interface RunnerEvent {
+  readonly type: 'log' | 'error' | 'started' | 'stopped' | 'url';
+  readonly processId: string;
+  readonly payload: string;
+}
+
+export interface ProjectTemplate {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly category: string;
+  readonly tags: readonly string[];
+}
+
+export interface ScaffoldResult {
+  readonly success: boolean;
+  readonly path: string;
+  readonly logs: string[];
+}
+
 declare global {
   interface Window {
     readonly visualnscode?: {
@@ -59,6 +122,54 @@ declare global {
         cancel(runId: string): Promise<boolean>;
         approve(runId: string, actionId: string, approved: boolean): Promise<boolean>;
         onEvent(listener: (event: WorkflowEvent) => void): () => void;
+      };
+      readonly fs: {
+        openFolder(): Promise<string | null>;
+        setWorkspace(p: string): Promise<boolean>;
+        getWorkspace(): Promise<string | null>;
+        listDir(relative: string): Promise<readonly FileEntry[]>;
+        readFile(relative: string): Promise<string>;
+        writeFile(relative: string, content: string): Promise<void>;
+        createDir(relative: string): Promise<void>;
+        delete(relative: string): Promise<void>;
+        rename(oldPath: string, newPath: string): Promise<void>;
+        scanSecrets(filename: string, content: string): Promise<readonly SecretMatch[]>;
+        redact(content: string): Promise<string>;
+        classifyCommand(command: string): Promise<CommandClassification>;
+      };
+      readonly checkpoint: {
+        create(label: string, files: unknown): Promise<string>;
+        list(): Promise<readonly CheckpointSummary[]>;
+        restore(id: string): Promise<unknown>;
+        remove(id: string): Promise<void>;
+      };
+      readonly git: {
+        isRepo(): Promise<boolean>;
+        status(): Promise<{ branch: string; files: readonly GitFileStatus[] }>;
+        diff(staged: boolean): Promise<string>;
+        stage(paths: string[]): Promise<void>;
+        unstage(paths: string[]): Promise<void>;
+        commit(message: string): Promise<string>;
+        log(limit?: number): Promise<readonly GitLogEntry[]>;
+        branches(): Promise<readonly GitBranch[]>;
+        checkout(branch: string): Promise<void>;
+        createBranch(name: string): Promise<void>;
+        stash(message?: string): Promise<void>;
+        stashPop(): Promise<void>;
+      };
+      readonly runner: {
+        detect(): Promise<{ manager: string; devCommand: string; buildCommand: string; testCommand: string; port: number | null } | null>;
+        start(processId: string, command: string): void;
+        stop(processId: string): Promise<boolean>;
+        isRunning(processId: string): Promise<boolean>;
+        onEvent(listener: (event: RunnerEvent) => void): () => void;
+      };
+      readonly scaffold: {
+        templates(): Promise<readonly ProjectTemplate[]>;
+        chooseDir(): Promise<string | null>;
+        create(templateId: string, projectPath: string, projectName: string): void;
+        onLog(listener: (msg: string) => void): () => void;
+        onDone(listener: (result: ScaffoldResult) => void): () => void;
       };
     };
   }

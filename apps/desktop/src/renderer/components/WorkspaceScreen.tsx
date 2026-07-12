@@ -82,6 +82,18 @@ export function WorkspaceScreen() {
         setStatus('Preview atualizado agora');
         setRightPanel('preview');
       }
+      if (event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        const file = useWorkspaceStore.getState().files.find(
+          (f) => f.id === useWorkspaceStore.getState().activeFileId,
+        );
+        if (file?.path) {
+          void window.visualnscode?.fs
+            .writeFile(file.path, file.content)
+            .then(() => setStatus(`Salvo: ${file.name}`))
+            .catch(() => setStatus('Erro ao salvar'));
+        }
+      }
     };
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
