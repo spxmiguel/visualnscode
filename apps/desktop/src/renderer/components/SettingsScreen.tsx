@@ -2,6 +2,7 @@ import { Bell, Bot, MonitorCog, Palette, ShieldCheck } from 'lucide-react';
 import { SegmentedControl, Surface } from '@visualnscode/ui';
 import { useAppStore } from '../store';
 import { WindowHeader } from './WindowHeader';
+import { ModelSettings } from './settings/ModelSettings';
 
 export function SettingsScreen() {
   const mode = useAppStore((state) => state.mode);
@@ -15,7 +16,7 @@ export function SettingsScreen() {
     <div className="flex h-screen flex-col bg-[rgb(var(--background))] text-[rgb(var(--text))]">
       <WindowHeader onBack={() => navigate('home')} showSettings={false} />
       <main className="min-h-0 flex-1 overflow-auto">
-        <div className="mx-auto max-w-3xl px-6 py-10">
+        <div className="mx-auto max-w-5xl px-6 py-10">
           <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
           <p className="mt-2 text-sm text-[rgb(var(--text-muted))]">
             Ajuste a experiência sem interromper seu fluxo.
@@ -91,12 +92,9 @@ export function SettingsScreen() {
               />
             </Surface>
 
+            <ModelSettings />
+
             {[
-              {
-                icon: Bot,
-                title: 'Modelos e agentes',
-                text: 'Será habilitado ao conectar o primeiro provider.',
-              },
               {
                 icon: ShieldCheck,
                 title: 'Permissões',
