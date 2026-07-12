@@ -4,6 +4,7 @@ import {
   GitHubIntegration,
   PermissionManager,
   SystemCommandRunner,
+  VercelIntegration,
   getToolDefinition,
   toolCatalog,
   type PermissionId,
@@ -43,6 +44,7 @@ export class EnvironmentService {
     const integration = new GenericToolIntegration(definition, this.runner);
     if (request.toolId === 'github') return this.performGitHub(request);
     if (request.toolId === 'firebase') return this.performFirebase(request);
+    if (request.toolId === 'vercel') return this.performVercel(request);
     if (request.action === 'test') return integration.test();
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
@@ -109,5 +111,32 @@ export class EnvironmentService {
     if (operation === 'select') return integration.selectProject(projectId, cwd);
     if (operation === 'initialize') return integration.initialize(projectId, cwd);
     return { ok: false, message: 'Operação Firebase não reconhecida.' };
+  }
+
+  private async performVercel(request: ToolActionRequest): Promise<ToolActionResult> {
+    const integration = new VercelIntegration(this.runner);
+    if (request.action === 'test') return integration.test();
+    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.action === 'install') {
+      if (!this.permissions.has('install-dependencies'))
+        return { ok: false, message: 'Autorize instalações antes de continuar.' };
+      return integration.install();
+    }
+    if (!this.permissions.has('credentials'))
+      return { ok: false, message: 'Autorize o acesso a credenciais antes de continuar.' };
+    if (request.action === 'authenticate') return integration.authenticate();
+    if (request.action !== 'configure')
+      return { ok: false, message: 'Ação Vercel não reconhecida.' };
+    const operation = request.parameters?.operation;
+    if (operation === 'projects') return integration.listProjects();
+    if (!this.permissions.has('write'))
+      return { ok: false, message: 'Autorize escrita no projeto antes de continuar.' };
+    const cwd = String(request.parameters?.trustedWorkspacePath ?? '');
+    const name = String(request.parameters?.projectName ?? '');
+    if (operation === 'link') return integration.link(name, cwd);
+    if (operation === 'create') return integration.create(name, cwd);
+    if (operation === 'preview') return integration.deploy(cwd, false);
+    if (operation === 'production') return integration.deploy(cwd, true);
+    return { ok: false, message: 'Operação Vercel não reconhecida.' };
   }
 }

@@ -22,6 +22,7 @@ import { AppMark } from '../AppMark';
 import { FirebaseSetup } from './FirebaseSetup';
 import { GitHubSetup } from './GitHubSetup';
 import { ToolCard } from './ToolCard';
+import { VercelSetup } from './VercelSetup';
 
 const steps = [
   { title: 'Boas-vindas', subtitle: 'Vamos preparar seu computador', tools: [] },
@@ -214,6 +215,7 @@ export function OnboardingScreen() {
             {stepIndex === 9 ? <ProviderNotice /> : null}
             {stepIndex === 3 ? <GitHubSetup /> : null}
             {stepIndex === 6 ? <FirebaseSetup /> : null}
+            {stepIndex === 7 ? <VercelSetup /> : null}
             {stepIndex === 11 ? <Summary counts={counts} mode={mode} /> : null}
           </div>
         </div>
