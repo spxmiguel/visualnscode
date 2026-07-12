@@ -17,6 +17,9 @@ fatias verticais pequenas; nenhuma fase autoriza a implementação antecipada de
 
 **Objetivo:** tornar o editor útil sem IA.
 
+A composição visual, os modos de experiência, temas, painéis e estados foram antecipados como uma
+fatia de interface demonstrativa. Os itens abaixo continuam pendentes porque dependem de IPC real.
+
 - abertura de pasta por diálogo nativo;
 - árvore de arquivos, abas, edição e salvamento;
 - busca básica e preferências de editor;

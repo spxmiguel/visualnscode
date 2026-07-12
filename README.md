@@ -4,8 +4,9 @@ O **VisualnsCode** é uma IDE desktop orientada por IA, inspirada na familiarida
 mas projetada para reduzir a complexidade inicial. A proposta é reunir editor, agentes, CLIs,
 providers de IA, automações e serviços de deploy em uma interface coerente e segura.
 
-> Estado: fundação técnica (`0.1.0`). O shell desktop e a landing page são executáveis, mas não
-> há integração real com IA, terminal, persistência ou deploy nesta fase.
+> Estado: interface inicial (`0.2.0-dev`). O desktop oferece tela inicial, configurações e um
+> workspace demonstrativo completo. Ainda não há integração real com IA, filesystem, terminal,
+> persistência de projeto ou deploy.
 
 ## Problema que resolve
 
@@ -81,6 +82,9 @@ pnpm dev
 # Somente a landing page
 pnpm dev:landing
 
+# Catálogo leve dos componentes de packages/ui
+pnpm dev:ui
+
 # Verificações locais
 pnpm lint
 pnpm typecheck
@@ -98,11 +102,12 @@ e use Conventional Commits. Mudanças arquiteturais relevantes devem incluir um 
 ## Roadmap resumido
 
 1. fundação do monorepo, shell, qualidade e documentação — **concluída**;
-2. workspace local, arquivos, busca e preferências;
-3. terminal seguro e persistência local;
-4. primeira integração de IA através da camada de providers;
-5. agentes, integrações de deploy e colaboração;
-6. empacotamento, atualização automática, acessibilidade e hardening.
+2. interface do workspace, temas, modos e componentes — **concluída**;
+3. workspace local real, arquivos, busca e preferências;
+4. terminal seguro e persistência local;
+5. primeira integração de IA através da camada de providers;
+6. agentes, integrações de deploy e colaboração;
+7. empacotamento, atualização automática, acessibilidade e hardening.
 
 Consulte [ROADMAP.md](./ROADMAP.md) e o [plano de desenvolvimento](./docs/development-plan.md) para
 critérios de saída e dependências entre fases.

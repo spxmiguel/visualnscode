@@ -13,3 +13,10 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 - contratos iniciais de core, agents, providers e integrations, sem IA real;
 - lint, formatação, typecheck, testes Vitest, smoke test Playwright e CI;
 - documentação de arquitetura, roadmap, governança e ADRs iniciais.
+- tela inicial com projetos recentes e ações guiadas;
+- configurações com temas claro/escuro persistidos e modos simples/avançado;
+- workspace responsivo com Monaco, explorador, abas, chat e preview demonstrativos;
+- painéis redimensionáveis para ferramentas avançadas, terminal, tarefas, logs, Git e permissões;
+- seletores locais de agente e modelo, atalhos e estados vazio, carregando e erro;
+- componentes compartilhados em `packages/ui` e catálogo visual leve em `apps/ui-docs`;
+- testes de interação para painéis, temas, modos, arquivos e abas.

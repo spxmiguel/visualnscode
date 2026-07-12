@@ -10,7 +10,17 @@ pesquisa com usuários e revisão de segurança.
 - [x] limites de packages e ADRs;
 - [x] lint, typecheck, testes, build e CI.
 
-## Próximo — Editor local
+## Interface inicial 0.2
+
+- [x] tela inicial, projetos recentes e configurações;
+- [x] identidade visual própria com temas claro e escuro;
+- [x] workspace em modos simples e avançado;
+- [x] Monaco, abas e estados de interface;
+- [x] explorador, chat, preview e painéis redimensionáveis demonstrativos;
+- [x] catálogo visual de componentes reutilizáveis;
+- [x] testes de interação do workspace.
+
+## Próximo — Workspace local real
 
 - [ ] abrir e gerenciar workspaces;
 - [ ] explorer, abas, salvar e busca;

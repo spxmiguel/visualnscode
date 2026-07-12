@@ -28,17 +28,18 @@ risco a processos utilitários.
 
 ## Responsabilidades dos pacotes
 
-| Pacote         | Responsabilidade                            | Não deve conhecer               |
-| -------------- | ------------------------------------------- | ------------------------------- |
-| `types`        | contratos de dados estáveis e serializáveis | Electron, React, SDKs           |
-| `core`         | regras de domínio puras                     | UI e adapters concretos         |
-| `agents`       | lifecycle e orquestração futura             | componentes React               |
-| `providers`    | portas e catálogo de capacidades de IA      | telas e credenciais em claro    |
-| `integrations` | portas para CLI, deploy e source control    | implementação do renderer       |
-| `config`       | constantes e configuração compartilhada     | segredos                        |
-| `ui`           | componentes visuais sem regra de domínio    | filesystem e processos          |
-| `apps/desktop` | composição Electron e experiência local     | lógica específica de fornecedor |
-| `apps/landing` | presença web e comunicação pública          | APIs privilegiadas desktop      |
+| Pacote         | Responsabilidade                             | Não deve conhecer               |
+| -------------- | -------------------------------------------- | ------------------------------- |
+| `types`        | contratos de dados estáveis e serializáveis  | Electron, React, SDKs           |
+| `core`         | regras de domínio puras                      | UI e adapters concretos         |
+| `agents`       | lifecycle e orquestração futura              | componentes React               |
+| `providers`    | portas e catálogo de capacidades de IA       | telas e credenciais em claro    |
+| `integrations` | portas para CLI, deploy e source control     | implementação do renderer       |
+| `config`       | constantes e configuração compartilhada      | segredos                        |
+| `ui`           | componentes visuais sem regra de domínio     | filesystem e processos          |
+| `apps/desktop` | composição Electron e experiência local      | lógica específica de fornecedor |
+| `apps/landing` | presença web e comunicação pública           | APIs privilegiadas desktop      |
+| `apps/ui-docs` | catálogo leve dos componentes compartilhados | regras de domínio               |
 
 Fluxo de dependência permitido: `apps -> features/adapters -> ports/core -> types`. Dependências
 circulares entre pacotes são proibidas.
@@ -66,3 +67,6 @@ lazy loading reduz custo inicial; filas com cancelamento e backpressure limitam 
 - smoke tests de artefatos empacotados nas plataformas suportadas.
 
 Decisões com trade-offs duradouros estão registradas em [`decisions`](./decisions/README.md).
+
+Detalhes da composição visual e seus estados estão em
+[`desktop-interface.md`](./desktop-interface.md).
