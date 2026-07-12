@@ -117,10 +117,55 @@ export function AgentWorkspace() {
               {currentWorkflow.description}
             </p>
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-[rgb(var(--text-muted))]">
-            <span>até ${currentWorkflow.maxCostUsd.toFixed(2)}</span>
-            <span>{currentWorkflow.maxSteps} passos</span>
-            <span>{Math.round(currentWorkflow.timeoutMs / 60000)} min</span>
+          <div className="flex items-center gap-2 text-[9px] text-[rgb(var(--text-muted))]">
+            <label>
+              Custo $
+              <input
+                aria-label="Limite de custo da equipe"
+                className="ml-1 w-14 rounded bg-[rgb(var(--surface-sunken))] px-1.5 py-1"
+                min="0"
+                onChange={(event) =>
+                  useAgentStore.getState().updateWorkflow({
+                    ...currentWorkflow,
+                    maxCostUsd: Number(event.target.value),
+                  })
+                }
+                step="0.5"
+                type="number"
+                value={currentWorkflow.maxCostUsd}
+              />
+            </label>
+            <label>
+              Passos
+              <input
+                aria-label="Limite de passos da equipe"
+                className="ml-1 w-12 rounded bg-[rgb(var(--surface-sunken))] px-1.5 py-1"
+                min="1"
+                onChange={(event) =>
+                  useAgentStore
+                    .getState()
+                    .updateWorkflow({ ...currentWorkflow, maxSteps: Number(event.target.value) })
+                }
+                type="number"
+                value={currentWorkflow.maxSteps}
+              />
+            </label>
+            <label>
+              Min
+              <input
+                aria-label="Limite de tempo da equipe em minutos"
+                className="ml-1 w-12 rounded bg-[rgb(var(--surface-sunken))] px-1.5 py-1"
+                min="1"
+                onChange={(event) =>
+                  useAgentStore.getState().updateWorkflow({
+                    ...currentWorkflow,
+                    timeoutMs: Number(event.target.value) * 60_000,
+                  })
+                }
+                type="number"
+                value={Math.round(currentWorkflow.timeoutMs / 60_000)}
+              />
+            </label>
           </div>
         </div>
         <div

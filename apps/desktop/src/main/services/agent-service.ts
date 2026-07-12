@@ -147,9 +147,11 @@ class ProviderAgentExecutor implements AgentExecutor {
 
 export class AgentService {
   private readonly historyPath = join(app.getPath('userData'), 'agent-history.json');
+  private readonly memoryPath = join(app.getPath('userData'), 'agent-memory.json');
   private readonly engines = new Map<string, WorkflowEngine>();
   private readonly approvals = new Map<string, PendingApproval>();
   private readonly memories = new Map<string, string[]>();
+  private memoriesLoaded = false;
 
   constructor(private readonly providers: ProviderService) {}
 
@@ -157,11 +159,12 @@ export class AgentService {
     request: AgentRunRequest,
     onEvent: (event: WorkflowEvent) => void,
   ): Promise<WorkflowRunResult> {
+    await this.loadMemories();
     const executor = new ProviderAgentExecutor(
       this.providers,
       (input, action, decision) => this.requestApproval(input, action, decision, onEvent),
-      (agent) => this.memories.get(agent.id) ?? [],
-      (agent, output) => this.remember(agent, output),
+      (agent) => this.memories.get(this.memoryKey(request.runId, agent)) ?? [],
+      (agent, output) => this.remember(request.runId, agent, output),
     );
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);
@@ -172,10 +175,14 @@ export class AgentService {
         onEvent,
       });
       await this.saveHistory(result);
+      await this.saveMemories();
       return result;
     } finally {
       this.engines.delete(request.runId);
       this.resolveRunApprovals(request.runId, false);
+      for (const key of this.memories.keys()) {
+        if (key.startsWith(`run:${request.runId}:`)) this.memories.delete(key);
+      }
     }
   }
 
@@ -234,10 +241,43 @@ export class AgentService {
     }
   }
 
-  private remember(agent: AgentDefinition, output: string): void {
+  private remember(runId: string, agent: AgentDefinition, output: string): void {
     if (!agent.memory.enabled || !output) return;
-    const current = this.memories.get(agent.id) ?? [];
-    this.memories.set(agent.id, [...current, output].slice(-agent.memory.maxEntries));
+    const key = this.memoryKey(runId, agent);
+    const current = this.memories.get(key) ?? [];
+    this.memories.set(key, [...current, output].slice(-agent.memory.maxEntries));
+  }
+
+  private memoryKey(runId: string, agent: AgentDefinition): string {
+    return agent.memory.scope === 'project' ? `project:${agent.id}` : `run:${runId}:${agent.id}`;
+  }
+
+  private async loadMemories(): Promise<void> {
+    if (this.memoriesLoaded) return;
+    this.memoriesLoaded = true;
+    try {
+      const stored = JSON.parse(await readFile(this.memoryPath, 'utf8')) as Record<
+        string,
+        string[]
+      >;
+      for (const [key, entries] of Object.entries(stored)) {
+        if (!key.startsWith('project:') || !Array.isArray(entries)) continue;
+        this.memories.set(key, entries.filter((entry) => typeof entry === 'string').slice(-100));
+      }
+    } catch {
+      // A primeira execução ainda não possui memória persistida.
+    }
+  }
+
+  private async saveMemories(): Promise<void> {
+    const projectMemories = Object.fromEntries(
+      [...this.memories].filter(([key]) => key.startsWith('project:')),
+    );
+    await mkdir(dirname(this.memoryPath), { recursive: true });
+    await writeFile(this.memoryPath, JSON.stringify(projectMemories, null, 2), {
+      encoding: 'utf8',
+      mode: 0o600,
+    });
   }
 
   private async saveHistory(result: WorkflowRunResult): Promise<void> {
