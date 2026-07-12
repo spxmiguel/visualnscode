@@ -82,6 +82,9 @@ export interface AgentAction {
   readonly command?: string;
   readonly tool?: AgentTool;
   readonly risk: 'safe' | 'important' | 'destructive';
+  readonly status?: 'requested' | 'approved' | 'denied' | 'executed';
+  readonly requiresApproval?: boolean;
+  readonly decisionReason?: string;
 }
 
 export interface ActionDecision {
@@ -158,6 +161,13 @@ export type WorkflowEvent =
       readonly agentId: string;
       readonly message: string;
       readonly attempt: number;
+    }
+  | {
+      readonly type: 'action-requested';
+      readonly runId: string;
+      readonly nodeId: string;
+      readonly agentId: string;
+      readonly action: AgentAction;
     }
   | {
       readonly type: 'log';

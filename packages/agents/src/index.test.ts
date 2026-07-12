@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { builtInAgents } from './defaults';
 import { FakeAgentExecutor } from './fake-executor';
 import { decideAgentAction } from './policy';
+import { parseAgentOutput } from './protocol';
 import { teamTemplates } from './templates';
 import { WorkflowEngine, workflowStages } from './workflow-engine';
 
@@ -42,6 +43,16 @@ describe('política de autonomia', () => {
         risk: 'important',
       }).requiresApproval,
     ).toBe(true);
+  });
+});
+
+describe('protocolo de ações', () => {
+  it('extrai ações estruturadas sem exibir o bloco de controle', () => {
+    const parsed = parseAgentOutput(
+      'Resumo final.\n<visualnscode-actions>[{"type":"command","description":"Testar","command":"pnpm test","risk":"safe"}]</visualnscode-actions>',
+    );
+    expect(parsed.output).toBe('Resumo final.');
+    expect(parsed.actions[0]?.command).toBe('pnpm test');
   });
 });
 
