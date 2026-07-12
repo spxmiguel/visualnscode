@@ -4,7 +4,7 @@ import type {
   ToolActionRequest,
   ToolActionResult,
   ToolDetectionResult,
-} from '@visualnscode/integrations';
+} from '@visualnscode/integrations/browser';
 
 declare global {
   interface Window {

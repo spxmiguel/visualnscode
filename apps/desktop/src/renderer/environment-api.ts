@@ -4,7 +4,7 @@ import {
   type ToolActionRequest,
   type ToolActionResult,
   type ToolDetectionResult,
-} from '@visualnscode/integrations';
+} from '@visualnscode/integrations/browser';
 
 const unavailable = (toolId: string): ToolDetectionResult => {
   return {

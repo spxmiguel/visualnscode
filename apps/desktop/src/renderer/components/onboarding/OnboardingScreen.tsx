@@ -15,10 +15,11 @@ import {
   toolCatalog,
   type PermissionState,
   type ToolDetectionResult,
-} from '@visualnscode/integrations';
+} from '@visualnscode/integrations/browser';
 import { environmentApi } from '../../environment-api';
 import { useAppStore } from '../../store';
 import { AppMark } from '../AppMark';
+import { GitHubSetup } from './GitHubSetup';
 import { ToolCard } from './ToolCard';
 
 const steps = [
@@ -210,6 +211,7 @@ export function OnboardingScreen() {
               </div>
             ) : null}
             {stepIndex === 9 ? <ProviderNotice /> : null}
+            {stepIndex === 3 ? <GitHubSetup /> : null}
             {stepIndex === 11 ? <Summary counts={counts} mode={mode} /> : null}
           </div>
         </div>

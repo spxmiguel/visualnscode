@@ -8,7 +8,7 @@ import {
   SkipForward,
 } from 'lucide-react';
 import { Button, Spinner } from '@visualnscode/ui';
-import { toolCatalog, type ToolDetectionResult } from '@visualnscode/integrations';
+import { toolCatalog, type ToolDetectionResult } from '@visualnscode/integrations/browser';
 
 interface ToolCardProps {
   readonly result?: ToolDetectionResult | undefined;
