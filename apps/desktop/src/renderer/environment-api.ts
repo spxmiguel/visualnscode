@@ -79,4 +79,7 @@ export const environmentApi = window.visualnscode?.environment ?? {
   permissions: async () => fallbackPermissions,
   setPermission: async () => fallbackPermissions,
   openDocumentation: async () => false,
+  secretStatus: async () => ({ available: false, configured: false }),
+  storeSecret: async () => false,
+  removeSecret: async () => false,
 };

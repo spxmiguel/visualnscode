@@ -21,6 +21,7 @@ import { useAppStore } from '../../store';
 import { AppMark } from '../AppMark';
 import { FirebaseSetup } from './FirebaseSetup';
 import { GitHubSetup } from './GitHubSetup';
+import { ProviderSetup } from './ProviderSetup';
 import { ToolCard } from './ToolCard';
 import { SupabaseSetup } from './SupabaseSetup';
 import { VercelSetup } from './VercelSetup';
@@ -214,6 +215,7 @@ export function OnboardingScreen() {
               </div>
             ) : null}
             {stepIndex === 9 ? <ProviderNotice /> : null}
+            {stepIndex === 9 ? <ProviderSetup /> : null}
             {stepIndex === 3 ? <GitHubSetup /> : null}
             {stepIndex === 6 ? <FirebaseSetup /> : null}
             {stepIndex === 7 ? <VercelSetup /> : null}

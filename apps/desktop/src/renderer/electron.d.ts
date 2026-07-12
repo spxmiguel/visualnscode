@@ -18,6 +18,9 @@ declare global {
         permissions(): Promise<readonly PermissionState[]>;
         setPermission(id: PermissionId, granted: boolean): Promise<readonly PermissionState[]>;
         openDocumentation(toolId: string): Promise<boolean>;
+        secretStatus(providerId: string): Promise<{ available: boolean; configured: boolean }>;
+        storeSecret(providerId: string, secret: string): Promise<boolean>;
+        removeSecret(providerId: string): Promise<boolean>;
       };
     };
   }

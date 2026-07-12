@@ -8,6 +8,7 @@ export function SettingsScreen() {
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
   const setTheme = useAppStore((state) => state.setTheme);
+  const restartOnboarding = useAppStore((state) => state.restartOnboarding);
   const theme = useAppStore((state) => state.theme);
 
   return (
@@ -21,6 +22,27 @@ export function SettingsScreen() {
           </p>
 
           <div className="mt-8 space-y-4">
+            <Surface
+              className="flex flex-col justify-between gap-5 p-5 sm:flex-row sm:items-center"
+              elevated
+            >
+              <div className="flex gap-3">
+                <Bot className="mt-0.5 size-5 text-[rgb(var(--accent))]" />
+                <div>
+                  <h2 className="text-sm font-semibold">Assistente de ambiente</h2>
+                  <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">
+                    Verifique novamente Git, runtimes, deploys e agentes.
+                  </p>
+                </div>
+              </div>
+              <button
+                className="rounded-lg border border-[rgb(var(--border))] px-3 py-2 text-xs font-medium hover:bg-[rgb(var(--surface-hover))]"
+                onClick={restartOnboarding}
+                type="button"
+              >
+                Executar novamente
+              </button>
+            </Surface>
             <Surface
               className="flex flex-col justify-between gap-5 p-5 sm:flex-row sm:items-center"
               elevated

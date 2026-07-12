@@ -6,7 +6,7 @@ export class SecureStorage {
   private readonly filePath = join(app.getPath('userData'), 'secure-store.json');
 
   async set(key: string, value: string): Promise<void> {
-    if (!safeStorage.isEncryptionAvailable())
+    if (!this.isSecureAvailable())
       throw new Error('O cofre seguro do sistema não está disponível.');
     const entries = await this.readEntries();
     entries[key] = safeStorage.encryptString(value).toString('base64');
@@ -15,10 +15,15 @@ export class SecureStorage {
   }
 
   async get(key: string): Promise<string | null> {
-    if (!safeStorage.isEncryptionAvailable()) return null;
+    if (!this.isSecureAvailable()) return null;
     const value = (await this.readEntries())[key];
     if (!value) return null;
     return safeStorage.decryptString(Buffer.from(value, 'base64'));
+  }
+
+  isSecureAvailable(): boolean {
+    if (!safeStorage.isEncryptionAvailable()) return false;
+    return process.platform !== 'linux' || safeStorage.getSelectedStorageBackend() !== 'basic_text';
   }
 
   async remove(key: string): Promise<void> {

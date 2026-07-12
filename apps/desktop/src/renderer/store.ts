@@ -24,6 +24,7 @@ interface AppState {
   readonly clearError: () => void;
   readonly completeOnboarding: () => void;
   readonly navigate: (screen: AppScreen) => void;
+  readonly restartOnboarding: () => void;
   readonly openProject: (project: RecentProject) => void;
   readonly setError: (error: string | null) => void;
   readonly setMode: (mode: ExperienceMode) => void;
@@ -68,6 +69,7 @@ export const useAppStore = create<AppState>()(
       clearError: () => set({ error: null }),
       completeOnboarding: () => set({ onboardingCompleted: true, screen: 'home' }),
       navigate: (screen) => set({ screen, error: null }),
+      restartOnboarding: () => set({ onboardingCompleted: false }),
       openProject: (project) => set({ activeProject: project, screen: 'workspace', error: null }),
       setError: (error) => set({ error }),
       setMode: (mode) => set({ mode }),
