@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type AppScreen = 'home' | 'settings' | 'workspace';
 export type ExperienceMode = 'simple' | 'advanced';
@@ -73,6 +73,7 @@ export const useAppStore = create<AppState>()(
     {
       name: 'visualnscode-preferences',
       partialize: ({ mode, theme }) => ({ mode, theme }),
+      storage: createJSONStorage(() => window.localStorage),
       version: 1,
     },
   ),

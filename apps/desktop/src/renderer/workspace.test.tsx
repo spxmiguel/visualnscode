@@ -1,0 +1,107 @@
+// @vitest-environment jsdom
+
+import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { App } from './App';
+import { WorkspaceScreen } from './components/WorkspaceScreen';
+import { demoProjects, useAppStore } from './store';
+import { useWorkspaceStore } from './workspace-store';
+
+vi.mock('@monaco-editor/react', () => ({
+  default: ({ onChange, value }: { onChange?: (value: string) => void; value?: string }) => (
+    <textarea
+      aria-label="Mock Monaco editor"
+      onChange={(event) => onChange?.(event.target.value)}
+      value={value ?? ''}
+    />
+  ),
+}));
+
+beforeEach(() => {
+  window.localStorage.clear();
+  useAppStore.setState({
+    activeProject: demoProjects[0] ?? null,
+    error: null,
+    mode: 'simple',
+    screen: 'workspace',
+    theme: 'dark',
+  });
+  useWorkspaceStore.setState({
+    activeFileId: 'app',
+    activeTool: 'files',
+    bottomPanel: 'terminal',
+    isBottomOpen: true,
+    isExplorerOpen: true,
+    isRightOpen: true,
+    openTabs: ['app'],
+    rightPanel: 'chat',
+  });
+});
+
+afterEach(() => cleanup());
+
+describe('workspace', () => {
+  it('abre e fecha os painéis principais', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceScreen />);
+
+    expect(screen.queryByText('Meu projeto')).not.toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
+    expect(screen.queryByText('Meu projeto')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
+    expect(screen.queryByText('Meu projeto')).not.toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Avançado' }));
+    expect(
+      screen.queryByText('Terminal demonstrativo — comandos locais ainda estão desativados.'),
+    ).not.toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Alternar painel inferior (⌘J)' }));
+    expect(
+      screen.queryByText('Terminal demonstrativo — comandos locais ainda estão desativados.'),
+    ).toBeNull();
+  });
+
+  it('alterna entre os modos simples e avançado', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceScreen />);
+
+    expect(screen.queryByRole('navigation', { name: 'Ferramentas avançadas' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Avançado' }));
+    expect(screen.queryByRole('navigation', { name: 'Ferramentas avançadas' })).not.toBeNull();
+    expect(useAppStore.getState().mode).toBe('advanced');
+  });
+
+  it('abre um arquivo pelo explorador', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceScreen />);
+
+    await user.click(screen.getByRole('button', { name: 'styles.css' }));
+    expect(useWorkspaceStore.getState().activeFileId).toBe('styles');
+    expect(screen.queryByRole('tab', { name: 'styles.css' })).not.toBeNull();
+  });
+
+  it('cria e fecha abas de arquivo', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceScreen />);
+
+    await user.click(screen.getByRole('button', { name: 'README.md' }));
+    expect(useWorkspaceStore.getState().openTabs).toEqual(['app', 'readme']);
+    await user.click(screen.getByRole('button', { name: 'Fechar README.md' }));
+    expect(useWorkspaceStore.getState().openTabs).toEqual(['app']);
+    expect(screen.queryByRole('tab', { name: 'README.md' })).toBeNull();
+  });
+});
+
+describe('tema', () => {
+  it('troca o tema e persiste a preferência', async () => {
+    const user = userEvent.setup();
+    useAppStore.setState({ screen: 'home', theme: 'dark' });
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Usar tema claro' }));
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(useAppStore.getState().theme).toBe('light');
+    expect(window.localStorage.getItem('visualnscode-preferences')).toContain('light');
+  });
+});
