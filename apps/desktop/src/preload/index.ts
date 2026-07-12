@@ -17,6 +17,21 @@ contextBridge.exposeInMainWorld('visualnscode', {
     removeSecret: (providerId: string) =>
       ipcRenderer.invoke('environment:remove-secret', providerId),
   },
+  providers: {
+    list: () => ipcRenderer.invoke('providers:list'),
+    update: (settings: unknown) => ipcRenderer.invoke('providers:update', settings),
+    test: (providerId: string) => ipcRenderer.invoke('providers:test', providerId),
+    models: (providerId: string) => ipcRenderer.invoke('providers:models', providerId),
+  },
+  chat: {
+    start: (payload: unknown) => ipcRenderer.send('chat:start', payload),
+    cancel: (requestId: string) => ipcRenderer.invoke('chat:cancel', requestId),
+    onChunk: (listener: (chunk: unknown) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, chunk: unknown) => listener(chunk);
+      ipcRenderer.on('chat:chunk', handler);
+      return () => ipcRenderer.removeListener('chat:chunk', handler);
+    },
+  },
   versions: {
     chrome: process.versions.chrome,
     electron: process.versions.electron,

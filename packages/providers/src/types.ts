@@ -95,6 +95,12 @@ export interface ProviderSummary extends ProviderDescriptor {
   readonly settings: ProviderSettings;
 }
 
+export interface ProviderConnectionResult {
+  readonly ok: boolean;
+  readonly message: string;
+  readonly models: readonly AIModel[];
+}
+
 export interface AIProvider {
   readonly id: string;
   readonly name: string;

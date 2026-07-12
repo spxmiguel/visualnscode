@@ -5,6 +5,14 @@ import type {
   ToolActionResult,
   ToolDetectionResult,
 } from '@visualnscode/integrations/browser';
+import type {
+  AgentChunk,
+  AgentInput,
+  AIModel,
+  ProviderConnectionResult,
+  ProviderSettings,
+  ProviderSummary,
+} from '@visualnscode/providers/browser';
 
 declare global {
   interface Window {
@@ -21,6 +29,17 @@ declare global {
         secretStatus(providerId: string): Promise<{ available: boolean; configured: boolean }>;
         storeSecret(providerId: string, secret: string): Promise<boolean>;
         removeSecret(providerId: string): Promise<boolean>;
+      };
+      readonly providers: {
+        list(): Promise<readonly ProviderSummary[]>;
+        update(settings: ProviderSettings): Promise<ProviderSettings>;
+        test(providerId: string): Promise<ProviderConnectionResult>;
+        models(providerId: string): Promise<readonly AIModel[]>;
+      };
+      readonly chat: {
+        start(payload: { providerId: string; input: AgentInput }): void;
+        cancel(requestId: string): Promise<void>;
+        onChunk(listener: (chunk: AgentChunk) => void): () => void;
       };
     };
   }
