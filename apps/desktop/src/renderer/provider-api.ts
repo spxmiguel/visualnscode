@@ -15,7 +15,11 @@ const fallbackList = (): readonly ProviderSummary[] =>
     ...descriptor,
     available: descriptor.id === 'ollama',
     configured: descriptor.id === 'ollama',
-    settings: settings.get(descriptor.id) ?? defaultProviderSettings(descriptor),
+    settings:
+      settings.get(descriptor.id) ??
+      (descriptor.id === 'ollama'
+        ? { ...defaultProviderSettings(descriptor), enabled: true, defaultModel: 'modelo-local' }
+        : defaultProviderSettings(descriptor)),
   }));
 
 const fallback = {
