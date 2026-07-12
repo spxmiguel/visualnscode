@@ -8,6 +8,25 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- landing page completa: hero, IDE mockup, integrations ticker, features, modos, agentes, segurança, roadmap, FAQ, CTA e footer;
+- identidade visual própria: novo AppMark SVG (ícone terminal `>_`) substituindo Sparkles genérico;
+- `electron-builder.yml`: empacotamento cross-platform — `.pkg` (macOS arm64/x64), `.AppImage`+`.deb`+`.rpm` (Linux), `.msi`+`.exe` (Windows);
+- executável renomeado para `spxcode` — abrível direto do terminal após instalação;
+- postinstall script macOS cria symlink `/usr/local/bin/spxcode → .app/Contents/MacOS/spxcode`;
+- `scripts/install.sh` — instalador curl para macOS e Linux, detecta OS e arch, sem dependências externas;
+- `scripts/install.ps1` — instalador PowerShell para Windows (cmd, PowerShell, Windows Terminal);
+- workflow `.github/workflows/release.yml` — CI builds em matrix mac/linux/windows, cria GitHub Release com todos os artifacts automaticamente;
+- README completo com ASCII logo, badges CI/release/license/platform, curl install em destaque, tabela de features, stack, estrutura e roadmap.
+
+### Changed
+
+- `README.md` reescrito do zero no estilo lootflow: punchy, install-first, badges, sem placeholder;
+- `apps/desktop/package.json`: scripts `pack`, `release`, `release:mac`, `release:linux`, `release:win` adicionados; `electron-builder ^25` em devDependencies.
+
+## [Unreleased — 0.4.0-dev]
+
+### Added
+
 - monorepo pnpm com desktop, landing e pacotes compartilhados;
 - shell Electron isolado, React, Vite, Tailwind, Monaco e Zustand;
 - contratos iniciais de core, agents, providers e integrations, sem IA real;

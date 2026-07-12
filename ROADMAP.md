@@ -54,12 +54,23 @@ pesquisa com usuários e revisão de segurança.
 - [x] logs sanitizados, cofre do sistema e testes com provider falso;
 - [ ] precificação atualizável por modelo e orçamento acumulado por sessão;
 
+## Empacotamento cross-platform
+
+- [x] `electron-builder` configurado para mac, linux e windows;
+- [x] executável `spxcode` — abrível de qualquer terminal;
+- [x] instaladores: `.pkg` (macOS), `.AppImage`+`.deb` (Linux), `.msi` (Windows);
+- [x] scripts `install.sh` e `install.ps1` detectam OS automaticamente;
+- [x] CI release em matrix macOS / Linux / Windows com GitHub Actions;
+- [ ] assinatura e notarização macOS (`CSC_*` secrets);
+- [ ] assinatura Windows (Code Signing Certificate);
+- [ ] auto-update via `electron-updater`.
+
 ## Futuro — Agentes e ecossistema
 
 - [x] mock provider e primeira integração opt-in;
 - [x] contexto explícito e secrets no keychain;
 - [ ] lifecycle de agentes e ferramentas autorizadas;
 - [ ] source control, deploy e eventos remotos;
-- [ ] empacotamento, assinatura, auto-update e releases.
+- [ ] plugins de terceiros.
 
 Detalhes e critérios de saída: [`docs/development-plan.md`](./docs/development-plan.md).
