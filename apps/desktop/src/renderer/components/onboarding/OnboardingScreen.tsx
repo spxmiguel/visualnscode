@@ -22,6 +22,7 @@ import { AppMark } from '../AppMark';
 import { FirebaseSetup } from './FirebaseSetup';
 import { GitHubSetup } from './GitHubSetup';
 import { ToolCard } from './ToolCard';
+import { SupabaseSetup } from './SupabaseSetup';
 import { VercelSetup } from './VercelSetup';
 
 const steps = [
@@ -216,6 +217,7 @@ export function OnboardingScreen() {
             {stepIndex === 3 ? <GitHubSetup /> : null}
             {stepIndex === 6 ? <FirebaseSetup /> : null}
             {stepIndex === 7 ? <VercelSetup /> : null}
+            {stepIndex === 8 ? <SupabaseSetup /> : null}
             {stepIndex === 11 ? <Summary counts={counts} mode={mode} /> : null}
           </div>
         </div>

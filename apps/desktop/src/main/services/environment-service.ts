@@ -4,6 +4,7 @@ import {
   GitHubIntegration,
   PermissionManager,
   SystemCommandRunner,
+  SupabaseIntegration,
   VercelIntegration,
   getToolDefinition,
   toolCatalog,
@@ -45,6 +46,7 @@ export class EnvironmentService {
     if (request.toolId === 'github') return this.performGitHub(request);
     if (request.toolId === 'firebase') return this.performFirebase(request);
     if (request.toolId === 'vercel') return this.performVercel(request);
+    if (request.toolId === 'supabase') return this.performSupabase(request);
     if (request.action === 'test') return integration.test();
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
@@ -138,5 +140,32 @@ export class EnvironmentService {
     if (operation === 'preview') return integration.deploy(cwd, false);
     if (operation === 'production') return integration.deploy(cwd, true);
     return { ok: false, message: 'Operação Vercel não reconhecida.' };
+  }
+
+  private async performSupabase(request: ToolActionRequest): Promise<ToolActionResult> {
+    const integration = new SupabaseIntegration(this.runner);
+    if (request.action === 'test') return integration.test();
+    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.action === 'install') {
+      if (!this.permissions.has('install-dependencies'))
+        return { ok: false, message: 'Autorize instalações antes de continuar.' };
+      return integration.install();
+    }
+    if (!this.permissions.has('credentials'))
+      return { ok: false, message: 'Autorize o acesso a credenciais antes de continuar.' };
+    if (request.action === 'authenticate') return integration.authenticate();
+    if (request.action !== 'configure')
+      return { ok: false, message: 'Ação Supabase não reconhecida.' };
+    const operation = request.parameters?.operation;
+    if (operation === 'projects') return integration.listProjects();
+    if (!this.permissions.has('write'))
+      return { ok: false, message: 'Autorize escrita no projeto antes de continuar.' };
+    const cwd = String(request.parameters?.trustedWorkspacePath ?? '');
+    const projectRef = String(request.parameters?.projectRef ?? '');
+    if (operation === 'link') return integration.link(projectRef, cwd);
+    if (operation === 'start') return integration.start(cwd);
+    if (operation === 'migrate') return integration.migrate(cwd);
+    if (operation === 'types') return integration.generateTypes(cwd);
+    return { ok: false, message: 'Operação Supabase não reconhecida.' };
   }
 }
