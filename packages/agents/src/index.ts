@@ -1,8 +1,6 @@
-export interface AgentDefinition {
-  readonly id: string;
-  readonly displayName: string;
-  readonly description: string;
-}
-
-// Execution orchestration will be introduced only after the security model is validated.
-export const builtInAgents: readonly AgentDefinition[] = [];
+export * from './defaults';
+export * from './fake-executor';
+export * from './policy';
+export * from './templates';
+export * from './types';
+export * from './workflow-engine';
