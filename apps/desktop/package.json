@@ -7,6 +7,11 @@
   "scripts": {
     "build": "vite build && tsup",
     "dev": "node scripts/dev.mjs",
+    "pack": "pnpm build && electron-builder --dir",
+    "release": "pnpm build && electron-builder",
+    "release:mac": "pnpm build && electron-builder --mac",
+    "release:linux": "pnpm build && electron-builder --linux",
+    "release:win": "pnpm build && electron-builder --win",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
@@ -28,6 +33,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.4.20",
+    "electron-builder": "^25.1.8",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.19",
     "tsup": "^8.5.1",

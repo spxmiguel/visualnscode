@@ -40,6 +40,9 @@ dist/
 dist-electron/
 out/
 build/
+# Allow electron-builder source scripts tracked under apps/desktop/build/
+!apps/desktop/build/
+!apps/desktop/build/**
 .turbo/
 .vite/
 .cache/

@@ -1,0 +1,63 @@
+appId: dev.visualnscode.app
+productName: VisualnsCode
+executableName: spxcode
+copyright: Copyright © 2025-2026 Miguel Moretti
+
+directories:
+  output: ../../release
+  buildResources: build
+
+files:
+  - dist/**
+  - dist-electron/**
+  - "!**/*.map"
+  - "!**/*.d.ts"
+
+# ── macOS ────────────────────────────────────────────────────────
+mac:
+  category: public.app-category.developer-tools
+  darkModeSupport: true
+  hardenedRuntime: false
+  target:
+    - target: pkg
+      arch: [arm64, x64]
+    - target: dmg
+      arch: [arm64, x64]
+
+pkg:
+  scripts: build/scripts/pkg
+
+# ── Linux ────────────────────────────────────────────────────────
+linux:
+  category: Development
+  description: AI-native IDE — Claude, Gemini, GPT and local models in one workspace
+  maintainer: Miguel Moretti <miguel.r.moretti.00@gmail.com>
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64]
+    - target: rpm
+      arch: [x64]
+
+# ── Windows ──────────────────────────────────────────────────────
+win:
+  target:
+    - target: msi
+      arch: [x64]
+    - target: nsis
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  runAfterFinish: false
+  # Add spxcode to PATH so it works from cmd, PowerShell, and Windows Terminal
+  include: build/scripts/nsis/installer.nsh
+
+msi:
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

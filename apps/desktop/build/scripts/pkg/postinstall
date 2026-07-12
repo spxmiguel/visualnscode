@@ -1,0 +1,13 @@
+#!/bin/bash
+# Creates the `spxcode` CLI symlink after macOS pkg install.
+# This lets users type `spxcode` in any terminal to open the GUI app.
+set -euo pipefail
+
+APP="/Applications/VisualnsCode.app/Contents/MacOS/spxcode"
+LINK="/usr/local/bin/spxcode"
+
+mkdir -p "$(dirname "$LINK")"
+ln -sf "$APP" "$LINK"
+chmod +x "$LINK"
+
+echo "spxcode installed at $LINK"
