@@ -10,6 +10,7 @@ import {
 import { Button, ErrorNotice, Spinner, Surface } from '@visualnscode/ui';
 import { useState } from 'react';
 import { demoProjects, useAppStore, type RecentProject } from '../store';
+import { CreateProjectModal } from './CreateProjectModal';
 import { WindowHeader } from './WindowHeader';
 
 interface QuickActionProps {
@@ -70,17 +71,21 @@ export function HomeScreen() {
   const openProject = useAppStore((state) => state.openProject);
   const setError = useAppStore((state) => state.setError);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const createDemoProject = async (kind: 'create' | 'open') => {
-    setLoadingAction(kind);
-    await new Promise((resolve) => window.setTimeout(resolve, 350));
-    openProject({
-      id: kind === 'create' ? 'new-project' : 'opened-folder',
-      name: kind === 'create' ? 'Novo Projeto' : 'Pasta de Exemplo',
-      path: kind === 'create' ? '~/Projetos/novo-projeto' : '~/Projetos/pasta-de-exemplo',
-      lastOpened: 'Agora',
-      color: '#8b6af6',
-    });
+  const openFolder = async () => {
+    setLoadingAction('open');
+    try {
+      const folderPath = await window.visualnscode?.fs.openFolder();
+      if (folderPath) {
+        const name = folderPath.split('/').pop() ?? 'Projeto';
+        openProject({ id: folderPath, name, path: folderPath, lastOpened: 'Agora', color: '#8b6af6' });
+      }
+    } catch {
+      setError('Não foi possível abrir a pasta.');
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   return (
@@ -101,7 +106,7 @@ export function HomeScreen() {
                 Comece algo novo ou continue exatamente de onde parou.
               </p>
             </div>
-            <Button onClick={() => void createDemoProject('create')}>
+            <Button onClick={() => setShowCreateModal(true)}>
               <Plus className="size-4" /> Criar projeto
             </Button>
           </div>
@@ -129,13 +134,13 @@ export function HomeScreen() {
                 description="Uma base limpa e guiada"
                 icon={Plus}
                 label="Novo projeto"
-                onClick={() => void createDemoProject('create')}
+                onClick={() => setShowCreateModal(true)}
               />
               <QuickAction
                 description="Trabalhe em uma pasta local"
                 icon={FolderOpen}
                 label="Abrir pasta"
-                onClick={() => void createDemoProject('open')}
+                onClick={() => void openFolder()}
               />
               <QuickAction
                 description="Disponível ao conectar o GitHub"
@@ -155,6 +160,8 @@ export function HomeScreen() {
               />
             </div>
           </section>
+
+          {showCreateModal ? <CreateProjectModal onClose={() => setShowCreateModal(false)} /> : null}
 
           <section aria-labelledby="recent-title" className="mt-10">
             <div className="mb-3 flex items-center justify-between">
