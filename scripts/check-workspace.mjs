@@ -3,6 +3,7 @@ import { access } from 'node:fs/promises';
 const requiredPaths = [
   'apps/desktop',
   'apps/landing',
+  'apps/ui-docs',
   'packages/ui',
   'packages/core',
   'packages/agents',
