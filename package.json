@@ -21,7 +21,7 @@
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
@@ -33,6 +33,6 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.10"
   }
 }
