@@ -1,0 +1,28 @@
+name: Security issue (non-critical)
+description: Report a non-critical security concern publicly. For critical vulnerabilities use SECURITY.md.
+labels: [security]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **For critical vulnerabilities** (data leaks, credential exposure, RCE) follow the private disclosure process in [SECURITY.md](../SECURITY.md) instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the security concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
