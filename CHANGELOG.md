@@ -20,3 +20,10 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 - seletores locais de agente e modelo, atalhos e estados vazio, carregando e erro;
 - componentes compartilhados em `packages/ui` e catálogo visual leve em `apps/ui-docs`;
 - testes de interação para painéis, temas, modos, arquivos e abas.
+- onboarding de primeira abertura com 12 etapas e resumo final;
+- detecção segura de 19 ferramentas com versão e caminho;
+- permissões separadas para leitura, escrita, comandos, instalação, credenciais e administração;
+- adapters GitHub, Firebase, Vercel e Supabase com ações allowlisted;
+- confirmação obrigatória antes de instalação, autenticação, configuração e deploy;
+- cofre de credenciais baseado em Electron `safeStorage`, sem tokens em texto puro;
+- 11 novos testes de adapters e onboarding usando comandos mockados.

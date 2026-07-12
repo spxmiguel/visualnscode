@@ -4,9 +4,9 @@ O **VisualnsCode** é uma IDE desktop orientada por IA, inspirada na familiarida
 mas projetada para reduzir a complexidade inicial. A proposta é reunir editor, agentes, CLIs,
 providers de IA, automações e serviços de deploy em uma interface coerente e segura.
 
-> Estado: interface inicial (`0.2.0-dev`). O desktop oferece tela inicial, configurações e um
-> workspace demonstrativo completo. Ainda não há integração real com IA, filesystem, terminal,
-> persistência de projeto ou deploy.
+> Estado: onboarding de ambiente (`0.3.0-dev`). O desktop detecta ferramentas locais por uma API
+> allowlisted, guia autenticação e prepara integrações. IA, filesystem de projeto, terminal e
+> deploy efetivo no workspace continuam fora desta fase.
 
 ## Problema que resolve
 
@@ -93,6 +93,19 @@ pnpm test:e2e
 pnpm build
 ```
 
+## Assistente de ambiente
+
+Na primeira abertura, 12 etapas verificam Git, GitHub CLI, Node.js, gerenciadores, Firebase,
+Vercel, Supabase, Docker, Python, providers locais e CLIs de agentes. Cada ferramenta mostra status,
+versão, caminho, teste, instalação, documentação e opção de ignorar.
+
+Detecções são somente leitura. Instalações, logins e mudanças exigem confirmação e a permissão
+correspondente. O runner usa `execFile` com argumentos estruturados e nunca aceita shell ou strings
+arbitrárias. Credenciais de providers são criptografadas com o cofre do sistema via Electron
+`safeStorage`; se o backend seguro não estiver disponível, a aplicação recusa persistir a chave.
+
+Consulte [`docs/onboarding.md`](./docs/onboarding.md) para o fluxo completo.
+
 ## Como contribuir
 
 Leia o [CONTRIBUTING.md](./CONTRIBUTING.md), crie uma branch curta, mantenha cada commit funcional
@@ -103,11 +116,12 @@ e use Conventional Commits. Mudanças arquiteturais relevantes devem incluir um 
 
 1. fundação do monorepo, shell, qualidade e documentação — **concluída**;
 2. interface do workspace, temas, modos e componentes — **concluída**;
-3. workspace local real, arquivos, busca e preferências;
-4. terminal seguro e persistência local;
-5. primeira integração de IA através da camada de providers;
-6. agentes, integrações de deploy e colaboração;
-7. empacotamento, atualização automática, acessibilidade e hardening.
+3. onboarding, detecção e integrações de configuração — **concluída**;
+4. workspace local real, arquivos, busca e preferências;
+5. terminal seguro e persistência local;
+6. primeira integração de IA através da camada de providers;
+7. agentes, integrações de deploy e colaboração;
+8. empacotamento, atualização automática, acessibilidade e hardening.
 
 Consulte [ROADMAP.md](./ROADMAP.md) e o [plano de desenvolvimento](./docs/development-plan.md) para
 critérios de saída e dependências entre fases.

@@ -27,6 +27,16 @@ pesquisa com usuários e revisão de segurança.
 - [ ] IPC versionado e validado;
 - [ ] acessibilidade de teclado desde a primeira jornada.
 
+## Onboarding de ambiente 0.3
+
+- [x] assistente persistido em 12 etapas;
+- [x] detecção de runtimes, package managers, deploy e agentes;
+- [x] permissões e confirmação por ação;
+- [x] GitHub, Firebase, Vercel e Supabase por adapters;
+- [x] providers locais e cofre seguro para chaves remotas;
+- [x] testes unitários e de integração sem login real;
+- [ ] conectar ações de escrita a um workspace real validado.
+
 ## Depois — Capacidades locais seguras
 
 - [ ] terminal isolado com `node-pty`;

@@ -26,6 +26,9 @@ O renderer nunca importa Electron, filesystem, shell, PTY ou SDKs de fornecedore
 expõe somente capacidades nomeadas. O main valida pedidos e delega trabalho bloqueante ou de maior
 risco a processos utilitários.
 
+O onboarding segue a mesma fronteira: renderer envia intents tipadas, preload expõe métodos
+nomeados e main resolve adapters. Não existe canal IPC de execução genérica.
+
 ## Responsabilidades dos pacotes
 
 | Pacote         | Responsabilidade                             | Não deve conhecer               |
@@ -70,3 +73,4 @@ Decisões com trade-offs duradouros estão registradas em [`decisions`](./decisi
 
 Detalhes da composição visual e seus estados estão em
 [`desktop-interface.md`](./desktop-interface.md).
+O fluxo de configuração, permissões e credenciais está em [`onboarding.md`](./onboarding.md).
