@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "check:structure": "node scripts/check-workspace.mjs",
     "dev": "pnpm --filter @visualnscode/desktop dev",
     "dev:desktop": "pnpm --filter @visualnscode/desktop dev",
     "dev:landing": "pnpm --filter @visualnscode/landing dev",
@@ -18,11 +19,13 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run --passWithNoTests",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "typecheck": "pnpm -r --if-present typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "@playwright/test": "^1.55.0",
     "@types/node": "^22.10.7",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
