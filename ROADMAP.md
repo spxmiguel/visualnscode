@@ -20,12 +20,17 @@ pesquisa com usuários e revisão de segurança.
 - [x] catálogo visual de componentes reutilizáveis;
 - [x] testes de interação do workspace.
 
-## Próximo — Workspace local real
+## Workspace local real — completo
 
-- [ ] abrir e gerenciar workspaces;
-- [ ] explorer, abas, salvar e busca;
-- [ ] IPC versionado e validado;
-- [ ] acessibilidade de teclado desde a primeira jornada.
+- [x] abrir e gerenciar workspaces via diálogo nativo;
+- [x] filesystem IPC com proteção contra path traversal;
+- [x] salvar arquivo com Cmd/Ctrl+S;
+- [x] diff viewer Monaco (aceitar / rejeitar / editar antes de aplicar);
+- [x] checkpoints e rollback;
+- [x] scanner e redação de secrets;
+- [x] classificador de comandos (safe / confirm / dangerous / blocked);
+- [ ] busca de texto no workspace;
+- [ ] acessibilidade de teclado completa.
 
 ## Onboarding de ambiente 0.3
 
@@ -37,11 +42,36 @@ pesquisa com usuários e revisão de segurança.
 - [x] testes unitários e de integração sem login real;
 - [ ] conectar ações de escrita a um workspace real validado.
 
-## Depois — Capacidades locais seguras
+## Integração Git e GitHub — completo
+
+- [x] git status, stage, unstage, commit;
+- [x] log de histórico visual;
+- [x] branches, checkout, criar branch;
+- [x] stash / stash pop;
+- [ ] merge e resolução de conflitos;
+- [ ] push / pull via `gh` CLI;
+- [ ] criar PR e issue pelo app.
+
+## Preview e execução — completo
+
+- [x] detectar script `dev` e package manager;
+- [x] iniciar / parar servidor com stream de logs;
+- [x] preview integrado com iframe (desktop / tablet / mobile);
+- [ ] element picker → enviar para o chat;
+- [ ] console e network logs no preview.
+
+## Templates e criação — completo
+
+- [x] 12 templates com scaffold, deps, git init e primeiro commit;
+- [x] modal de seleção de template com categorias e tags;
+- [x] suporte a `createCommand` e `files[]` estáticos;
+- [ ] templates versionados e sincronizados do remoto.
+
+## Depois — Capacidades locais avançadas
 
 - [ ] terminal isolado com `node-pty`;
 - [ ] SQLite e migrations;
-- [ ] policy engine, confirmação, diff e auditoria;
+- [ ] auto-update via `electron-updater`;
 - [ ] testes macOS, Windows e Linux.
 
 ## Providers universais 0.4

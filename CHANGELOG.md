@@ -8,6 +8,31 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- sistema de edição segura com diff viewer lado a lado (Monaco `DiffEditor`), fluxo propor → revisar → aceitar/rejeitar → checkpoint → gravar;
+- `FilesystemService`: operações de arquivo isoladas ao workspace, proteção contra path traversal e symlinks externos;
+- `SecretScanner`: detecção de API keys, tokens, chaves privadas, URLs de banco com credenciais — redação automática antes de enviar ao contexto de IA;
+- `CheckpointService`: snapshots por workspace com rollback automático e limite de 50 checkpoints;
+- `GitService`: status, stage, unstage, commit, log, branches, checkout, criar branch, stash via `child_process.execFile`;
+- `RunnerService`: iniciar/parar processo de desenvolvimento, detectar script `dev` e porta, stream de logs e URL para o painel de preview;
+- `ScaffoldService`: 12 templates de projeto (React+Vite, Next.js, Node API, Fastify, Electron, Firebase, Supabase, Landing, Portfolio, Dashboard, Static, Empty) com scaffold, instalação e primeiro commit automáticos;
+- `CreateProjectModal`: picker de template com categorias, configuração de nome e pasta, logs em tempo real durante a criação;
+- painel Git funcional no BottomPanel: arquivos staged/unstaged, stage/unstage por arquivo, commit com mensagem, histórico de 10 commits;
+- painel Preview com controles Run/Stop, modos desktop/tablet/mobile, iframe integrado, botão de abrir no navegador;
+- `DiffViewer` component com Monaco diff editor lado a lado, botões aceitar/rejeitar;
+- Cmd/Ctrl+S grava o arquivo ativo no disco via `fs:write-file` IPC;
+- botão "Abrir pasta" na HomeScreen abre diálogo nativo de sistema de arquivos;
+- 50+ canais IPC novos: `fs:*`, `checkpoint:*`, `git:*`, `runner:*`, `scaffold:*`;
+- todos os canais expostos no preload e tipados em `electron.d.ts`;
+- documentação completa: `docs/getting-started.md`, `docs/installation.md`, `docs/agents.md`, `docs/integrations.md`, `docs/security-model.md`, `docs/cli-detection.md`, `docs/project-templates.md`, `docs/deployment.md`, `docs/troubleshooting.md`, `docs/development.md`, `docs/testing.md`, `docs/releases.md`, `docs/README.pt-BR.md`;
+- `docs/audit-report.md` com auditoria completa, classificação Critical/High/Medium/Low e issues rastreadas;
+- templates de issue GitHub (bug report, feature request, security, config.yml) e template de pull request;
+- `dependabot.yml` com grupos npm e atualização semanal;
+- `.changeset/config.json` para versionamento semântico via Changesets;
+- `.husky/pre-commit` com lint-staged (ESLint + Prettier por extensão);
+- `lint-staged` e `husky` adicionados ao root `package.json`.
+
+### Changed
+
 - landing page completa: hero, IDE mockup, integrations ticker, features, modos, agentes, segurança, roadmap, FAQ, CTA e footer;
 - identidade visual própria: novo AppMark SVG (ícone terminal `>_`) substituindo Sparkles genérico;
 - `electron-builder.yml`: empacotamento cross-platform — `.pkg` (macOS arm64/x64), `.AppImage`+`.deb`+`.rpm` (Linux), `.msi`+`.exe` (Windows);
