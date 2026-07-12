@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@visualnscode/agents": "workspace:^",
     "@visualnscode/config": "workspace:*",
     "@visualnscode/integrations": "workspace:*",
     "@visualnscode/providers": "workspace:^",

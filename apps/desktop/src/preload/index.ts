@@ -32,6 +32,19 @@ contextBridge.exposeInMainWorld('visualnscode', {
       return () => ipcRenderer.removeListener('chat:chunk', handler);
     },
   },
+  agents: {
+    history: () => ipcRenderer.invoke('agents:history'),
+    start: (payload: unknown) => ipcRenderer.send('agents:start', payload),
+    cancel: (runId: string) => ipcRenderer.invoke('agents:cancel', runId),
+    approve: (runId: string, actionId: string, approved: boolean) =>
+      ipcRenderer.invoke('agents:approve', runId, actionId, approved),
+    onEvent: (listener: (event: unknown) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, workflowEvent: unknown) =>
+        listener(workflowEvent);
+      ipcRenderer.on('agents:event', handler);
+      return () => ipcRenderer.removeListener('agents:event', handler);
+    },
+  },
   versions: {
     chrome: process.versions.chrome,
     electron: process.versions.electron,

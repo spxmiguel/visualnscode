@@ -13,6 +13,12 @@ import type {
   ProviderSettings,
   ProviderSummary,
 } from '@visualnscode/providers/browser';
+import type {
+  AgentDefinition,
+  TeamWorkflow,
+  WorkflowEvent,
+  WorkflowRunResult,
+} from '@visualnscode/agents/browser';
 
 declare global {
   interface Window {
@@ -40,6 +46,19 @@ declare global {
         start(payload: { providerId: string; input: AgentInput }): void;
         cancel(requestId: string): Promise<void>;
         onChunk(listener: (chunk: AgentChunk) => void): () => void;
+      };
+      readonly agents: {
+        history(): Promise<readonly WorkflowRunResult[]>;
+        start(payload: {
+          runId: string;
+          workflow: TeamWorkflow;
+          agents: readonly AgentDefinition[];
+          task: string;
+          relevantContext: Readonly<Record<string, string>>;
+        }): void;
+        cancel(runId: string): Promise<boolean>;
+        approve(runId: string, actionId: string, approved: boolean): Promise<boolean>;
+        onEvent(listener: (event: WorkflowEvent) => void): () => void;
       };
     };
   }
