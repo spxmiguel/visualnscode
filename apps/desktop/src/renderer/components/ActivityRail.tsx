@@ -6,6 +6,7 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  Users,
 } from 'lucide-react';
 import { IconButton } from '@visualnscode/ui';
 import { useAppStore } from '../store';
@@ -13,6 +14,7 @@ import { useWorkspaceStore, type WorkspaceTool } from '../workspace-store';
 
 const tools: readonly [WorkspaceTool, string, typeof Files][] = [
   ['files', 'Arquivos', Files],
+  ['agents', 'Agentes', Users],
   ['git', 'Git', GitBranch],
   ['diffs', 'Diffs', Braces],
   ['tasks', 'Tarefas', ListChecks],

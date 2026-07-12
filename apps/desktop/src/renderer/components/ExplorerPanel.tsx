@@ -12,6 +12,7 @@ import {
 import { EmptyState } from '@visualnscode/ui';
 import { useAppStore } from '../store';
 import { useWorkspaceStore } from '../workspace-store';
+import { AgentLibraryPanel } from './agents/AgentLibraryPanel';
 
 const toolCopy = {
   git: ['Git', 'Branch main · nenhuma alteração pendente', GitBranch],
@@ -27,6 +28,8 @@ export function ExplorerPanel() {
   const files = useWorkspaceStore((state) => state.files);
   const openFile = useWorkspaceStore((state) => state.openFile);
   const activeFileId = useWorkspaceStore((state) => state.activeFileId);
+
+  if (activeTool === 'agents') return <AgentLibraryPanel />;
 
   if (activeTool !== 'files') {
     const [title, description, Icon] = toolCopy[activeTool];

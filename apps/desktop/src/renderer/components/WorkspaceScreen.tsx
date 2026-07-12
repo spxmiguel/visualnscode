@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store';
 import { useWorkspaceStore } from '../workspace-store';
 import { ActivityRail } from './ActivityRail';
+import { AgentWorkspace } from './agents/AgentWorkspace';
 import { AppMark } from './AppMark';
 import { BottomPanel } from './BottomPanel';
 import { ExplorerPanel } from './ExplorerPanel';
@@ -38,6 +39,7 @@ export function WorkspaceScreen() {
   const setMode = useAppStore((state) => state.setMode);
   const theme = useAppStore((state) => state.theme);
   const activeFileId = useWorkspaceStore((state) => state.activeFileId);
+  const activeTool = useWorkspaceStore((state) => state.activeTool);
   const files = useWorkspaceStore((state) => state.files);
   const isBottomOpen = useWorkspaceStore((state) => state.isBottomOpen);
   const isExplorerOpen = useWorkspaceStore((state) => state.isExplorerOpen);
@@ -186,72 +188,76 @@ export function WorkspaceScreen() {
             />
           </>
         ) : null}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1">
-            <section className="flex min-w-0 flex-1 flex-col" aria-label="Editor de código">
-              <FileTabs />
-              <div className="min-h-0 flex-1 bg-[rgb(var(--background))]">
-                {activeFile ? (
-                  <Editor
-                    language={activeFile.language}
-                    loading={<Spinner label="Abrindo editor…" />}
-                    onChange={(value) => updateActiveFile(value ?? '')}
-                    options={{
-                      automaticLayout: true,
-                      fontFamily: 'SFMono-Regular, Consolas, monospace',
-                      fontSize: 13,
-                      lineHeight: 21,
-                      minimap: { enabled: mode === 'advanced' },
-                      padding: { top: 16 },
-                      renderLineHighlight: 'gutter',
-                      scrollBeyondLastLine: false,
-                    }}
-                    theme={theme === 'dark' ? 'vs-dark' : 'light'}
-                    value={activeFile.content}
+        {activeTool === 'agents' ? (
+          <AgentWorkspace />
+        ) : (
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex min-h-0 flex-1">
+              <section className="flex min-w-0 flex-1 flex-col" aria-label="Editor de código">
+                <FileTabs />
+                <div className="min-h-0 flex-1 bg-[rgb(var(--background))]">
+                  {activeFile ? (
+                    <Editor
+                      language={activeFile.language}
+                      loading={<Spinner label="Abrindo editor…" />}
+                      onChange={(value) => updateActiveFile(value ?? '')}
+                      options={{
+                        automaticLayout: true,
+                        fontFamily: 'SFMono-Regular, Consolas, monospace',
+                        fontSize: 13,
+                        lineHeight: 21,
+                        minimap: { enabled: mode === 'advanced' },
+                        padding: { top: 16 },
+                        renderLineHighlight: 'gutter',
+                        scrollBeyondLastLine: false,
+                      }}
+                      theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                      value={activeFile.content}
+                    />
+                  ) : (
+                    <EmptyState
+                      action={
+                        <Button
+                          onClick={() => useWorkspaceStore.getState().openFile('app')}
+                          variant="secondary"
+                        >
+                          Abrir App.tsx
+                        </Button>
+                      }
+                      description="Escolha um arquivo no explorador para começar."
+                      icon={<Sparkles className="size-5" />}
+                      title="Editor vazio"
+                    />
+                  )}
+                </div>
+              </section>
+              {isRightOpen ? (
+                <>
+                  <ResizeHandle
+                    direction="horizontal"
+                    label="Redimensionar chat e preview"
+                    onResize={(delta) => setRightWidth((width) => clamp(width - delta, 260, 480))}
                   />
-                ) : (
-                  <EmptyState
-                    action={
-                      <Button
-                        onClick={() => useWorkspaceStore.getState().openFile('app')}
-                        variant="secondary"
-                      >
-                        Abrir App.tsx
-                      </Button>
-                    }
-                    description="Escolha um arquivo no explorador para começar."
-                    icon={<Sparkles className="size-5" />}
-                    title="Editor vazio"
-                  />
-                )}
-              </div>
-            </section>
-            {isRightOpen ? (
+                  <div style={{ width: rightWidth }}>
+                    <RightWorkspacePanel />
+                  </div>
+                </>
+              ) : null}
+            </div>
+            {showBottom ? (
               <>
                 <ResizeHandle
-                  direction="horizontal"
-                  label="Redimensionar chat e preview"
-                  onResize={(delta) => setRightWidth((width) => clamp(width - delta, 260, 480))}
+                  direction="vertical"
+                  label="Redimensionar painel inferior"
+                  onResize={(delta) => setBottomHeight((height) => clamp(height - delta, 100, 340))}
                 />
-                <div style={{ width: rightWidth }}>
-                  <RightWorkspacePanel />
+                <div style={{ height: bottomHeight }}>
+                  <BottomPanel />
                 </div>
               </>
             ) : null}
           </div>
-          {showBottom ? (
-            <>
-              <ResizeHandle
-                direction="vertical"
-                label="Redimensionar painel inferior"
-                onResize={(delta) => setBottomHeight((height) => clamp(height - delta, 100, 340))}
-              />
-              <div style={{ height: bottomHeight }}>
-                <BottomPanel />
-              </div>
-            </>
-          ) : null}
-        </div>
+        )}
       </div>
 
       <footer className="flex h-6 shrink-0 items-center justify-between border-t border-[rgb(var(--border))] bg-[rgb(var(--accent))] px-2 text-[10px] text-white">

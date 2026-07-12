@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 export type BottomPanel = 'terminal' | 'tasks' | 'logs' | 'git' | 'diffs' | 'permissions';
 export type RightPanel = 'chat' | 'preview';
-export type WorkspaceTool = 'files' | 'git' | 'logs' | 'diffs' | 'tasks' | 'permissions';
+export type WorkspaceTool = 'files' | 'agents' | 'git' | 'logs' | 'diffs' | 'tasks' | 'permissions';
 
 export interface WorkspaceFile {
   readonly id: string;
