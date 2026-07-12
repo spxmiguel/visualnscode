@@ -53,6 +53,9 @@ importers:
       electron:
         specifier: ^43.1.0
         version: 43.1.0
+      lucide-react:
+        specifier: ^1.24.0
+        version: 1.24.0(react@19.2.7)
       react:
         specifier: ^19.2.7
         version: 19.2.7
