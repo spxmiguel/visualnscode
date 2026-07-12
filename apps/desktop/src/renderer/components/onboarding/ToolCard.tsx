@@ -72,7 +72,7 @@ export function ToolCard({ busy, ignored, onAction, result, toolId }: ToolCardPr
         <Button disabled={busy} onClick={() => onAction('test')} size="sm" variant="secondary">
           <Play className="size-3" /> Testar
         </Button>
-        {!installed && definition.install ? (
+        {!installed ? (
           <Button disabled={busy} onClick={() => onAction('install')} size="sm">
             <Download className="size-3" /> Instalar
           </Button>

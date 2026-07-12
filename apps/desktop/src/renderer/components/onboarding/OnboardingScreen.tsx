@@ -31,7 +31,7 @@ const steps = [
   { title: 'Seu modo', subtitle: 'Escolha o nível de detalhe', tools: [] },
   { title: 'Git', subtitle: 'Controle de versão', tools: ['git'] },
   { title: 'GitHub', subtitle: 'Conta e repositórios', tools: ['github'] },
-  { title: 'Node.js', subtitle: 'Runtime JavaScript', tools: ['node'] },
+  { title: 'Node.js', subtitle: 'Runtimes JavaScript e Python', tools: ['node', 'python'] },
   {
     title: 'Gerenciadores',
     subtitle: 'pnpm, npm, yarn e bun',

@@ -63,7 +63,11 @@ export class EnvironmentService {
 
   private async performGitHub(request: ToolActionRequest): Promise<ToolActionResult> {
     const integration = new GitHubIntegration(this.runner);
-    if (request.action === 'test') return integration.test();
+    if (request.action === 'test') {
+      if (!this.permissions.has('credentials'))
+        return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
+      return integration.test();
+    }
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
@@ -92,7 +96,11 @@ export class EnvironmentService {
 
   private async performFirebase(request: ToolActionRequest): Promise<ToolActionResult> {
     const integration = new FirebaseIntegration(this.runner);
-    if (request.action === 'test') return integration.test();
+    if (request.action === 'test') {
+      if (!this.permissions.has('credentials'))
+        return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
+      return integration.test();
+    }
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
@@ -117,7 +125,11 @@ export class EnvironmentService {
 
   private async performVercel(request: ToolActionRequest): Promise<ToolActionResult> {
     const integration = new VercelIntegration(this.runner);
-    if (request.action === 'test') return integration.test();
+    if (request.action === 'test') {
+      if (!this.permissions.has('credentials'))
+        return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
+      return integration.test();
+    }
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
@@ -144,7 +156,11 @@ export class EnvironmentService {
 
   private async performSupabase(request: ToolActionRequest): Promise<ToolActionResult> {
     const integration = new SupabaseIntegration(this.runner);
-    if (request.action === 'test') return integration.test();
+    if (request.action === 'test') {
+      if (!this.permissions.has('credentials'))
+        return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
+      return integration.test();
+    }
     if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
