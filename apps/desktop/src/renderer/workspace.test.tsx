@@ -24,6 +24,7 @@ beforeEach(() => {
     activeProject: demoProjects[0] ?? null,
     error: null,
     mode: 'simple',
+    onboardingCompleted: true,
     screen: 'workspace',
     theme: 'dark',
   });

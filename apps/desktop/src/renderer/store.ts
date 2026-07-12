@@ -17,10 +17,12 @@ interface AppState {
   readonly activeProject: RecentProject | null;
   readonly error: string | null;
   readonly mode: ExperienceMode;
+  readonly onboardingCompleted: boolean;
   readonly recentProjects: readonly RecentProject[];
   readonly screen: AppScreen;
   readonly theme: ThemePreference;
   readonly clearError: () => void;
+  readonly completeOnboarding: () => void;
   readonly navigate: (screen: AppScreen) => void;
   readonly openProject: (project: RecentProject) => void;
   readonly setError: (error: string | null) => void;
@@ -59,10 +61,12 @@ export const useAppStore = create<AppState>()(
       activeProject: null,
       error: null,
       mode: 'simple',
+      onboardingCompleted: false,
       recentProjects: demoProjects,
       screen: 'home',
       theme: 'dark',
       clearError: () => set({ error: null }),
+      completeOnboarding: () => set({ onboardingCompleted: true, screen: 'home' }),
       navigate: (screen) => set({ screen, error: null }),
       openProject: (project) => set({ activeProject: project, screen: 'workspace', error: null }),
       setError: (error) => set({ error }),
@@ -72,9 +76,9 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'visualnscode-preferences',
-      partialize: ({ mode, theme }) => ({ mode, theme }),
+      partialize: ({ mode, onboardingCompleted, theme }) => ({ mode, onboardingCompleted, theme }),
       storage: createJSONStorage(() => window.localStorage),
-      version: 1,
+      version: 2,
     },
   ),
 );
