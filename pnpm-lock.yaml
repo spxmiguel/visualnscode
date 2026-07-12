@@ -188,7 +188,11 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/integrations: {}
+  packages/integrations:
+    dependencies:
+      '@visualnscode/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/providers:
     dependencies:

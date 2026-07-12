@@ -1,7 +1,5 @@
-export interface IntegrationDescriptor {
-  readonly id: string;
-  readonly name: string;
-  readonly kind: 'cli' | 'deploy' | 'source-control';
-}
-
-export const availableIntegrations: readonly IntegrationDescriptor[] = [];
+export { GenericToolIntegration } from './generic-integration';
+export { PermissionManager } from './permissions';
+export { SystemCommandRunner } from './command-runner';
+export { getToolDefinition, toolCatalog } from './tool-catalog';
+export type * from './types';
