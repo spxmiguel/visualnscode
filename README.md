@@ -4,9 +4,9 @@ O **VisualnsCode** é uma IDE desktop orientada por IA, inspirada na familiarida
 mas projetada para reduzir a complexidade inicial. A proposta é reunir editor, agentes, CLIs,
 providers de IA, automações e serviços de deploy em uma interface coerente e segura.
 
-> Estado: onboarding de ambiente (`0.3.0-dev`). O desktop detecta ferramentas locais por uma API
-> allowlisted, guia autenticação e prepara integrações. IA, filesystem de projeto, terminal e
-> deploy efetivo no workspace continuam fora desta fase.
+> Estado: providers universais e chat (`0.4.0-dev`). O desktop conecta APIs, servidores locais e
+> CLIs por uma porta comum, transmite respostas no workspace e mantém chaves fora do renderer.
+> Filesystem de projeto, terminal interativo e deploy efetivo continuam fora desta fase.
 
 ## Problema que resolve
 
@@ -35,9 +35,8 @@ de desenvolvedores experientes.
 
 ## Tecnologias
 
-Electron, React, TypeScript, Vite, Tailwind CSS, Monaco Editor, Zustand, Node.js, pnpm workspaces,
-Vitest e Playwright. `node-pty`, SQLite e WebSocket estão planejados para fases posteriores e não
-foram adicionados prematuramente.
+Electron, React, TypeScript, Vite, Tailwind CSS, Monaco Editor, Zustand, Node.js, `node-pty`, pnpm
+workspaces, Vitest e Playwright. SQLite e WebSocket permanecem planejados para fases posteriores.
 
 ## Estrutura
 
@@ -68,7 +67,7 @@ visualnscode/
 ## Instalação
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/spxmiguel/visualnscode.git
 cd visualnscode
 pnpm install
 ```
@@ -106,6 +105,20 @@ arbitrárias. Credenciais de providers são criptografadas com o cofre do sistem
 
 Consulte [`docs/onboarding.md`](./docs/onboarding.md) para o fluxo completo.
 
+## Providers e chat
+
+A porta `AIProvider` normaliza disponibilidade, modelos, mensagens, streaming e cancelamento. A
+primeira versão inclui OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio, endpoint compatível
+com OpenAI, Claude Code, Codex, Gemini CLI, Aider e OpenCode. CLIs são executadas com `node-pty` e
+ambiente filtrado; APIs e segredos permanecem no processo principal.
+
+A tela **Configurações → Modelos e providers** oferece teste de conexão, modelo padrão, alias,
+limites de custo e tokens, timeout, concorrência e ativação. O chat transmite respostas, permite
+cancelar e reenviar, inclui abas abertas como contexto, mostra consumo, persiste o histórico e
+exporta Markdown. Testes usam `FakeProvider`; nenhuma chave real é necessária.
+
+Consulte [`docs/providers.md`](./docs/providers.md) para arquitetura, segurança e extensão.
+
 ## Como contribuir
 
 Leia o [CONTRIBUTING.md](./CONTRIBUTING.md), crie uma branch curta, mantenha cada commit funcional
@@ -117,9 +130,9 @@ e use Conventional Commits. Mudanças arquiteturais relevantes devem incluir um 
 1. fundação do monorepo, shell, qualidade e documentação — **concluída**;
 2. interface do workspace, temas, modos e componentes — **concluída**;
 3. onboarding, detecção e integrações de configuração — **concluída**;
-4. workspace local real, arquivos, busca e preferências;
-5. terminal seguro e persistência local;
-6. primeira integração de IA através da camada de providers;
+4. camada universal de providers e chat com streaming — **concluída**;
+5. workspace local real, arquivos, busca e preferências;
+6. terminal seguro e persistência local;
 7. agentes, integrações de deploy e colaboração;
 8. empacotamento, atualização automática, acessibilidade e hardening.
 

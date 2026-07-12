@@ -16,9 +16,12 @@ flowchart LR
   PRE --> IPC["IPC tipado e validado"]
   IPC --> MAIN["Electron main"]
   MAIN --> CORE["Core de domínio"]
+  MAIN --> RUNTIME["ProviderService"]
   MAIN --> WORKER["Processos utilitários futuros"]
   CORE --> PORTS["Portas: providers e integrations"]
-  PORTS --> ADAPTERS["Adapters externos futuros"]
+  RUNTIME --> PORTS
+  PORTS --> HTTP["APIs e servidores locais"]
+  PORTS --> PTY["Adapters CLI via node-pty"]
   WORKER --> OS["Filesystem, PTY e SQLite"]
 ```
 
@@ -28,6 +31,10 @@ risco a processos utilitários.
 
 O onboarding segue a mesma fronteira: renderer envia intents tipadas, preload expõe métodos
 nomeados e main resolve adapters. Não existe canal IPC de execução genérica.
+
+O chat segue `renderer → preload → IPC validado → ProviderService → AIProvider`. Chunks canônicos
+voltam por um canal somente de eventos. Configurações sem segredo usam arquivo local com permissão
+restrita; chaves usam `safeStorage`. O renderer nunca recebe a chave.
 
 ## Responsabilidades dos pacotes
 
@@ -49,7 +56,7 @@ circulares entre pacotes são proibidas.
 
 ## Dados e comunicação futuros
 
-- IPC usa canais registrados, payloads versionados e schemas runtime; nunca um executor genérico.
+- IPC usa canais registrados, payloads validados em runtime; nunca um executor genérico.
 - SQLite armazena configurações e metadados, com migrations monotônicas e transações.
 - segredos ficam no keychain do sistema e chegam ao adapter somente no momento do uso.
 - WebSocket serve a eventos remotos; comunicação interna local prefere IPC do Electron.
@@ -74,3 +81,4 @@ Decisões com trade-offs duradouros estão registradas em [`decisions`](./decisi
 Detalhes da composição visual e seus estados estão em
 [`desktop-interface.md`](./desktop-interface.md).
 O fluxo de configuração, permissões e credenciais está em [`onboarding.md`](./onboarding.md).
+A camada de IA e o guia de extensão estão em [`providers.md`](./providers.md).

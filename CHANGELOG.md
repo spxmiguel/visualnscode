@@ -27,3 +27,11 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 - confirmação obrigatória antes de instalação, autenticação, configuração e deploy;
 - cofre de credenciais baseado em Electron `safeStorage`, sem tokens em texto puro;
 - 11 novos testes de adapters e onboarding usando comandos mockados.
+- camada universal `AIProvider` com modelos, capacidades, streaming, cancelamento e consumo;
+- adapters para OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio e endpoints compatíveis;
+- adapters isolados via `node-pty` para Claude Code, Codex, Gemini CLI, Aider e OpenCode;
+- configuração persistente de modelo, alias, custo, tokens, timeout, concorrência e ativação;
+- logs recursivamente sanitizados e chaves mantidas no cofre seguro do sistema;
+- chat funcional com contexto explícito, streaming, cancelamento, reenvio, histórico e exportação;
+- `FakeProvider` e testes de chat sem dependência de credenciais ou serviços reais;
+- auditoria de segredos no histórico e hook obrigatório antes de cada push.

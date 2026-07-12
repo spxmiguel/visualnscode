@@ -44,10 +44,20 @@ pesquisa com usuários e revisão de segurança.
 - [ ] policy engine, confirmação, diff e auditoria;
 - [ ] testes macOS, Windows e Linux.
 
-## Futuro — IA, agentes e ecossistema
+## Providers universais 0.4
 
-- [ ] mock provider e primeira integração opt-in;
-- [ ] contexto explícito e secrets no keychain;
+- [x] porta comum para APIs, serviços locais e CLIs;
+- [x] catálogo de 12 providers com capacidades e execução local/remota;
+- [x] streaming e cancelamento normalizados por IPC;
+- [x] configuração de modelos, limites e concorrência;
+- [x] chat com arquivos no contexto, histórico e exportação;
+- [x] logs sanitizados, cofre do sistema e testes com provider falso;
+- [ ] precificação atualizável por modelo e orçamento acumulado por sessão;
+
+## Futuro — Agentes e ecossistema
+
+- [x] mock provider e primeira integração opt-in;
+- [x] contexto explícito e secrets no keychain;
 - [ ] lifecycle de agentes e ferramentas autorizadas;
 - [ ] source control, deploy e eventos remotos;
 - [ ] empacotamento, assinatura, auto-update e releases.
