@@ -6,7 +6,7 @@ import { environmentApi } from '../../environment-api';
 const providers = [
   { id: 'openai', name: 'OpenAI' },
   { id: 'anthropic', name: 'Anthropic' },
-  { id: 'google', name: 'Google AI' },
+  { id: 'gemini', name: 'Google Gemini' },
 ] as const;
 export function ProviderSetup() {
   const [values, setValues] = useState<Record<string, string>>({});
