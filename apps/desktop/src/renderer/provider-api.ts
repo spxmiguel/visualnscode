@@ -67,8 +67,22 @@ const fallback = {
           for (const listener of listeners)
             listener({ type: 'text', requestId: input.requestId, text });
           if (index === words.length - 1) {
-            for (const listener of listeners)
+            for (const listener of listeners) {
+              listener({
+                type: 'usage',
+                requestId: input.requestId,
+                usage: {
+                  inputTokens: Math.max(1, Math.ceil(JSON.stringify(input).length / 4)),
+                  outputTokens: Math.ceil(words.join('').length / 4),
+                  totalTokens: Math.ceil(
+                    (JSON.stringify(input).length + words.join('').length) / 4,
+                  ),
+                  estimated: true,
+                  estimatedCostUsd: 0,
+                },
+              });
               listener({ type: 'done', requestId: input.requestId });
+            }
           }
         }, index * 20),
       );

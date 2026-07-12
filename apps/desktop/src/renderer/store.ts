@@ -78,6 +78,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'visualnscode-preferences',
+      migrate: (persistedState) => persistedState as AppState,
       partialize: ({ mode, onboardingCompleted, theme }) => ({ mode, onboardingCompleted, theme }),
       storage: createJSONStorage(() => window.localStorage),
       version: 2,
