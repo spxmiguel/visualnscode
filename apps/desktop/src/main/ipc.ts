@@ -21,9 +21,12 @@ const providerIds = new Set(
   providerCatalog.filter(({ type }) => type === 'api').map(({ id }) => id),
 );
 
-const isValidAgentInput = (input: AgentInput): boolean => {
+const isValidAgentInput = (value: unknown): value is AgentInput => {
+  if (!value || typeof value !== 'object') return false;
+  const input = value as Partial<AgentInput>;
+  if (!Array.isArray(input.messages) || !Array.isArray(input.contextFiles ?? [])) return false;
   const contextLength = (input.contextFiles ?? []).reduce(
-    (total, file) => total + file.content.length,
+    (total, file) => total + (typeof file.content === 'string' ? file.content.length : 0),
     0,
   );
   return (
@@ -36,7 +39,14 @@ const isValidAgentInput = (input: AgentInput): boolean => {
     input.messages.length <= 100 &&
     input.messages.every(
       (message) =>
-        ['system', 'user', 'assistant'].includes(message.role) && message.content.length <= 200_000,
+        Boolean(message) &&
+        typeof message.id === 'string' &&
+        ['system', 'user', 'assistant'].includes(message.role) &&
+        typeof message.content === 'string' &&
+        message.content.length <= 200_000,
+    ) &&
+    (input.contextFiles ?? []).every(
+      (file) => Boolean(file) && typeof file.path === 'string' && typeof file.content === 'string',
     ) &&
     (input.contextFiles?.length ?? 0) <= 20 &&
     contextLength <= 1_000_000
@@ -89,20 +99,34 @@ export const registerEnvironmentIpc = (): void => {
   ipcMain.handle('providers:models', (_event, providerId: string) =>
     getProviderDescriptor(providerId) ? providerService.models(providerId) : [],
   );
-  ipcMain.on('chat:start', (event, payload: { providerId: string; input: AgentInput }) => {
+  ipcMain.on('chat:start', (event, payload: unknown) => {
     const send = (chunk: unknown): void => event.sender.send('chat:chunk', chunk);
-    if (!getProviderDescriptor(payload.providerId) || !isValidAgentInput(payload.input)) {
+    const candidate = payload as { providerId?: unknown; input?: unknown } | null;
+    if (
+      !candidate ||
+      typeof candidate.providerId !== 'string' ||
+      !getProviderDescriptor(candidate.providerId) ||
+      !isValidAgentInput(candidate.input)
+    ) {
       send({
         type: 'error',
-        requestId: payload.input?.requestId ?? 'invalid-request',
+        requestId:
+          candidate?.input &&
+          typeof candidate.input === 'object' &&
+          'requestId' in candidate.input &&
+          typeof candidate.input.requestId === 'string'
+            ? candidate.input.requestId
+            : 'invalid-request',
         message: 'A solicitação do chat é inválida.',
       });
       return;
     }
-    void providerService.stream(payload.providerId, payload.input, send).catch((error: unknown) =>
+    const input = candidate.input;
+    const providerId = candidate.providerId;
+    void providerService.stream(providerId, input, send).catch((error: unknown) =>
       send({
         type: 'error',
-        requestId: payload.input.requestId,
+        requestId: input.requestId,
         message: error instanceof Error ? error.message : 'Falha ao iniciar o chat.',
       }),
     );

@@ -136,6 +136,20 @@ export class ProviderService {
         maxTokens: Math.min(input.maxTokens ?? settings.tokenLimit, settings.tokenLimit),
         timeoutMs: Math.min(input.timeoutMs ?? settings.timeoutMs, settings.timeoutMs),
       })) {
+        if (
+          chunk.type === 'usage' &&
+          settings.costLimitUsd !== null &&
+          chunk.usage.estimatedCostUsd !== null &&
+          chunk.usage.estimatedCostUsd > settings.costLimitUsd
+        ) {
+          await provider.cancel(input.requestId);
+          onChunk({
+            type: 'error',
+            requestId: input.requestId,
+            message: `Limite de custo de US$ ${settings.costLimitUsd.toFixed(2)} atingido.`,
+          });
+          break;
+        }
         onChunk(chunk);
       }
     } finally {

@@ -6,7 +6,7 @@ export default defineConfig({
     'main/index': 'src/main/index.ts',
     'preload/index': 'src/preload/index.ts',
   },
-  external: ['electron'],
+  external: ['electron', 'node-pty'],
   format: ['cjs'],
   outDir: 'dist-electron',
   outExtension: () => ({ js: '.cjs' }),
