@@ -1,3 +1,6 @@
+import { readdirSync } from 'node:fs';
+import { delimiter, join } from 'node:path';
+
 const SAFE_PROCESS_ENVIRONMENT_KEYS = [
   'PATH',
   'HOME',
@@ -22,6 +25,17 @@ const SAFE_PROCESS_ENVIRONMENT_KEYS = [
   'SSH_AUTH_SOCK',
   'GPG_TTY',
 ] as const;
+
+export const applicationExecutableDirectories = (
+  platform: NodeJS.Platform,
+  home: string,
+): readonly string[] =>
+  platform === 'darwin'
+    ? [
+        '/Applications/ChatGPT.app/Contents/Resources',
+        join(home, 'Applications', 'ChatGPT.app', 'Contents', 'Resources'),
+      ]
+    : [];
 
 /**
  * Builds the environment passed to local tools and workspace processes.
@@ -65,6 +79,7 @@ export const createSafeProcessEnvironment = (
           join(home, '.bun', 'bin'),
           join(home, 'Library', 'pnpm'),
           join(home, '.local', 'share', 'pnpm'),
+          ...applicationExecutableDirectories(process.platform, home),
           ...nvmBins,
         ];
   safe.PATH = [...(source.PATH ?? '').split(delimiter), ...common]
@@ -80,5 +95,3 @@ export const createSafeProcessEnvironment = (
     ),
   };
 };
-import { readdirSync } from 'node:fs';
-import { delimiter, join } from 'node:path';

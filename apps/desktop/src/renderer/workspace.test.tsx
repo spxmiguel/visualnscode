@@ -53,7 +53,7 @@ describe('workspace', () => {
     useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
-    expect(await screen.findByText('Meu projeto')).not.toBeNull();
+    expect(await screen.findByText('Meu projeto', undefined, { timeout: 5_000 })).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
     expect(screen.queryByText('Meu projeto')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));

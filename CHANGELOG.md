@@ -46,6 +46,10 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- macOS desktop builds now discover the Codex CLI bundled with ChatGPT in both system and user
+  Applications folders, even when the app is launched without a terminal `PATH`.
+- The lazy Advanced-workspace interaction test now allows realistic Monaco loading time under
+  concurrent coverage and build workloads.
 - Local AI CLI adapters now resolve executables from desktop-safe Homebrew and user tool locations,
   decode vendor JSON/JSONL into chat text and measured usage, run in the active workspace, and report
   native PTY failures separately from a missing executable.

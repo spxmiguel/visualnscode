@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createSafeProcessEnvironment } from './process-environment';
+import {
+  applicationExecutableDirectories,
+  createSafeProcessEnvironment,
+} from './process-environment';
 
 describe('createSafeProcessEnvironment', () => {
   it('keeps operating system values and removes credentials', () => {
@@ -31,5 +34,13 @@ describe('createSafeProcessEnvironment', () => {
     expect(result.PATH?.split(process.platform === 'win32' ? ';' : ':')).toContain('/bin');
     expect(result).toMatchObject({ CI: '1', FORCE_COLOR: '0' });
     expect(result).not.toHaveProperty('SECRET');
+  });
+
+  it('adds application-bundled CLIs on macOS without affecting other platforms', () => {
+    expect(applicationExecutableDirectories('darwin', '/Users/tester')).toEqual([
+      '/Applications/ChatGPT.app/Contents/Resources',
+      '/Users/tester/Applications/ChatGPT.app/Contents/Resources',
+    ]);
+    expect(applicationExecutableDirectories('win32', 'C:\\Users\\tester')).toEqual([]);
   });
 });

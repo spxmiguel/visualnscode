@@ -2,6 +2,17 @@ import { accessSync, constants, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, dirname, isAbsolute, join } from 'node:path';
 
+export const applicationCliDirectories = (
+  platform: NodeJS.Platform = process.platform,
+  home: string = homedir(),
+): readonly string[] =>
+  platform === 'darwin'
+    ? [
+        '/Applications/ChatGPT.app/Contents/Resources',
+        join(home, 'Applications', 'ChatGPT.app', 'Contents', 'Resources'),
+      ]
+    : [];
+
 const executableExtensions = (): readonly string[] => {
   if (process.platform !== 'win32') return [''];
   const configured = process.env.PATHEXT?.split(delimiter).filter(Boolean) ?? [];
@@ -41,6 +52,7 @@ export const cliSearchDirectories = (): readonly string[] => {
           join(home, '.bun', 'bin'),
           join(home, 'Library', 'pnpm'),
           join(home, '.local', 'share', 'pnpm'),
+          ...applicationCliDirectories(),
           ...nvmBins(),
         ];
   return [...new Set([...configured, ...common].filter(Boolean))];

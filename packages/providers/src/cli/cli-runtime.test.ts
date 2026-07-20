@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { cliEnvironment, resolveCliExecutable } from './cli-runtime';
+import { applicationCliDirectories, cliEnvironment, resolveCliExecutable } from './cli-runtime';
 
 describe('CLI runtime', () => {
   it('accepts an absolute executable path', () => {
@@ -16,5 +16,13 @@ describe('CLI runtime', () => {
 
   it('does not resolve a missing CLI', () => {
     expect(resolveCliExecutable('visualnscode-definitely-missing-cli')).toBeNull();
+  });
+
+  it('discovers the Codex executable bundled with ChatGPT on macOS', () => {
+    expect(applicationCliDirectories('darwin', '/Users/tester')).toEqual([
+      '/Applications/ChatGPT.app/Contents/Resources',
+      '/Users/tester/Applications/ChatGPT.app/Contents/Resources',
+    ]);
+    expect(applicationCliDirectories('linux', '/home/tester')).toEqual([]);
   });
 });
