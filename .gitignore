@@ -51,6 +51,7 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
+.lighthouseci/
 *.sqlite
 *.sqlite3
 *.db
