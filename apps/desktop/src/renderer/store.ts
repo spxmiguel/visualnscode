@@ -43,7 +43,7 @@ export const demoProjects: readonly RecentProject[] = [
     name: 'Aurora Dashboard',
     path: '~/Projetos/aurora-dashboard',
     lastOpened: 'Hoje, 14:32',
-    color: '#8b6af6',
+    color: '#ae5128',
   },
   {
     id: 'coffee',

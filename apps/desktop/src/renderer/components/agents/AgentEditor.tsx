@@ -50,7 +50,7 @@ export function AgentEditor({
 
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 p-6 backdrop-blur-sm">
-      <div className="max-h-full w-full max-w-2xl overflow-auto rounded-2xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] shadow-2xl">
+      <div className="max-h-full w-full max-w-2xl overflow-auto rounded-md border border-[rgb(var(--border-strong))] bg-[rgb(var(--surface))] shadow-2xl">
         <div className="sticky top-0 flex items-center justify-between border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] px-5 py-4">
           <div>
             <h2 className="text-sm font-semibold">

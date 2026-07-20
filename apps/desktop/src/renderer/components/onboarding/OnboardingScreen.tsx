@@ -1,15 +1,5 @@
-import {
-  Bot,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  KeyRound,
-  Settings2,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from 'lucide-react';
-import { Button, ErrorNotice, SegmentedControl, Surface } from '@visualnscode/ui';
+import { Check, ChevronLeft, ChevronRight, KeyRound, ShieldCheck, Wrench } from 'lucide-react';
+import { Button, ErrorNotice, Surface } from '@visualnscode/ui';
 import { useEffect, useMemo, useState } from 'react';
 import {
   toolCatalog,
@@ -160,13 +150,13 @@ export function OnboardingScreen() {
         <nav className="mt-8 min-h-0 flex-1 overflow-auto" aria-label="Etapas da configuração">
           {steps.map((item, index) => (
             <button
-              className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-xs ${index === stepIndex ? 'bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]' : index < stepIndex ? 'text-[rgb(var(--text-muted))]' : 'text-[rgb(var(--text-subtle))]'}`}
+              className={`mb-px flex w-full items-center gap-3 border-l-2 px-3 py-2 text-left text-xs transition ${index === stepIndex ? 'border-[rgb(var(--accent))] bg-[rgb(var(--surface-hover))] text-[rgb(var(--text))]' : index < stepIndex ? 'border-transparent text-[rgb(var(--text-muted))]' : 'border-transparent text-[rgb(var(--text-subtle))]'}`}
               key={item.title}
               onClick={() => setStepIndex(index)}
               type="button"
             >
               <span
-                className={`flex size-5 items-center justify-center rounded-full text-[10px] ${index < stepIndex ? 'bg-emerald-500 text-white' : 'border border-current'}`}
+                className={`flex size-5 items-center justify-center font-mono text-[9px] ${index < stepIndex ? 'text-emerald-500' : 'text-current'}`}
               >
                 {index < stepIndex ? <Check className="size-3" /> : index + 1}
               </span>
@@ -174,9 +164,11 @@ export function OnboardingScreen() {
             </button>
           ))}
         </nav>
-        <div className="rounded-xl border border-[rgb(var(--border))] p-3 text-[10px] leading-4 text-[rgb(var(--text-subtle))]">
-          <ShieldCheck className="mb-2 size-4 text-emerald-500" />
-          Nenhum comando de instalação roda sem sua confirmação.
+        <div className="border-t border-[rgb(var(--border))] pt-4 text-[10px] leading-4 text-[rgb(var(--text-subtle))]">
+          <span className="mb-2 flex items-center gap-2 font-mono uppercase tracking-wider text-[rgb(var(--text-muted))]">
+            <ShieldCheck className="size-3.5 text-emerald-500" /> Segurança
+          </span>
+          Instalações só começam depois da sua confirmação.
         </div>
       </aside>
       <main className="flex min-w-0 flex-1 flex-col">
@@ -236,7 +228,7 @@ export function OnboardingScreen() {
           </div>
           {stepIndex === steps.length - 1 ? (
             <Button onClick={complete}>
-              Entrar no VisualnsCode <Sparkles className="size-4" />
+              Entrar no VisualnsCode <ChevronRight className="size-4" />
             </Button>
           ) : (
             <Button onClick={() => setStepIndex((index) => Math.min(steps.length - 1, index + 1))}>
@@ -248,7 +240,7 @@ export function OnboardingScreen() {
       {confirmation ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <Surface className="max-w-md p-6" elevated>
-            <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-500">
+            <div className="flex size-9 items-center justify-center border border-amber-500/40 text-amber-500">
               <Wrench className="size-5" />
             </div>
             <h2 className="mt-4 text-lg font-semibold">Confirmar instalação</h2>
@@ -284,12 +276,12 @@ export function OnboardingScreen() {
             <div className="mt-6 space-y-3">
               {permissions.map((permission) => (
                 <label
-                  className="flex items-start gap-3 rounded-xl border border-[rgb(var(--border))] p-4"
+                  className="flex items-start gap-3 rounded-md border border-[rgb(var(--border))] p-4"
                   key={permission.id}
                 >
                   <input
                     checked={permission.granted}
-                    className="mt-1 accent-violet-500"
+                    className="mt-1 accent-[rgb(var(--accent))]"
                     onChange={(event) =>
                       void environmentApi
                         .setPermission(permission.id, event.target.checked)
@@ -316,30 +308,37 @@ export function OnboardingScreen() {
   );
 }
 
-const welcomeCards = [
-  { icon: ShieldCheck, label: 'Seguro', text: 'Confirmação antes de instalar' },
-  { icon: Settings2, label: 'Guiado', text: 'Erros em linguagem simples' },
-  { icon: Bot, label: 'Flexível', text: 'IA e agentes opcionais' },
+const welcomeRows = [
+  { code: '01', label: 'Instalações', text: 'Sempre pedem confirmação' },
+  { code: '02', label: 'Diagnóstico', text: 'Explica o problema antes de agir' },
+  { code: '03', label: 'Serviços externos', text: 'São opcionais e configurados por você' },
 ] as const;
 
 function Welcome() {
   return (
-    <div className="py-10 text-center">
-      <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-xl shadow-violet-500/20">
-        <Sparkles className="size-7" />
-      </div>
-      <h1 className="mt-7 text-3xl font-semibold tracking-tight">Seu ambiente, sem complicação.</h1>
-      <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[rgb(var(--text-muted))]">
+    <div className="py-8">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[rgb(var(--accent))]">
+        Setup / 01
+      </p>
+      <h1 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.035em]">
+        Seu ambiente, sem complicação.
+      </h1>
+      <p className="mt-4 max-w-2xl text-sm leading-7 text-[rgb(var(--text-muted))]">
         Vamos verificar as ferramentas do seu computador e explicar cada escolha. Você pode ignorar
         qualquer etapa e voltar depois.
       </p>
-      <div className="mx-auto mt-8 grid max-w-xl gap-3 text-left sm:grid-cols-3">
-        {welcomeCards.map(({ icon: Icon, label, text }) => (
-          <Surface className="p-4" key={label}>
-            <Icon className="size-5 text-[rgb(var(--accent))]" />
-            <p className="mt-3 text-sm font-semibold">{label}</p>
-            <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">{text}</p>
-          </Surface>
+      <div className="mt-8 max-w-2xl border-y border-[rgb(var(--border))]">
+        {welcomeRows.map(({ code, label, text }) => (
+          <div
+            className="grid grid-cols-[32px_1fr] gap-3 border-b border-[rgb(var(--border))] py-4 last:border-b-0 sm:grid-cols-[32px_160px_1fr]"
+            key={label}
+          >
+            <span className="font-mono text-[10px] text-[rgb(var(--accent))]">{code}</span>
+            <p className="text-sm font-medium">{label}</p>
+            <p className="col-start-2 text-xs text-[rgb(var(--text-muted))] sm:col-start-auto">
+              {text}
+            </p>
+          </div>
         ))}
       </div>
     </div>
@@ -354,35 +353,64 @@ function ModeChoice({
 }) {
   return (
     <div className="py-8">
-      <h1 className="text-center text-2xl font-semibold">Como você prefere trabalhar?</h1>
-      <div className="mx-auto mt-8 flex justify-center">
-        <SegmentedControl
-          label="Modo inicial"
-          onChange={setMode}
-          options={[
-            { label: 'Simples', value: 'simple' },
-            { label: 'Avançado', value: 'advanced' },
-          ]}
-          value={mode}
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[rgb(var(--accent))]">
+        Preferência / Interface
+      </p>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Como você prefere trabalhar?</h1>
+      <p className="mt-2 text-sm text-[rgb(var(--text-muted))]">
+        Esta escolha só muda o nível de detalhe visível e pode ser alterada depois.
+      </p>
+      <div className="mt-8 border-y border-[rgb(var(--border))]">
+        <ModeRow
+          active={mode === 'simple'}
+          description="Arquivos importantes, editor, chat, preview e ações essenciais."
+          index="01"
+          label="Simples"
+          onClick={() => setMode('simple')}
+        />
+        <ModeRow
+          active={mode === 'advanced'}
+          description="Terminal, Git, logs, agentes, modelos e permissões detalhadas."
+          index="02"
+          label="Avançado"
+          onClick={() => setMode('advanced')}
         />
       </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Surface className={`p-6 ${mode === 'simple' ? 'ring-2 ring-[rgb(var(--accent))]' : ''}`}>
-          <Sparkles className="size-5 text-violet-500" />
-          <h2 className="mt-4 font-semibold">Simples</h2>
-          <p className="mt-2 text-sm leading-6 text-[rgb(var(--text-muted))]">
-            Arquivos importantes, editor, chat, preview e ações essenciais.
-          </p>
-        </Surface>
-        <Surface className={`p-6 ${mode === 'advanced' ? 'ring-2 ring-[rgb(var(--accent))]' : ''}`}>
-          <Settings2 className="size-5 text-violet-500" />
-          <h2 className="mt-4 font-semibold">Avançado</h2>
-          <p className="mt-2 text-sm leading-6 text-[rgb(var(--text-muted))]">
-            Terminal, Git, logs, agentes, modelos e permissões detalhadas.
-          </p>
-        </Surface>
-      </div>
     </div>
+  );
+}
+
+function ModeRow({
+  active,
+  description,
+  index,
+  label,
+  onClick,
+}: {
+  readonly active: boolean;
+  readonly description: string;
+  readonly index: string;
+  readonly label: string;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      className={`grid w-full grid-cols-[32px_1fr_auto] items-center gap-3 border-b border-[rgb(var(--border))] px-3 py-5 text-left transition last:border-b-0 ${active ? 'bg-[rgb(var(--surface-hover))]' : 'hover:bg-[rgb(var(--surface-raised))]'}`}
+      onClick={onClick}
+      type="button"
+    >
+      <span className="font-mono text-[10px] text-[rgb(var(--accent))]">{index}</span>
+      <span>
+        <span className="block text-sm font-semibold">{label}</span>
+        <span className="mt-1 block text-xs text-[rgb(var(--text-muted))]">{description}</span>
+      </span>
+      <span
+        aria-hidden
+        className={`size-3 rounded-full border ${active ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]' : 'border-[rgb(var(--border-strong))]'}`}
+      />
+    </button>
   );
 }
 function ProviderNotice() {
@@ -407,27 +435,27 @@ function Summary({
   readonly mode: string;
 }) {
   return (
-    <div className="py-8 text-center">
-      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500">
-        <Check className="size-8" />
-      </div>
-      <h1 className="mt-6 text-3xl font-semibold">Configuração concluída</h1>
+    <div className="py-8">
+      <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-500">
+        <Check className="size-3.5" /> Verificação concluída
+      </p>
+      <h1 className="mt-4 text-3xl font-semibold tracking-[-0.035em]">Configuração concluída</h1>
       <p className="mt-3 text-sm text-[rgb(var(--text-muted))]">
         Você pode refazer esta verificação nas configurações.
       </p>
-      <div className="mx-auto mt-8 grid max-w-xl grid-cols-3 gap-3">
-        <Surface className="p-4">
+      <div className="mt-8 grid max-w-xl grid-cols-3 border-y border-[rgb(var(--border))]">
+        <div className="border-r border-[rgb(var(--border))] py-4">
           <p className="text-2xl font-semibold">{counts.installed}</p>
           <p className="text-xs text-[rgb(var(--text-muted))]">instaladas</p>
-        </Surface>
-        <Surface className="p-4">
+        </div>
+        <div className="border-r border-[rgb(var(--border))] px-4 py-4">
           <p className="text-2xl font-semibold">{counts.checked}</p>
           <p className="text-xs text-[rgb(var(--text-muted))]">verificadas</p>
-        </Surface>
-        <Surface className="p-4">
+        </div>
+        <div className="px-4 py-4">
           <p className="text-2xl font-semibold">{counts.ignored}</p>
           <p className="text-xs text-[rgb(var(--text-muted))]">ignoradas</p>
-        </Surface>
+        </div>
       </div>
       <p className="mt-6 text-xs text-[rgb(var(--text-subtle))]">
         Modo escolhido: {mode === 'simple' ? 'simples' : 'avançado'}

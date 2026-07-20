@@ -80,7 +80,7 @@ export function VercelSetup() {
       </div>
       {pending ? (
         <div
-          className={`mt-4 rounded-xl border p-4 ${pending === 'production' ? 'border-red-500/30 bg-red-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}
+          className={`mt-4 rounded-md border p-4 ${pending === 'production' ? 'border-red-500/30 bg-red-500/10' : 'border-amber-500/30 bg-amber-500/10'}`}
         >
           <p className="text-sm font-medium">
             Confirmar {pending === 'production' ? 'deploy de produção' : 'ação Vercel'}

@@ -46,6 +46,6 @@ describe('assistente inicial', () => {
     await user.click(screen.getByRole('button', { name: '12Tudo pronto' }));
     await user.click(screen.getByRole('button', { name: 'Entrar no VisualnsCode' }));
     expect(useAppStore.getState().onboardingCompleted).toBe(true);
-    expect(screen.queryByRole('heading', { name: 'O que vamos criar hoje?' })).not.toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Comece um projeto.' })).not.toBeNull();
   });
 });

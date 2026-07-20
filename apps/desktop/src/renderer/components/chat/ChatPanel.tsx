@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Bot, FileCode2, RotateCw, Send, Sparkles, Square, Trash2, Upload } from 'lucide-react';
+import { FileCode2, RotateCw, Send, Square, Trash2, Upload } from 'lucide-react';
 import type { ProviderSummary } from '@visualnscode/providers/browser';
 import { Button } from '@visualnscode/ui';
 import { useChatStore } from '../../chat-store';
@@ -183,26 +183,25 @@ export function ChatPanel() {
 
       <div className="min-h-0 flex-1 overflow-auto p-4">
         {messages.length === 0 ? (
-          <div className="flex gap-2.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]">
-              <Sparkles className="size-3.5" />
-            </span>
-            <div className="rounded-xl rounded-tl-sm bg-[rgb(var(--surface-raised))] p-3 text-xs leading-5 text-[rgb(var(--text-muted))]">
-              Abra os arquivos relevantes, escolha um provider e descreva o que quer construir.
-            </div>
+          <div className="border-l border-[rgb(var(--border-strong))] pl-3">
+            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[rgb(var(--text-subtle))]">
+              Assistente / novo contexto
+            </p>
+            <p className="mt-2 max-w-[28rem] text-xs leading-5 text-[rgb(var(--text-muted))]">
+              Abra os arquivos relevantes, escolha um provider e descreva a tarefa.
+            </p>
           </div>
         ) : null}
         <div className="space-y-4">
           {messages.map((message) => (
-            <div className={message.role === 'user' ? 'ml-8' : 'flex gap-2.5'} key={message.id}>
-              {message.role === 'assistant' ? (
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]">
-                  <Bot className="size-3.5" />
-                </span>
-              ) : null}
-              <div
-                className={`min-w-0 rounded-xl p-3 text-xs leading-5 ${message.role === 'user' ? 'rounded-tr-sm bg-[rgb(var(--accent))] text-white' : 'rounded-tl-sm bg-[rgb(var(--surface-raised))] text-[rgb(var(--text-muted))]'}`}
-              >
+            <div
+              className={`border-l pl-3 ${message.role === 'user' ? 'ml-8 border-[rgb(var(--border-strong))]' : 'border-[rgb(var(--accent))]'}`}
+              key={message.id}
+            >
+              <p className="mb-1 font-mono text-[9px] uppercase tracking-wider text-[rgb(var(--text-subtle))]">
+                {message.role === 'user' ? 'Você' : 'Assistente'}
+              </p>
+              <div className="min-w-0 text-xs leading-5 text-[rgb(var(--text-muted))]">
                 <p className="whitespace-pre-wrap break-words">{message.content || 'Pensando…'}</p>
                 {message.role === 'assistant' ? (
                   <div className="mt-2 flex flex-wrap gap-x-2 text-[9px] text-[rgb(var(--text-subtle))]">
@@ -242,7 +241,7 @@ export function ChatPanel() {
             </span>
           ))}
         </div>
-        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] p-2 focus-within:border-[rgb(var(--accent))]">
+        <div className="rounded-md border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] p-2 focus-within:border-[rgb(var(--accent))]">
           <textarea
             aria-label="Mensagem para o chat"
             className="h-16 w-full resize-none bg-transparent px-1 text-xs outline-none placeholder:text-[rgb(var(--text-subtle))]"

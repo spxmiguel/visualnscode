@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell, Bot, MonitorCog, Palette, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Bell, ListChecks, MonitorCog, Palette, ShieldCheck } from 'lucide-react';
 import { Button, SegmentedControl, Surface } from '@visualnscode/ui';
 import { useAppStore } from '../store';
 import { WindowHeader } from './WindowHeader';
@@ -39,7 +39,7 @@ export function SettingsScreen() {
               elevated
             >
               <div className="flex gap-3">
-                <Bot className="mt-0.5 size-5 text-[rgb(var(--accent))]" />
+                <ListChecks className="mt-0.5 size-5 text-[rgb(var(--accent))]" />
                 <div>
                   <h2 className="text-sm font-semibold">Assistente de ambiente</h2>
                   <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">
@@ -48,7 +48,7 @@ export function SettingsScreen() {
                 </div>
               </div>
               <button
-                className="rounded-lg border border-[rgb(var(--border))] px-3 py-2 text-xs font-medium hover:bg-[rgb(var(--surface-hover))]"
+                className="rounded-[5px] border border-[rgb(var(--border))] px-3 py-2 text-xs font-medium hover:bg-[rgb(var(--surface-hover))]"
                 onClick={restartOnboarding}
                 type="button"
               >

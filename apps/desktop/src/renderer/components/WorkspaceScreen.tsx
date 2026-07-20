@@ -1,14 +1,14 @@
 import Editor from '@monaco-editor/react';
 import {
-  Bot,
   ChevronDown,
   Eye,
+  FileCode2,
+  MessageSquare,
   PanelBottom,
   PanelLeft,
   PanelRight,
   Play,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import {
   Button,
@@ -108,7 +108,7 @@ export function WorkspaceScreen() {
 
   return (
     <div className="flex h-screen min-w-[720px] flex-col overflow-hidden bg-[rgb(var(--background))] text-[rgb(var(--text))]">
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] px-3">
+      <header className="flex h-11 shrink-0 items-center gap-2.5 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] px-2.5">
         <button aria-label="Voltar ao início" onClick={() => navigate('home')} type="button">
           <AppMark compact />
         </button>
@@ -255,7 +255,7 @@ export function WorkspaceScreen() {
                         </Button>
                       }
                       description="Escolha um arquivo no explorador para começar."
-                      icon={<Sparkles className="size-5" />}
+                      icon={<FileCode2 className="size-4" strokeWidth={1.6} />}
                       title="Editor vazio"
                     />
                   )}
@@ -290,9 +290,11 @@ export function WorkspaceScreen() {
         )}
       </div>
 
-      <footer className="flex h-6 shrink-0 items-center justify-between border-t border-[rgb(var(--border))] bg-[rgb(var(--accent))] px-2 text-[10px] text-white">
+      <footer className="flex h-6 shrink-0 items-center justify-between border-t border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] px-2 text-[10px] text-[rgb(var(--text-muted))]">
         <div className="flex items-center gap-3">
-          <span>main</span>
+          <span className="flex items-center gap-1.5 text-[rgb(var(--text))]">
+            <span className="size-1.5 rounded-full bg-emerald-500" /> main
+          </span>
           <span>✓ 0 erros</span>
           <span>{status}</span>
         </div>
@@ -304,7 +306,7 @@ export function WorkspaceScreen() {
                 onClick={() => setRightPanel('chat')}
                 type="button"
               >
-                <Bot className="size-3" /> Chat
+                <MessageSquare className="size-3" /> Chat
               </button>
               <button
                 className="flex items-center gap-1"

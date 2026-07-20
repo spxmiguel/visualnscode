@@ -1,4 +1,4 @@
-import { Bot, Boxes, Plus, Users } from 'lucide-react';
+import { Boxes, Plus, Users } from 'lucide-react';
 import { builtInAgents, teamTemplates } from '@visualnscode/agents/browser';
 import { resolvedAgents, useAgentStore } from '../../agent-store';
 
@@ -18,7 +18,7 @@ export function AgentLibraryPanel() {
       <div className="space-y-1">
         {teamTemplates.map((template) => (
           <button
-            className={`w-full rounded-lg px-2.5 py-2 text-left text-xs ${currentWorkflow.id === template.id ? 'bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]' : 'text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]'}`}
+            className={`w-full rounded-[5px] px-2.5 py-2 text-left text-xs ${currentWorkflow.id === template.id ? 'bg-[rgb(var(--surface-hover))] text-[rgb(var(--text))] shadow-[inset_2px_0_0_rgb(var(--accent))]' : 'text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]'}`}
             key={template.id}
             onClick={() => applyTemplate(template.id)}
             type="button"
@@ -50,15 +50,15 @@ export function AgentLibraryPanel() {
       <div className="space-y-1">
         {agents.map((agent) => (
           <button
-            className="flex w-full cursor-grab items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]"
+            className="flex w-full cursor-grab items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-xs text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]"
             draggable
             key={agent.id}
             onClick={() => setSelectedAgent(agent.id)}
             onDragStart={(event) => event.dataTransfer.setData('text/plain', `agent:${agent.id}`)}
             type="button"
           >
-            <span className="flex size-6 items-center justify-center rounded-md bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]">
-              <Bot className="size-3" />
+            <span className="flex size-6 items-center justify-center border border-[rgb(var(--border))] font-mono text-[8px] text-[rgb(var(--text-muted))]">
+              {agent.name.slice(0, 2).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1 truncate">{agent.name}</span>
             {agent.builtIn ? null : <span className="text-[8px] text-emerald-500">CUSTOM</span>}

@@ -72,7 +72,7 @@ export function SupabaseSetup() {
         {action('types', 'Gerar tipos', Code2)}
       </div>
       {pending ? (
-        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
           <p className="text-sm font-medium">Confirmar ação Supabase</p>
           <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">
             A operação é allowlisted e não usa shell. Um workspace real será exigido para qualquer

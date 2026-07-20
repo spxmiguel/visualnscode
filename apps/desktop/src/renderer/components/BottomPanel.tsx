@@ -46,7 +46,7 @@ export function BottomPanel() {
           <>
             <p>
               <span className="text-emerald-500">visualnscode</span>{' '}
-              <span className="text-violet-400">main</span> $ pnpm dev
+              <span className="text-[rgb(var(--accent))]">main</span> $ pnpm dev
             </p>
             <p className="mt-2 text-[rgb(var(--text-subtle))]">
               Terminal via node-pty chegará na próxima fase.

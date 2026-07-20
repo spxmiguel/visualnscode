@@ -24,11 +24,11 @@ export function ToolCard({ busy, ignored, onAction, result, toolId }: ToolCardPr
   const installed = result?.installed && result.status === 'installed';
   return (
     <article
-      className={`rounded-xl border p-4 transition ${ignored ? 'border-[rgb(var(--border))] opacity-55' : installed ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))]'}`}
+      className={`rounded-md border p-4 transition ${ignored ? 'border-[rgb(var(--border))] opacity-55' : installed ? 'border-emerald-500/30 bg-emerald-500/[0.04]' : 'border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))]'}`}
     >
       <div className="flex items-start gap-3">
         <span
-          className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg ${installed ? 'bg-emerald-500/15 text-emerald-500' : result?.status === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-[rgb(var(--surface-sunken))] text-[rgb(var(--text-muted))]'}`}
+          className={`mt-0.5 flex size-7 shrink-0 items-center justify-center border ${installed ? 'border-emerald-500/40 text-emerald-500' : result?.status === 'error' ? 'border-red-500/40 text-red-500' : 'border-[rgb(var(--border))] text-[rgb(var(--text-muted))]'}`}
         >
           {busy ? (
             <Spinner label="" />
@@ -42,7 +42,7 @@ export function ToolCard({ busy, ignored, onAction, result, toolId }: ToolCardPr
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-semibold">{definition.name}</h3>
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${installed ? 'bg-emerald-500/15 text-emerald-500' : 'bg-[rgb(var(--surface-sunken))] text-[rgb(var(--text-subtle))]'}`}
+              className={`border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide ${installed ? 'border-emerald-500/30 text-emerald-500' : 'border-[rgb(var(--border))] text-[rgb(var(--text-subtle))]'}`}
             >
               {ignored
                 ? 'Ignorada'

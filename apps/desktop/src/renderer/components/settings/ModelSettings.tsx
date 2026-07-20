@@ -96,7 +96,7 @@ export function ModelSettings() {
         <nav className="border-b border-[rgb(var(--border))] p-2 md:border-b-0 md:border-r">
           {providers.map((provider) => (
             <button
-              className={`mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs ${provider.id === selected.id ? 'bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]' : 'text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]'}`}
+              className={`mb-px flex w-full items-center gap-2 border-l-2 px-3 py-2.5 text-left text-xs ${provider.id === selected.id ? 'border-[rgb(var(--accent))] bg-[rgb(var(--surface-hover))] text-[rgb(var(--text))]' : 'border-transparent text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]'}`}
               key={provider.id}
               onClick={() => setSelectedId(provider.id)}
               type="button"
@@ -120,7 +120,7 @@ export function ModelSettings() {
         <div className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex gap-3">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]">
+              <span className="flex size-8 items-center justify-center border border-[rgb(var(--border))] text-[rgb(var(--text-muted))]">
                 <TypeIcon className="size-4" />
               </span>
               <div>
@@ -146,7 +146,7 @@ export function ModelSettings() {
           <div className="mt-4 flex flex-wrap gap-1.5">
             {Object.entries(selected.capabilities).map(([key, enabled]) => (
               <span
-                className={`rounded-full px-2 py-1 text-[10px] ${enabled ? 'bg-emerald-500/10 text-emerald-500' : 'bg-[rgb(var(--surface-sunken))] text-[rgb(var(--text-subtle))]'}`}
+                className={`border px-2 py-1 font-mono text-[9px] uppercase ${enabled ? 'border-emerald-500/30 text-emerald-500' : 'border-[rgb(var(--border))] text-[rgb(var(--text-subtle))]'}`}
                 key={key}
               >
                 {key}

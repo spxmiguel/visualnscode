@@ -1,10 +1,10 @@
 import {
-  Bot,
   Camera,
   CloudUpload,
   Eye,
   ExternalLink,
   Inspect,
+  MessageSquare,
   Monitor,
   Play,
   RefreshCw,
@@ -59,7 +59,7 @@ export function RightWorkspacePanel() {
       <div className="flex h-9 shrink-0 border-b border-[rgb(var(--border))] p-1">
         <PanelTab
           active={rightPanel === 'chat'}
-          icon={<Bot className="size-3.5" />}
+          icon={<MessageSquare className="size-3.5" />}
           label="Chat"
           onClick={() => setRightPanel('chat')}
         />

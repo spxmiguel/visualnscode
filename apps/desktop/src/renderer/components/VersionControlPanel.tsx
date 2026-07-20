@@ -7,8 +7,8 @@ import {
   GitCommit,
   GitMerge,
   Loader2,
+  MessageSquareText,
   RefreshCw,
-  Sparkles,
   Tag,
 } from 'lucide-react';
 import { Button } from '@visualnscode/ui';
@@ -205,7 +205,7 @@ export function VersionControlPanel() {
               size="sm"
               variant="secondary"
             >
-              <Sparkles className="size-3.5" /> Sugerir mensagem
+              <MessageSquareText className="size-3.5" /> Sugerir mensagem
             </Button>
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -362,7 +362,7 @@ export function VersionControlPanel() {
             size="sm"
             variant="ghost"
           >
-            <Sparkles className="size-3.5" /> Sugerir
+            <MessageSquareText className="size-3.5" /> Sugerir
           </Button>
         </div>
         <div className="mt-4 border-t border-[rgb(var(--border))] pt-3">

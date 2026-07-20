@@ -63,7 +63,7 @@ export function FirebaseSetup() {
         <Settings2 className="size-3.5" /> Configurar Hosting, Firestore e Auth
       </Button>
       {pending ? (
-        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
           <p className="flex items-center gap-2 text-sm font-medium">
             <Cloud className="size-4" /> Confirmar ação Firebase
           </p>

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import {
   Activity,
-  Bot,
   CircleDollarSign,
   Clock3,
   Link2,
@@ -229,7 +228,7 @@ export function AgentWorkspace() {
                     : 'idle';
               return (
                 <article
-                  className={`absolute w-[180px] cursor-grab rounded-xl border bg-[rgb(var(--surface))] p-3 shadow-lg ${statusColor(status)} ${connectFrom === node.id ? 'ring-2 ring-[rgb(var(--accent))]' : ''}`}
+                  className={`absolute w-[180px] cursor-grab rounded-md border bg-[rgb(var(--surface))] p-3 shadow-[var(--shadow-panel)] ${statusColor(status)} ${connectFrom === node.id ? 'ring-1 ring-[rgb(var(--accent))]' : ''}`}
                   draggable
                   key={node.id}
                   onClick={() => useAgentStore.getState().setSelectedAgent(agent.id)}
@@ -248,8 +247,8 @@ export function AgentWorkspace() {
                   style={{ left: node.position.x, top: node.position.y }}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]">
-                      <Bot className="size-3.5" />
+                    <span className="flex size-7 shrink-0 items-center justify-center border border-[rgb(var(--border))] font-mono text-[8px] text-[rgb(var(--text-muted))]">
+                      {agent.name.slice(0, 2).toUpperCase()}
                     </span>
                     <div className="min-w-0 flex-1">
                       <h2 className="truncate text-xs font-semibold">{agent.name}</h2>

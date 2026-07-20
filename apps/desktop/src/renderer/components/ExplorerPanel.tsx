@@ -45,7 +45,7 @@ export function ExplorerPanel() {
         <ChevronDown className="size-3" /> Meu projeto
       </div>
       <div className="mb-1 flex items-center gap-2 px-2 py-1.5 text-xs text-[rgb(var(--text-muted))]">
-        <Folder className="size-4 fill-violet-500/15 text-violet-500" /> src
+        <Folder className="size-4 text-[rgb(var(--accent))]" /> src
       </div>
       {visibleFiles.map((file) => (
         <button

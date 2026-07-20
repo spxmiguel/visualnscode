@@ -123,7 +123,7 @@ export function GitHubSetup() {
         <Save className="size-3.5" /> Salvar identidade Git
       </Button>
       {pending ? (
-        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
           <p className="text-sm font-medium">Confirmar ação</p>
           <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">{pending.label}</p>
           <div className="mt-3 flex gap-2">

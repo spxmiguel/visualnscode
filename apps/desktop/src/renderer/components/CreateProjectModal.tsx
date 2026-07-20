@@ -2,9 +2,9 @@ import {
   Check,
   ChevronRight,
   CircleAlert,
+  ClipboardList,
   Folder,
   Loader2,
-  Sparkles,
   TerminalSquare,
   X,
 } from 'lucide-react';
@@ -35,7 +35,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const FIELD_CLASS =
-  'w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--background))] px-3 py-2 text-sm text-[rgb(var(--text))] outline-none focus:border-[rgb(var(--accent))]';
+  'w-full rounded-[5px] border border-[rgb(var(--border))] bg-[rgb(var(--background))] px-3 py-2 text-sm text-[rgb(var(--text))] outline-none focus:border-[rgb(var(--accent))]';
 
 const slug = (value: string) =>
   value
@@ -145,7 +145,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
       name: projectName,
       path: result.path,
       lastOpened: 'Agora',
-      color: '#7c5cfc',
+      color: '#ae5128',
     });
     if (result.runCommand) {
       window.setTimeout(() => {
@@ -160,7 +160,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] shadow-2xl">
+      <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-md border border-[rgb(var(--border-strong))] bg-[rgb(var(--surface))] shadow-2xl">
         <header className="flex items-center justify-between border-b border-[rgb(var(--border))] px-5 py-4">
           <div>
             <h2 className="text-base font-semibold text-[rgb(var(--text))]">Criar projeto</h2>
@@ -203,9 +203,9 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
                 </p>
               ) : null}
               {suggestion ? (
-                <div className="rounded-xl border border-[rgb(var(--accent))]/40 bg-[rgb(var(--accent-soft))] p-4">
+                <div className="rounded-md border border-[rgb(var(--accent))]/40 bg-[rgb(var(--accent-soft))] p-4">
                   <div className="mb-3 flex items-center gap-2">
-                    <Sparkles className="size-4 text-[rgb(var(--accent))]" />
+                    <ClipboardList className="size-4 text-[rgb(var(--accent))]" />
                     <p className="text-sm font-semibold">Sugestão para {suggestion.name}</p>
                   </div>
                   <dl className="grid gap-x-5 gap-y-3 text-xs sm:grid-cols-2">
@@ -236,7 +236,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
                   <div className="grid gap-2 sm:grid-cols-2">
                     {items.map((template) => (
                       <button
-                        className={`flex items-start gap-3 rounded-xl border p-3 text-left transition hover:border-[rgb(var(--accent))] ${selected?.id === template.id ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent-soft))]' : 'border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))]'}`}
+                        className={`flex items-start gap-3 rounded-md border p-3 text-left transition hover:border-[rgb(var(--accent))] ${selected?.id === template.id ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent-soft))]' : 'border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))]'}`}
                         key={template.id}
                         onClick={() => setSelected(template)}
                         type="button"
@@ -319,7 +319,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
                 </label>
               </div>
 
-              <div className="space-y-3 rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] p-4 text-sm">
+              <div className="space-y-3 rounded-md border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] p-4 text-sm">
                 <p className="font-medium">O VisualnsCode pode cuidar de:</p>
                 {[
                   [installDependencies, setInstallDependencies, 'Instalar bibliotecas'],
@@ -441,7 +441,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
                   {suggesting ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
-                    <Sparkles className="size-4" />
+                    <ClipboardList className="size-4" />
                   )}
                   Sugerir projeto
                 </Button>
