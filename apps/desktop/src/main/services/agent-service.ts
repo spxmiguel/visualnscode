@@ -75,6 +75,7 @@ class ProviderAgentExecutor implements AgentExecutor {
       agent: AgentDefinition,
       action: AgentAction,
     ) => Promise<ActionExecution>,
+    private readonly workingDirectory?: string,
   ) {}
 
   async execute(input: AgentExecutorInput): Promise<AgentExecutionResult> {
@@ -119,6 +120,7 @@ class ProviderAgentExecutor implements AgentExecutor {
           if (chunk.type === 'usage') usage = chunk.usage;
           if (chunk.type === 'error') throw new Error(chunk.message);
         },
+        this.workingDirectory ? { workingDirectory: this.workingDirectory } : {},
       );
     } finally {
       input.signal.removeEventListener('abort', cancelProvider);
@@ -267,6 +269,7 @@ export class AgentService {
       (agent) => this.memories.get(this.memoryKey(request.runId, agent, workspace)) ?? [],
       (agent, output) => this.remember(request.runId, agent, output, workspace),
       (agent, action) => this.executeAction(agent, action, workspace),
+      workspace ?? undefined,
     );
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);

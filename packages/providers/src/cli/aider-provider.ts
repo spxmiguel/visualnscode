@@ -1,9 +1,9 @@
 import type { AgentInput, ProviderDescriptor } from '../types';
-import { CliProvider } from './cli-provider';
+import { CliProvider, type CliProviderOptions } from './cli-provider';
 
 export class AiderProvider extends CliProvider {
-  constructor(descriptor: ProviderDescriptor) {
-    super(descriptor, 'aider');
+  constructor(descriptor: ProviderDescriptor, options?: CliProviderOptions) {
+    super(descriptor, 'aider', options);
   }
 
   protected buildArguments(prompt: string, input: AgentInput): readonly string[] {

@@ -30,6 +30,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
+    "postinstall": "node scripts/ensure-node-pty-helper.mjs",
     "prepare": "husky",
     "security:audit": "node scripts/audit-repository.mjs",
     "test": "pnpm test:unit && pnpm test:integration",

@@ -1,9 +1,9 @@
 import type { AgentInput, ProviderDescriptor } from '../types';
-import { CliProvider } from './cli-provider';
+import { CliProvider, type CliProviderOptions } from './cli-provider';
 
 export class CodexCliProvider extends CliProvider {
-  constructor(descriptor: ProviderDescriptor) {
-    super(descriptor, 'codex');
+  constructor(descriptor: ProviderDescriptor, options?: CliProviderOptions) {
+    super(descriptor, 'codex', options);
   }
 
   protected buildArguments(prompt: string, input: AgentInput): readonly string[] {
@@ -12,6 +12,9 @@ export class CodexCliProvider extends CliProvider {
       '--json',
       '--sandbox',
       'read-only',
+      '--ephemeral',
+      '--color',
+      'never',
       ...(input.model !== 'default' ? ['--model', input.model] : []),
       prompt,
     ];

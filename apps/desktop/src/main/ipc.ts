@@ -350,13 +350,17 @@ export const registerEnvironmentIpc = (): void => {
     }
     const input = candidate.input;
     const providerId = candidate.providerId;
-    void providerService.stream(providerId, input, send).catch((error: unknown) =>
-      send({
-        type: 'error',
-        requestId: input.requestId,
-        message: error instanceof Error ? error.message : 'Falha ao iniciar o chat.',
-      }),
-    );
+    void providerService
+      .stream(providerId, input, send, {
+        ...(fsService.getWorkspace() ? { workingDirectory: fsService.getWorkspace()! } : {}),
+      })
+      .catch((error: unknown) =>
+        send({
+          type: 'error',
+          requestId: input.requestId,
+          message: error instanceof Error ? error.message : 'Falha ao iniciar o chat.',
+        }),
+      );
   });
   ipcMain.handle('chat:cancel', (_event, requestId: string) => providerService.cancel(requestId));
 

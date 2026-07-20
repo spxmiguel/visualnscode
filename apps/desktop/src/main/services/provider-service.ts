@@ -117,6 +117,7 @@ export class ProviderService {
     providerId: string,
     input: AgentInput,
     onChunk: (chunk: AgentChunk) => void,
+    runtime: { readonly workingDirectory?: string } = {},
   ): Promise<void> {
     const settings = (await this.readSettings())[providerId];
     if (!settings?.enabled)
@@ -126,7 +127,7 @@ export class ProviderService {
       throw new Error('Limite de conversas simultâneas atingido.');
     if (!input.model.trim()) throw new Error('Selecione um modelo antes de enviar.');
 
-    const provider = await this.create(providerId);
+    const provider = await this.create(providerId, runtime);
     const descriptor = getProviderDescriptor(providerId);
     const safeInput =
       descriptor?.execution === 'remote'
@@ -178,7 +179,7 @@ export class ProviderService {
     this.activeProviders.delete(requestId);
   }
 
-  private async create(providerId: string) {
+  private async create(providerId: string, runtime: { readonly workingDirectory?: string } = {}) {
     const descriptor = getProviderDescriptor(providerId);
     if (!descriptor) throw new Error('Provider desconhecido.');
     const settings = (await this.readSettings())[providerId] ?? defaultProviderSettings(descriptor);
@@ -187,7 +188,7 @@ export class ProviderService {
     const secret = await this.secrets.get(`provider:${providerId}`);
     if (descriptor.requiresSecret && !secret)
       throw new Error('Configure a chave no cofre do sistema.');
-    return createProvider(descriptor, settings, secret);
+    return createProvider(descriptor, settings, secret, runtime);
   }
 
   private async readSettings(): Promise<Record<string, ProviderSettings>> {

@@ -8,10 +8,15 @@ import { GeminiProvider } from './gemini-provider';
 import { OpenAICompatibleProvider } from './openai-compatible-provider';
 import type { AIProvider, ProviderDescriptor, ProviderSettings } from './types';
 
+export interface ProviderRuntimeOptions {
+  readonly workingDirectory?: string;
+}
+
 export const createProvider = (
   descriptor: ProviderDescriptor,
   settings: ProviderSettings,
   secret: string | null,
+  options: ProviderRuntimeOptions = {},
 ): AIProvider => {
   if (descriptor.id === 'anthropic') {
     return new AnthropicProvider(descriptor, secret ?? '', settings.baseUrl);
@@ -19,11 +24,11 @@ export const createProvider = (
   if (descriptor.id === 'gemini') {
     return new GeminiProvider(descriptor, secret ?? '', settings.baseUrl);
   }
-  if (descriptor.id === 'claude-cli') return new ClaudeCodeProvider(descriptor);
-  if (descriptor.id === 'codex-cli') return new CodexCliProvider(descriptor);
-  if (descriptor.id === 'gemini-cli') return new GeminiCliProvider(descriptor);
-  if (descriptor.id === 'aider') return new AiderProvider(descriptor);
-  if (descriptor.id === 'opencode') return new OpenCodeProvider(descriptor);
+  if (descriptor.id === 'claude-cli') return new ClaudeCodeProvider(descriptor, options);
+  if (descriptor.id === 'codex-cli') return new CodexCliProvider(descriptor, options);
+  if (descriptor.id === 'gemini-cli') return new GeminiCliProvider(descriptor, options);
+  if (descriptor.id === 'aider') return new AiderProvider(descriptor, options);
+  if (descriptor.id === 'opencode') return new OpenCodeProvider(descriptor, options);
 
   return new OpenAICompatibleProvider({
     descriptor,

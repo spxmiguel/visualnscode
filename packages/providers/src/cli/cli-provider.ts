@@ -1,4 +1,6 @@
 import * as pty from 'node-pty';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { BaseProvider } from '../base-provider';
 import {
   estimateTokenUsage,
@@ -7,16 +9,16 @@ import {
   type AIModel,
   type ProviderDescriptor,
 } from '../types';
+import { CliOutputDecoder } from './cli-output';
+import { cliEnvironment, resolveCliExecutable } from './cli-runtime';
 
 const ansiPattern = new RegExp(`${String.fromCharCode(27)}\\[[0-?]*[ -/]*[@-~]`, 'g');
 const stripAnsi = (value: string): string => value.replace(ansiPattern, '');
+const execFileAsync = promisify(execFile);
 
-const safeEnvironment = (): Record<string, string> =>
-  Object.fromEntries(
-    ['HOME', 'LANG', 'LC_ALL', 'PATH', 'SHELL', 'TERM', 'TMPDIR', 'USER']
-      .map((key) => [key, process.env[key]])
-      .filter((entry): entry is [string, string] => Boolean(entry[1])),
-  );
+export interface CliProviderOptions {
+  readonly workingDirectory?: string;
+}
 
 export abstract class CliProvider extends BaseProvider {
   readonly id: string;
@@ -24,11 +26,12 @@ export abstract class CliProvider extends BaseProvider {
   readonly type;
   readonly capabilities;
   readonly execution;
-  private readonly terminals = new Map<string, pty.IPty>();
+  private readonly terminals = new Map<string, { terminal: pty.IPty; cancelled: boolean }>();
 
   constructor(
     descriptor: ProviderDescriptor,
     protected readonly command: string,
+    private readonly options: CliProviderOptions = {},
   ) {
     super();
     this.id = descriptor.id;
@@ -39,28 +42,19 @@ export abstract class CliProvider extends BaseProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    return new Promise((resolve) => {
-      let terminal: pty.IPty;
-      try {
-        terminal = pty.spawn(this.command, ['--version'], {
-          cols: 80,
-          rows: 24,
-          cwd: process.cwd(),
-          env: safeEnvironment(),
-        });
-      } catch {
-        resolve(false);
-        return;
-      }
-      const timeout = setTimeout(() => {
-        terminal.kill();
-        resolve(false);
-      }, 2500);
-      terminal.onExit(({ exitCode }) => {
-        clearTimeout(timeout);
-        resolve(exitCode === 0);
+    const executable = resolveCliExecutable(this.command);
+    if (!executable) return false;
+    try {
+      await execFileAsync(executable, ['--version'], {
+        cwd: this.options.workingDirectory ?? process.cwd(),
+        env: cliEnvironment(executable),
+        timeout: 4000,
+        windowsHide: true,
       });
-    });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async listModels(): Promise<readonly AIModel[]> {
@@ -84,10 +78,21 @@ export abstract class CliProvider extends BaseProvider {
 
   async *streamMessage(input: AgentInput): AsyncIterable<AgentChunk> {
     const prompt = this.inputText(input);
+    const executable = resolveCliExecutable(this.command);
+    if (!executable) {
+      yield {
+        type: 'error',
+        requestId: input.requestId,
+        message: `${this.name} não está instalado ou não foi encontrado nos locais conhecidos.`,
+      };
+      return;
+    }
     const queue: AgentChunk[] = [];
     let finished = false;
     let wake: (() => void) | null = null;
     let output = '';
+    let timedOut = false;
+    const decoder = new CliOutputDecoder(this.id);
     const push = (chunk: AgentChunk): void => {
       queue.push(chunk);
       wake?.();
@@ -95,44 +100,63 @@ export abstract class CliProvider extends BaseProvider {
     };
 
     try {
-      const terminal = pty.spawn(this.command, [...this.buildArguments(prompt, input)], {
+      const terminal = pty.spawn(executable, [...this.buildArguments(prompt, input)], {
         cols: 120,
         rows: 40,
-        cwd: process.cwd(),
-        env: safeEnvironment(),
+        cwd: this.options.workingDirectory ?? process.cwd(),
+        env: cliEnvironment(executable),
       });
-      this.terminals.set(input.requestId, terminal);
-      const timeout = setTimeout(() => terminal.kill(), input.timeoutMs ?? 60_000);
+      const session = { terminal, cancelled: false };
+      this.terminals.set(input.requestId, session);
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        terminal.kill();
+      }, input.timeoutMs ?? 60_000);
       terminal.onData((data) => {
-        const text = stripAnsi(data).replace(/\r/g, '');
-        if (!text) return;
-        output += text;
-        push({ type: 'text', requestId: input.requestId, text });
+        const clean = stripAnsi(data);
+        for (const text of decoder.push(clean)) {
+          output += text;
+          push({ type: 'text', requestId: input.requestId, text });
+        }
       });
       terminal.onExit(({ exitCode }) => {
         clearTimeout(timeout);
-        if (exitCode !== 0 && output.trim().length === 0) {
+        for (const text of decoder.flush()) {
+          output += text;
+          push({ type: 'text', requestId: input.requestId, text });
+        }
+        const cliError = decoder.error();
+        if (timedOut) {
           push({
             type: 'error',
             requestId: input.requestId,
-            message: `${this.name} encerrou com código ${exitCode}. Verifique a autenticação da CLI.`,
+            message: `${this.name} ultrapassou o tempo limite configurado.`,
           });
-        } else {
+        } else if (cliError) {
+          push({ type: 'error', requestId: input.requestId, message: cliError });
+        } else if (exitCode !== 0 && !session.cancelled) {
+          push({
+            type: 'error',
+            requestId: input.requestId,
+            message: `${this.name} encerrou com código ${exitCode}. Confira o login e a configuração da CLI.`,
+          });
+        } else if (!session.cancelled) {
           push({
             type: 'usage',
             requestId: input.requestId,
-            usage: estimateTokenUsage(prompt, output),
+            usage: decoder.usage() ?? estimateTokenUsage(prompt, output),
           });
           push({ type: 'done', requestId: input.requestId });
         }
         finished = true;
         wake?.();
       });
-    } catch {
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'erro nativo desconhecido';
       yield {
         type: 'error',
         requestId: input.requestId,
-        message: `${this.name} não foi encontrado no PATH.`,
+        message: `${this.name} foi encontrado em ${executable}, mas não pôde ser iniciado (${detail}). Reinstale as dependências do VisualnsCode para reparar o terminal integrado.`,
       };
       return;
     }
@@ -146,7 +170,11 @@ export abstract class CliProvider extends BaseProvider {
   }
 
   override async cancel(requestId: string): Promise<void> {
-    this.terminals.get(requestId)?.kill();
+    const session = this.terminals.get(requestId);
+    if (session) {
+      session.cancelled = true;
+      session.terminal.kill();
+    }
     this.terminals.delete(requestId);
   }
 
