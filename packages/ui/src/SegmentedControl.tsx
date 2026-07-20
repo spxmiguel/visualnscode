@@ -19,13 +19,13 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       aria-label={label}
-      className="inline-flex rounded-lg bg-[rgb(var(--surface-sunken))] p-1"
+      className="inline-flex rounded-[5px] border border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] p-0.5"
       role="group"
     >
       {options.map((option) => (
         <button
           aria-pressed={value === option.value}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${value === option.value ? 'bg-[rgb(var(--surface-raised))] text-[rgb(var(--text))] shadow-sm' : 'text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]'}`}
+          className={`rounded-[3px] px-3 py-1 text-xs font-medium transition ${value === option.value ? 'bg-[rgb(var(--surface-raised))] text-[rgb(var(--text))] shadow-[0_1px_2px_rgb(0_0_0/0.08)]' : 'text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]'}`}
           key={option.value}
           onClick={() => onChange(option.value)}
           type="button"

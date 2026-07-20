@@ -18,7 +18,7 @@ export function IconButton({
     <button
       aria-label={label}
       aria-pressed={active || undefined}
-      className={`inline-flex size-9 items-center justify-center rounded-lg outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--focus))] ${active ? 'bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]' : 'text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))] hover:text-[rgb(var(--text))]'} ${className}`}
+      className={`inline-flex size-8 items-center justify-center rounded-[5px] outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--focus))] ${active ? 'bg-[rgb(var(--surface-hover))] text-[rgb(var(--text))] shadow-[inset_2px_0_0_rgb(var(--accent))]' : 'text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))] hover:text-[rgb(var(--text))]'} ${className}`}
       title={label}
       type={type}
       {...props}

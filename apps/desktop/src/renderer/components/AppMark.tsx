@@ -14,18 +14,29 @@ export function AppMark({ compact = false, size = 28 }: AppMarkProps) {
         viewBox="0 0 28 28"
         width={size}
       >
-        <rect fill="#7C5CFC" height="28" rx="8" width="28" />
+        <rect
+          height="27"
+          rx="5.5"
+          stroke="rgb(var(--border-strong))"
+          transform="translate(.5 .5)"
+          width="27"
+        />
         <path
-          d="M8 10l4 4-4 4"
-          stroke="white"
+          d="M7.5 8.5 12 19.5 16.5 8.5"
+          stroke="rgb(var(--text))"
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth="2"
+          strokeWidth="1.8"
         />
-        <path d="M15 18h5" stroke="white" strokeLinecap="round" strokeWidth="2" />
+        <path
+          d="m20.5 8.5-3.5 11"
+          stroke="rgb(var(--accent))"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
       </svg>
       {!compact ? (
-        <span className="text-sm font-semibold tracking-tight text-[rgb(var(--text))]">
+        <span className="text-sm font-semibold tracking-[-0.02em] text-[rgb(var(--text))]">
           VisualnsCode
         </span>
       ) : null}

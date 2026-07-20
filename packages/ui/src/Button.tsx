@@ -6,7 +6,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary: 'bg-[rgb(var(--accent))] text-white shadow-sm hover:bg-[rgb(var(--accent-hover))]',
+  primary:
+    'border border-[rgb(var(--accent))] bg-[rgb(var(--accent))] text-[rgb(var(--accent-contrast))] hover:border-[rgb(var(--accent-hover))] hover:bg-[rgb(var(--accent-hover))]',
   secondary:
     'border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] text-[rgb(var(--text))] hover:bg-[rgb(var(--surface-hover))]',
   ghost:
@@ -15,8 +16,8 @@ const variants = {
 } as const;
 
 const sizes = {
-  sm: 'h-8 px-3 text-xs',
-  md: 'h-10 px-4 text-sm',
+  sm: 'h-7 px-2.5 text-xs',
+  md: 'h-9 px-3.5 text-sm',
 } as const;
 
 export function Button({
@@ -28,7 +29,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--focus))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background))] disabled:cursor-not-allowed disabled:opacity-45 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-[5px] font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--focus))] focus-visible:ring-offset-1 focus-visible:ring-offset-[rgb(var(--background))] disabled:cursor-not-allowed disabled:opacity-45 ${variants[variant]} ${sizes[size]} ${className}`}
       type={type}
       {...props}
     />

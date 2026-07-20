@@ -21,12 +21,12 @@ export function SelectField({
       </span>
       <select
         aria-label={hideLabel ? label : undefined}
-        className="h-9 w-full appearance-none rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] py-1 pl-3 pr-8 text-sm text-[rgb(var(--text))] outline-none transition focus:border-[rgb(var(--accent))] focus:ring-2 focus:ring-[rgb(var(--accent-soft))]"
+        className="h-8 w-full appearance-none rounded-[5px] border border-[rgb(var(--border))] bg-[rgb(var(--surface-raised))] py-1 pl-2.5 pr-8 text-xs text-[rgb(var(--text))] outline-none transition focus:border-[rgb(var(--accent))] focus:ring-1 focus:ring-[rgb(var(--accent))]"
         {...props}
       />
       <ChevronDown
         aria-hidden="true"
-        className={`pointer-events-none absolute right-2.5 size-4 text-[rgb(var(--text-subtle))] ${hideLabel ? 'top-2.5' : 'bottom-2.5'}`}
+        className={`pointer-events-none absolute right-2.5 size-3.5 text-[rgb(var(--text-subtle))] ${hideLabel ? 'top-2' : 'bottom-2'}`}
       />
     </label>
   );

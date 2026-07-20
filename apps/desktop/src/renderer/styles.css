@@ -4,40 +4,42 @@
 
 :root {
   color-scheme: light;
-  --background: 246 247 251;
-  --surface: 250 250 252;
-  --surface-raised: 255 255 255;
-  --surface-sunken: 237 239 245;
-  --surface-hover: 232 234 242;
-  --border: 219 222 231;
-  --border-strong: 185 190 204;
-  --text: 31 34 43;
-  --text-muted: 100 105 120;
-  --text-subtle: 135 140 154;
-  --accent: 109 76 237;
-  --accent-hover: 91 61 218;
-  --accent-soft: 235 229 255;
-  --focus: 124 92 246;
-  --shadow-panel: 0 8px 30px rgb(30 34 52 / 0.08);
+  --background: 242 241 237;
+  --surface: 247 246 242;
+  --surface-raised: 252 251 247;
+  --surface-sunken: 234 233 228;
+  --surface-hover: 227 226 220;
+  --border: 207 205 197;
+  --border-strong: 165 162 151;
+  --text: 31 30 28;
+  --text-muted: 96 93 86;
+  --text-subtle: 128 124 115;
+  --accent: 174 81 40;
+  --accent-hover: 145 64 28;
+  --accent-soft: 242 222 207;
+  --accent-contrast: 255 255 255;
+  --focus: 181 83 40;
+  --shadow-panel: 0 2px 10px rgb(41 35 27 / 0.06);
 }
 
 [data-theme='dark'] {
   color-scheme: dark;
-  --background: 14 15 19;
-  --surface: 19 21 27;
-  --surface-raised: 27 29 37;
-  --surface-sunken: 11 12 16;
-  --surface-hover: 38 41 51;
-  --border: 45 48 59;
-  --border-strong: 76 80 94;
-  --text: 239 240 245;
-  --text-muted: 161 165 178;
-  --text-subtle: 117 121 136;
-  --accent: 139 106 246;
-  --accent-hover: 154 126 250;
-  --accent-soft: 49 39 85;
-  --focus: 155 128 250;
-  --shadow-panel: 0 12px 34px rgb(0 0 0 / 0.3);
+  --background: 17 17 16;
+  --surface: 21 21 20;
+  --surface-raised: 27 27 25;
+  --surface-sunken: 13 13 12;
+  --surface-hover: 35 34 31;
+  --border: 48 47 43;
+  --border-strong: 77 74 67;
+  --text: 233 231 224;
+  --text-muted: 160 156 146;
+  --text-subtle: 116 112 104;
+  --accent: 221 132 78;
+  --accent-hover: 235 151 98;
+  --accent-soft: 61 41 29;
+  --accent-contrast: 30 22 17;
+  --focus: 224 137 84;
+  --shadow-panel: 0 2px 12px rgb(0 0 0 / 0.22);
 }
 
 html,
@@ -52,6 +54,10 @@ body {
   background: rgb(var(--background));
   color: rgb(var(--text));
   overflow: hidden;
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.28);
 }
 
 * {

@@ -13,7 +13,7 @@ export function ErrorNotice({
 }: ErrorNoticeProps) {
   return (
     <div
-      className="flex items-start gap-3 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm"
+      className="flex items-start gap-3 rounded-md border border-red-500/30 bg-red-500/[0.07] p-3 text-sm"
       role="alert"
     >
       <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-500" />
