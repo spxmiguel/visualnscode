@@ -1,11 +1,11 @@
 import {
-  Bot,
   ChevronRight,
   CirclePlay,
   Eye,
   FileCode2,
   Folder,
   GitBranch,
+  MessageSquare,
   PanelLeft,
   ShieldCheck,
 } from 'lucide-react';
@@ -51,7 +51,7 @@ export function ProductDemo() {
               aria-label="Ferramentas da demonstração"
               className="flex flex-col items-center gap-1 border-r border-[rgb(var(--line))] py-2 text-[rgb(var(--subtle))]"
             >
-              {[PanelLeft, FileCode2, GitBranch, Bot].map((Icon, index) => (
+              {[PanelLeft, FileCode2, GitBranch, MessageSquare].map((Icon, index) => (
                 <span
                   className={`grid size-8 place-items-center rounded-md ${index === 1 ? 'bg-[rgb(var(--accent-soft))] text-[rgb(var(--accent))]' : ''}`}
                   key={index}
@@ -113,7 +113,7 @@ export function ProductDemo() {
             <aside className="hidden border-l border-[rgb(var(--line))] lg:flex lg:flex-col">
               <div className="flex h-10 border-b border-[rgb(var(--line))] font-mono text-[9px]">
                 <span className="grid flex-1 place-items-center border-b border-[rgb(var(--accent))] text-[rgb(var(--ink))]">
-                  <Bot className="mr-1 inline size-3" /> CHAT
+                  <MessageSquare className="mr-1 inline size-3" /> CHAT
                 </span>
                 <span className="grid flex-1 place-items-center text-[rgb(var(--subtle))]">
                   <Eye className="mr-1 inline size-3" /> PREVIEW
@@ -142,8 +142,10 @@ export function ProductDemo() {
               </div>
             </aside>
           </div>
-          <div className="flex h-7 items-center justify-between bg-[rgb(var(--accent))] px-3 font-mono text-[9px] text-[rgb(var(--page))]">
-            <span>main · clean</span>
+          <div className="flex h-7 items-center justify-between border-t border-[rgb(var(--line))] bg-[rgb(var(--code))] px-3 font-mono text-[9px] text-[rgb(var(--muted))]">
+            <span className="flex items-center gap-1.5 text-[rgb(var(--ink))]">
+              <span className="size-1.5 rounded-full bg-emerald-500" /> main · clean
+            </span>
             <span>Guided mode · Local context</span>
           </div>
         </div>

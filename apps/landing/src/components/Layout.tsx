@@ -14,12 +14,28 @@ function getInitialTheme(): Theme {
 export function Wordmark() {
   return (
     <span className="flex items-center gap-2.5">
-      <span
-        aria-hidden
-        className="grid size-8 place-items-center rounded-[9px] bg-[rgb(var(--ink))] font-mono text-xs font-semibold text-[rgb(var(--page))]"
-      >
-        &gt;_
-      </span>
+      <svg aria-hidden className="size-8" fill="none" viewBox="0 0 28 28">
+        <rect
+          height="27"
+          rx="5.5"
+          stroke="rgb(var(--line-strong))"
+          transform="translate(.5 .5)"
+          width="27"
+        />
+        <path
+          d="M7.5 8.5 12 19.5 16.5 8.5"
+          stroke="rgb(var(--ink))"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.8"
+        />
+        <path
+          d="m20.5 8.5-3.5 11"
+          stroke="rgb(var(--accent))"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
+      </svg>
       <span className="text-sm font-semibold tracking-[-0.02em]">VisualnsCode</span>
     </span>
   );

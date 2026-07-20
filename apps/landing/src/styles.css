@@ -3,29 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --page: 247 247 244;
-  --panel: 239 239 235;
-  --code: 243 243 239;
-  --ink: 20 21 24;
-  --muted: 84 86 94;
-  --subtle: 96 98 106;
-  --line: 217 217 211;
-  --line-strong: 177 178 173;
-  --accent: 74 72 222;
-  --accent-soft: 230 229 252;
+  --page: 242 241 237;
+  --panel: 234 233 228;
+  --code: 247 246 242;
+  --ink: 31 30 28;
+  --muted: 96 93 86;
+  --subtle: 128 124 115;
+  --line: 207 205 197;
+  --line-strong: 165 162 151;
+  --accent: 174 81 40;
+  --accent-soft: 242 222 207;
 }
 
 .dark {
-  --page: 12 13 16;
-  --panel: 18 19 23;
-  --code: 15 16 20;
-  --ink: 239 239 235;
-  --muted: 164 165 173;
-  --subtle: 132 133 143;
-  --line: 39 40 46;
-  --line-strong: 68 69 78;
-  --accent: 130 128 255;
-  --accent-soft: 31 31 65;
+  --page: 17 17 16;
+  --panel: 21 21 20;
+  --code: 13 13 12;
+  --ink: 233 231 224;
+  --muted: 160 156 146;
+  --subtle: 116 112 104;
+  --line: 48 47 43;
+  --line-strong: 77 74 67;
+  --accent: 221 132 78;
+  --accent-soft: 61 41 29;
 }
 
 html {
@@ -104,6 +104,7 @@ summary {
   padding-inline: 1rem;
   font-size: 0.75rem;
   font-weight: 650;
+  border-radius: 5px;
 }
 
 .button-primary {
@@ -130,6 +131,7 @@ summary {
   width: 2.5rem;
   height: 2.5rem;
   color: rgb(var(--muted));
+  border-radius: 5px;
 }
 
 .icon-button:hover {
@@ -137,24 +139,12 @@ summary {
   color: rgb(var(--ink));
 }
 
-.grid-background::before {
-  position: absolute;
-  inset: 0;
-  content: '';
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgb(var(--line) / 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--line) / 0.5) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: linear-gradient(to bottom, black, transparent 88%);
-}
-
-.grid-background > * {
-  position: relative;
+.grid-background {
+  border-bottom: 1px solid rgb(var(--line));
 }
 
 .demo-shell {
-  border-radius: 14px;
+  border-radius: 6px;
 }
 
 summary::-webkit-details-marker {

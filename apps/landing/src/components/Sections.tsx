@@ -1,7 +1,6 @@
 import {
   ArrowDownToLine,
   Blocks,
-  Bot,
   Braces,
   Command,
   FileDiff,
@@ -9,6 +8,7 @@ import {
   KeyRound,
   LockKeyhole,
   Network,
+  Plug,
   ScanSearch,
   ShieldCheck,
   Wrench,
@@ -130,7 +130,7 @@ export function SolutionSection() {
             <SolutionItem icon={Braces} title="Código e contexto">
               Monaco, arquivos abertos e preview trabalham juntos.
             </SolutionItem>
-            <SolutionItem icon={Bot} title="IA sem lock-in">
+            <SolutionItem icon={Plug} title="IA sem lock-in">
               APIs, modelos locais e CLIs seguem o mesmo contrato.
             </SolutionItem>
             <SolutionItem icon={ShieldCheck} title="Revisão antes da escrita">
@@ -295,6 +295,7 @@ export function ModesSection() {
 }
 
 const agents = ['Architect', 'Frontend Developer', 'Reviewer', 'Tester', 'Documentation Writer'];
+const agentCodes = ['AR', 'FE', 'RV', 'QA', 'DW'] as const;
 
 export function AgentsSection() {
   return (
@@ -315,7 +316,9 @@ export function AgentsSection() {
                   <span className="font-mono text-[9px] text-[rgb(var(--accent))]">
                     AGENT / 0{index + 1}
                   </span>
-                  <Bot className="mt-8 size-5" />
+                  <span className="mt-8 block font-mono text-lg tracking-[-0.08em] text-[rgb(var(--ink))]">
+                    {agentCodes[index]}
+                  </span>
                   <h3 className="mt-3 text-sm font-semibold">{agent}</h3>
                   <p className="mt-2 font-mono text-[8px] uppercase text-emerald-700 dark:text-emerald-400">
                     ready
