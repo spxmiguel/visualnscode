@@ -44,6 +44,7 @@ build/
 # Allow electron-builder source scripts tracked under apps/desktop/build/
 !apps/desktop/build/
 !apps/desktop/build/**
+release/
 .turbo/
 .vite/
 .cache/
