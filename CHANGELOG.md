@@ -31,6 +31,8 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- Desktop and landing now share a restrained `V/` identity, warm neutral surfaces, a copper signal
+  color, denser layouts, flatter controls, and role-specific icons instead of decorative AI motifs.
 - Workspace, scaffold, Git, and deploy processes now inherit only an allowlisted, credential-free
   environment.
 - Automatic agent commits now stage only files attributed to the completed agent run and preserve

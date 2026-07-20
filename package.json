@@ -19,6 +19,7 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "changeset": "changeset",
+    "docs:screenshots": "node scripts/capture-desktop-screenshots.mjs",
     "check:structure": "node scripts/check-workspace.mjs",
     "dev": "pnpm --filter @visualnscode/desktop dev",
     "dev:desktop": "pnpm --filter @visualnscode/desktop dev",
