@@ -1,17 +1,66 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v[0-9]*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer without the v prefix (for example 0.2.0-beta.1)
+        required: true
+        type: string
+      channel:
+        description: Release channel
+        required: true
+        default: alpha
+        type: choice
+        options: [alpha, beta, stable]
+      publish:
+        description: Publish a GitHub release after building
+        required: true
+        default: false
+        type: boolean
+      confirmation:
+        description: To publish, type publish vVERSION exactly
+        required: false
+        type: string
 
 permissions:
-  contents: write # needed to create GitHub releases and upload assets
+  contents: read
 
 jobs:
-  # ── Build on every supported platform ─────────────────────────
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: release
+        name: Validate release request
+        shell: bash
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          PUBLISH: ${{ inputs.publish }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          case "$CHANNEL" in
+            stable) pattern='^[0-9]+\.[0-9]+\.[0-9]+$'; prerelease=false ;;
+            alpha) pattern='^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$'; prerelease=true ;;
+            beta) pattern='^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$'; prerelease=true ;;
+          esac
+          [[ "$VERSION" =~ $pattern ]] || { echo "Version does not match the $CHANNEL channel."; exit 1; }
+          PACKAGE_VERSION=$(node -p "require('./apps/desktop/package.json').version")
+          [[ "$PACKAGE_VERSION" == "$VERSION" ]] || { echo "package.json is $PACKAGE_VERSION, not $VERSION."; exit 1; }
+          if [[ "$PUBLISH" == "true" && "$CONFIRMATION" != "publish v$VERSION" ]]; then
+            echo "Publishing requires the exact confirmation: publish v$VERSION"
+            exit 1
+          fi
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
   build:
-    name: Build — ${{ matrix.os }}
+    needs: validate
     strategy:
       fail-fast: false
       matrix:
@@ -22,44 +71,19 @@ jobs:
             platform: linux
           - os: windows-latest
             platform: win
-
     runs-on: ${{ matrix.os }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Linux needs additional system libraries for Electron
-      - name: Install Linux build deps
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Install Linux packaging tools
         if: matrix.platform == 'linux'
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y rpm fakeroot dpkg
-
-      - name: Build renderer & main
-        run: pnpm --filter @visualnscode/desktop build
-
-      - name: Package — ${{ matrix.platform }}
+          sudo apt-get update
+          sudo apt-get install --yes fakeroot rpm
+      - name: Package desktop application
         run: pnpm --filter @visualnscode/desktop release:${{ matrix.platform }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
         with:
           name: release-${{ matrix.platform }}
           path: |
@@ -70,61 +94,29 @@ jobs:
             release/*.rpm
             release/*.msi
             release/*.exe
-          if-no-files-found: warn
-          retention-days: 7
+          if-no-files-found: error
+          retention-days: 14
 
-  # ── Create GitHub Release with all artifacts ──────────────────
   publish:
-    name: Publish GitHub Release
-    needs: build
+    if: inputs.publish
+    needs: [validate, build]
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           path: release
           merge-multiple: true
-
-      - name: List release files
-        run: ls -lh release/
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Publish confirmed GitHub release
+        uses: softprops/action-gh-release@v3
         with:
-          name: VisualnsCode ${{ github.ref_name }}
-          body: |
-            ## Install
-
-            **macOS / Linux — one line:**
-            ```bash
-            curl -fsSL https://raw.githubusercontent.com/spxmiguel/visualnscode/main/scripts/install.sh | bash
-            ```
-
-            **Windows — PowerShell:**
-            ```powershell
-            irm https://raw.githubusercontent.com/spxmiguel/visualnscode/main/scripts/install.ps1 | iex
-            ```
-
-            After install, run **`spxcode`** in any terminal to open the app.
-
-            ---
-
-            ### Downloads
-            | Platform | File |
-            |----------|------|
-            | macOS (Apple Silicon) | `VisualnsCode-*-arm64.pkg` |
-            | macOS (Intel) | `VisualnsCode-*-x64.pkg` |
-            | Linux x64 | `VisualnsCode-*-x64.AppImage` |
-            | Linux x64 (deb) | `VisualnsCode-*-amd64.deb` |
-            | Windows x64 | `VisualnsCode-*-x64.msi` |
-
-            See the full [CHANGELOG](https://github.com/spxmiguel/visualnscode/blob/main/CHANGELOG.md).
+          tag_name: ${{ needs.validate.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: VisualnsCode ${{ needs.validate.outputs.tag }}
           files: release/*
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          prerelease: ${{ needs.validate.outputs.prerelease }}
+          make_latest: ${{ inputs.channel == 'stable' }}

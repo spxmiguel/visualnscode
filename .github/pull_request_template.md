@@ -8,7 +8,9 @@
 
 ## Testing
 
-- [ ] Unit tests pass (`pnpm test`)
+- [ ] Documentation links pass (`pnpm docs:check`)
+- [ ] Unit tests pass (`pnpm test:unit`)
+- [ ] Integration tests pass (`pnpm test:integration`)
 - [ ] TypeScript compiles (`pnpm typecheck`)
 - [ ] Lint passes (`pnpm lint`)
 - [ ] Tested manually (describe what you tested)
@@ -27,4 +29,5 @@
 - [ ] Follows Conventional Commits in the PR title
 - [ ] No credentials or secrets in the diff
 - [ ] Documentation updated if behaviour changed
-- [ ] CHANGELOG.md updated under `[Unreleased]`
+- [ ] A Changeset is included for user-visible behavior, or the PR explains why none is needed
+- [ ] New commands, IPC, filesystem access, credentials, and remote effects received a security review

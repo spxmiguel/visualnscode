@@ -1,0 +1,30 @@
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Audit tracked files and history
+        run: pnpm security:audit
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Validate workspace structure
+        run: pnpm check:structure
+      - name: Run ESLint
+        run: pnpm lint

@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "changeset": "changeset",
     "check:structure": "node scripts/check-workspace.mjs",
     "dev": "pnpm --filter @visualnscode/desktop dev",
     "dev:desktop": "pnpm --filter @visualnscode/desktop dev",
@@ -26,13 +27,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
-    "prepare": "node scripts/setup-git-hooks.mjs",
+    "prepare": "husky",
     "security:audit": "node scripts/audit-repository.mjs",
-    "test": "vitest run --passWithNoTests",
+    "test": "pnpm test:unit && pnpm test:integration",
     "test:e2e": "playwright test",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:lighthouse": "pnpm --filter @visualnscode/landing build && lhci autorun",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck"
+    "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
+    "version-packages": "changeset version"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

@@ -1,0 +1,18 @@
+name: Set up VisualnsCode
+description: Install the pinned Node.js and pnpm toolchain with the lockfile cache
+
+runs:
+  using: composite
+  steps:
+    - name: Enable pnpm
+      uses: pnpm/action-setup@v6
+      with:
+        version: 9.15.0
+    - name: Set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: 22
+        cache: pnpm
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

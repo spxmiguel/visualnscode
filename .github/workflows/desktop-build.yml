@@ -1,4 +1,4 @@
-name: Lighthouse
+name: Desktop build
 
 on:
   pull_request:
@@ -9,15 +9,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: lighthouse-${{ github.ref }}
+  group: desktop-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  audit:
-    name: Landing quality audit
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Run Lighthouse CI
-        run: pnpm test:lighthouse
+      - run: pnpm --filter @visualnscode/desktop build

@@ -1,0 +1,2 @@
+pnpm security:audit
+pnpm test:integration

@@ -1,11 +1,11 @@
 name: Security issue (non-critical)
-description: Report a non-critical security concern publicly. For critical vulnerabilities use SECURITY.md.
+description: Report a hardening task that does not disclose an exploitable vulnerability
 labels: [security]
 body:
   - type: markdown
     attributes:
       value: |
-        **For critical vulnerabilities** (data leaks, credential exposure, RCE) follow the private disclosure process in [SECURITY.md](../SECURITY.md) instead.
+        Do not disclose an exploitable vulnerability here. Credential exposure, data leaks, sandbox escapes, and remote code execution must use the private [security advisory form](https://github.com/spxmiguel/visualnscode/security/advisories/new).
 
   - type: textarea
     id: description
