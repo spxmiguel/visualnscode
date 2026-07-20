@@ -38,6 +38,8 @@ export function WorkspaceScreen() {
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
   const theme = useAppStore((state) => state.theme);
+  const yoloEnabled = useAppStore((state) => state.yoloEnabled);
+  const setYoloEnabled = useAppStore((state) => state.setYoloEnabled);
   const activeFileId = useWorkspaceStore((state) => state.activeFileId);
   const activeTool = useWorkspaceStore((state) => state.activeTool);
   const files = useWorkspaceStore((state) => state.files);
@@ -84,9 +86,9 @@ export function WorkspaceScreen() {
       }
       if (event.key.toLowerCase() === 's') {
         event.preventDefault();
-        const file = useWorkspaceStore.getState().files.find(
-          (f) => f.id === useWorkspaceStore.getState().activeFileId,
-        );
+        const file = useWorkspaceStore
+          .getState()
+          .files.find((f) => f.id === useWorkspaceStore.getState().activeFileId);
         if (file?.path) {
           void window.visualnscode?.fs
             .writeFile(file.path, file.content)
@@ -185,6 +187,22 @@ export function WorkspaceScreen() {
           <span className="hidden xl:inline">Desfazer</span>
         </Button>
       </header>
+
+      {yoloEnabled ? (
+        <div
+          className="flex h-8 shrink-0 items-center justify-between border-b border-amber-500/40 bg-amber-500/10 px-3 text-[11px] text-amber-500"
+          role="status"
+        >
+          <span>Modo YOLO ativo — ações não destrutivas podem seguir sem nova confirmação.</span>
+          <button
+            className="font-semibold underline underline-offset-2"
+            onClick={() => setYoloEnabled(false)}
+            type="button"
+          >
+            Desativar
+          </button>
+        </div>
+      ) : null}
 
       <div className="flex min-h-0 flex-1">
         {mode === 'advanced' ? <ActivityRail /> : null}

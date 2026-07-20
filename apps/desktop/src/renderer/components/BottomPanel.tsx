@@ -12,6 +12,7 @@ import { Button } from '@visualnscode/ui';
 import { useCallback, useEffect, useState } from 'react';
 import type { GitFileStatus, GitLogEntry } from '../electron.d';
 import { useWorkspaceStore, type BottomPanel as BottomPanelName } from '../workspace-store';
+import { EditReviewPanel } from './EditReviewPanel';
 
 const tabs: readonly [BottomPanelName, string, typeof TerminalSquare][] = [
   ['terminal', 'Terminal', TerminalSquare],
@@ -79,12 +80,20 @@ function GitPanel() {
 
         {staged.length > 0 ? (
           <div className="mb-3">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-500">Staged ({staged.length})</p>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-500">
+              Staged ({staged.length})
+            </p>
             {staged.map((f) => (
               <div className="flex items-center gap-2 py-0.5" key={f.path}>
                 <span className="text-emerald-400">{f.status}</span>
                 <span className="truncate text-[rgb(var(--text-muted))]">{f.path}</span>
-                <button className="ml-auto text-[rgb(var(--text-subtle))] hover:text-[rgb(var(--text))]" onClick={() => void unstage(f.path)} type="button">−</button>
+                <button
+                  className="ml-auto text-[rgb(var(--text-subtle))] hover:text-[rgb(var(--text))]"
+                  onClick={() => void unstage(f.path)}
+                  type="button"
+                >
+                  −
+                </button>
               </div>
             ))}
           </div>
@@ -92,12 +101,20 @@ function GitPanel() {
 
         {unstaged.length > 0 ? (
           <div className="mb-3">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-amber-500">Alterações ({unstaged.length})</p>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-amber-500">
+              Alterações ({unstaged.length})
+            </p>
             {unstaged.map((f) => (
               <div className="flex items-center gap-2 py-0.5" key={f.path}>
                 <span className="text-amber-400">{f.status}</span>
                 <span className="truncate text-[rgb(var(--text-muted))]">{f.path}</span>
-                <button className="ml-auto text-[rgb(var(--text-subtle))] hover:text-[rgb(var(--text))]" onClick={() => void stage(f.path)} type="button">+</button>
+                <button
+                  className="ml-auto text-[rgb(var(--text-subtle))] hover:text-[rgb(var(--text))]"
+                  onClick={() => void stage(f.path)}
+                  type="button"
+                >
+                  +
+                </button>
               </div>
             ))}
           </div>
@@ -117,13 +134,23 @@ function GitPanel() {
             rows={3}
             value={commitMsg}
           />
-          <Button disabled={!commitMsg.trim() || staged.length === 0 || loading} onClick={() => void commit()} size="sm">
-            {loading ? <Loader2 className="size-3 animate-spin" /> : <GitCommit className="size-3" />}
+          <Button
+            disabled={!commitMsg.trim() || staged.length === 0 || loading}
+            onClick={() => void commit()}
+            size="sm"
+          >
+            {loading ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <GitCommit className="size-3" />
+            )}
             Commit
           </Button>
         </div>
 
-        <p className="mb-1 mt-3 text-[10px] font-semibold uppercase tracking-wider text-[rgb(var(--text-subtle))]">Histórico</p>
+        <p className="mb-1 mt-3 text-[10px] font-semibold uppercase tracking-wider text-[rgb(var(--text-subtle))]">
+          Histórico
+        </p>
         <div className="min-h-0 overflow-auto font-mono text-[10px]">
           {log.map((entry) => (
             <div className="mb-1.5" key={entry.hash}>
@@ -132,7 +159,9 @@ function GitPanel() {
               <p className="mt-0.5 text-[rgb(var(--text-subtle))]">{entry.date}</p>
             </div>
           ))}
-          {log.length === 0 ? <p className="text-[rgb(var(--text-subtle))]">Sem commits ainda.</p> : null}
+          {log.length === 0 ? (
+            <p className="text-[rgb(var(--text-subtle))]">Sem commits ainda.</p>
+          ) : null}
         </div>
       </div>
     </div>
@@ -157,7 +186,11 @@ export function BottomPanel() {
           </button>
         ))}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-3 font-mono text-xs text-[rgb(var(--text-muted))]">
+      <div
+        className={`min-h-0 flex-1 overflow-auto text-xs text-[rgb(var(--text-muted))] ${
+          bottomPanel === 'diffs' ? '' : 'p-3 font-mono'
+        }`}
+      >
         {bottomPanel === 'terminal' ? (
           <>
             <p>
@@ -178,7 +211,7 @@ export function BottomPanel() {
         ) : null}
         {bottomPanel === 'logs' ? <p>[info] Workspace aberto com segurança.</p> : null}
         {bottomPanel === 'git' ? <GitPanel /> : null}
-        {bottomPanel === 'diffs' ? <p>Altere um arquivo para comparar as mudanças.</p> : null}
+        {bottomPanel === 'diffs' ? <EditReviewPanel /> : null}
         {bottomPanel === 'permissions' ? (
           <p>Filesystem: somente workspace · Rede: bloqueada · Shell: bloqueado.</p>
         ) : null}

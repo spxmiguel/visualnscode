@@ -21,6 +21,9 @@ interface AppState {
   readonly recentProjects: readonly RecentProject[];
   readonly screen: AppScreen;
   readonly theme: ThemePreference;
+  readonly yoloEnabled: boolean;
+  readonly yoloGloballyAllowed: boolean;
+  readonly yoloAcknowledged: boolean;
   readonly clearError: () => void;
   readonly completeOnboarding: () => void;
   readonly navigate: (screen: AppScreen) => void;
@@ -30,6 +33,8 @@ interface AppState {
   readonly setMode: (mode: ExperienceMode) => void;
   readonly setTheme: (theme: ThemePreference) => void;
   readonly toggleTheme: () => void;
+  readonly setYoloGloballyAllowed: (allowed: boolean) => void;
+  readonly setYoloEnabled: (enabled: boolean, acknowledged?: boolean) => void;
 }
 
 export const demoProjects: readonly RecentProject[] = [
@@ -66,6 +71,9 @@ export const useAppStore = create<AppState>()(
       recentProjects: demoProjects,
       screen: 'home',
       theme: 'dark',
+      yoloEnabled: false,
+      yoloGloballyAllowed: false,
+      yoloAcknowledged: false,
       clearError: () => set({ error: null }),
       completeOnboarding: () => set({ onboardingCompleted: true, screen: 'home' }),
       navigate: (screen) => set({ screen, error: null }),
@@ -75,13 +83,38 @@ export const useAppStore = create<AppState>()(
       setMode: (mode) => set({ mode }),
       setTheme: (theme) => set({ theme }),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      setYoloGloballyAllowed: (allowed) =>
+        set((state) => ({
+          yoloGloballyAllowed: allowed,
+          yoloEnabled: allowed ? state.yoloEnabled : false,
+          yoloAcknowledged: allowed ? state.yoloAcknowledged : false,
+        })),
+      setYoloEnabled: (enabled, acknowledged = false) =>
+        set((state) => ({
+          yoloEnabled: state.yoloGloballyAllowed && enabled && acknowledged,
+          yoloAcknowledged: state.yoloGloballyAllowed && enabled && acknowledged,
+        })),
     }),
     {
       name: 'visualnscode-preferences',
       migrate: (persistedState) => persistedState as AppState,
-      partialize: ({ mode, onboardingCompleted, theme }) => ({ mode, onboardingCompleted, theme }),
+      partialize: ({
+        mode,
+        onboardingCompleted,
+        theme,
+        yoloAcknowledged,
+        yoloEnabled,
+        yoloGloballyAllowed,
+      }) => ({
+        mode,
+        onboardingCompleted,
+        theme,
+        yoloAcknowledged,
+        yoloEnabled,
+        yoloGloballyAllowed,
+      }),
       storage: createJSONStorage(() => window.localStorage),
-      version: 2,
+      version: 3,
     },
   ),
 );

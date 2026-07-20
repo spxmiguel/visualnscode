@@ -1,5 +1,5 @@
-import { Bell, Bot, MonitorCog, Palette, ShieldCheck } from 'lucide-react';
-import { SegmentedControl, Surface } from '@visualnscode/ui';
+import { AlertTriangle, Bell, Bot, MonitorCog, Palette, ShieldCheck } from 'lucide-react';
+import { Button, SegmentedControl, Surface } from '@visualnscode/ui';
 import { useAppStore } from '../store';
 import { WindowHeader } from './WindowHeader';
 import { ModelSettings } from './settings/ModelSettings';
@@ -11,6 +11,17 @@ export function SettingsScreen() {
   const setTheme = useAppStore((state) => state.setTheme);
   const restartOnboarding = useAppStore((state) => state.restartOnboarding);
   const theme = useAppStore((state) => state.theme);
+  const yoloEnabled = useAppStore((state) => state.yoloEnabled);
+  const yoloGloballyAllowed = useAppStore((state) => state.yoloGloballyAllowed);
+  const setYoloEnabled = useAppStore((state) => state.setYoloEnabled);
+  const setYoloGloballyAllowed = useAppStore((state) => state.setYoloGloballyAllowed);
+
+  const enableYolo = (): void => {
+    const acknowledged = window.confirm(
+      'O modo YOLO executa ações não destrutivas que normalmente pediriam confirmação. Comandos perigosos ainda exigem aprovação e comandos extremos continuam bloqueados. Deseja ativar?',
+    );
+    if (acknowledged) setYoloEnabled(true, true);
+  };
 
   return (
     <div className="flex h-screen flex-col bg-[rgb(var(--background))] text-[rgb(var(--text))]">
@@ -93,6 +104,42 @@ export function SettingsScreen() {
             </Surface>
 
             <ModelSettings />
+
+            <Surface
+              className={`flex flex-col gap-5 p-5 ${yoloEnabled ? 'border-amber-500/50' : ''}`}
+              elevated
+            >
+              <div className="flex gap-3">
+                <AlertTriangle className="mt-0.5 size-5 text-amber-500" />
+                <div className="flex-1">
+                  <h2 className="text-sm font-semibold">Modo YOLO</h2>
+                  <p className="mt-1 text-xs leading-5 text-[rgb(var(--text-muted))]">
+                    Reduz confirmações para ações não destrutivas. Comandos perigosos continuam
+                    pedindo aprovação e operações extremas permanecem bloqueadas.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[rgb(var(--border))] pt-4">
+                <label className="flex items-center gap-2 text-xs text-[rgb(var(--text-muted))]">
+                  <input
+                    checked={yoloGloballyAllowed}
+                    className="accent-[rgb(var(--accent))]"
+                    onChange={(event) => setYoloGloballyAllowed(event.target.checked)}
+                    type="checkbox"
+                  />
+                  Permitir modo YOLO neste dispositivo
+                </label>
+                {yoloEnabled ? (
+                  <Button onClick={() => setYoloEnabled(false)} size="sm" variant="secondary">
+                    Desativar YOLO
+                  </Button>
+                ) : (
+                  <Button disabled={!yoloGloballyAllowed} onClick={enableYolo} size="sm">
+                    Ativar com confirmação
+                  </Button>
+                )}
+              </div>
+            </Surface>
 
             {[
               {
