@@ -95,6 +95,33 @@ export function HomeScreen() {
     }
   };
 
+  const cloneFromGitHub = async () => {
+    const repository = window.prompt('Qual repositório deseja clonar? Use owner/repository.');
+    if (!repository) return;
+    if (!window.confirm(`Clonar ${repository} para uma pasta escolhida por você?`)) return;
+    setLoadingAction('clone');
+    try {
+      const folderPath = await window.visualnscode?.github.clone(repository.trim(), true);
+      if (folderPath) {
+        openProject({
+          id: folderPath,
+          name: folderPath.split(/[\\/]/u).pop() ?? repository.split('/').at(-1) ?? 'Projeto',
+          path: folderPath,
+          lastOpened: 'Agora',
+          color: '#3fa7a0',
+        });
+      }
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : 'Não foi possível clonar o repositório. Verifique o GitHub CLI e tente novamente.',
+      );
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
   return (
     <div className="flex h-screen flex-col bg-[rgb(var(--background))] text-[rgb(var(--text))]">
       <WindowHeader />
@@ -183,14 +210,10 @@ export function HomeScreen() {
                 onClick={() => void openFolder()}
               />
               <QuickAction
-                description="Disponível ao conectar o GitHub"
+                description="Baixe um repositório conectado"
                 icon={GitFork}
                 label="Clonar do GitHub"
-                onClick={() =>
-                  setError(
-                    'A conexão com o GitHub chegará em uma próxima fase. Por enquanto, abra uma pasta local.',
-                  )
-                }
+                onClick={() => void cloneFromGitHub()}
               />
               <QuickAction
                 description="Ferramentas, runtimes e preferências"

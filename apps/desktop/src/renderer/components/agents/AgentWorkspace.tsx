@@ -13,6 +13,7 @@ import {
 import type { AgentDefinition } from '@visualnscode/agents/browser';
 import { Button } from '@visualnscode/ui';
 import { agentApi } from '../../agent-api';
+import type { AgentVersionControlOptions } from '../../../shared/version-control';
 import { resolvedAgents, useAgentStore } from '../../agent-store';
 import { useWorkspaceStore } from '../../workspace-store';
 import { AgentEditor } from './AgentEditor';
@@ -25,10 +26,26 @@ const statusColor = (status: 'running' | 'complete' | 'idle' | 'error') =>
     idle: 'border-[rgb(var(--border))]',
   })[status];
 
+const VERSION_CONTROL_CHOICES: ReadonlyArray<readonly [keyof AgentVersionControlOptions, string]> =
+  [
+    ['checkpoint', 'Checkpoint local'],
+    ['branch', 'Branch da tarefa'],
+    ['commit', 'Commit automático'],
+    ['pullRequest', 'Pull request draft'],
+  ];
+
 export function AgentWorkspace() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [task, setTask] = useState('Crie uma melhoria segura e bem testada para este projeto.');
   const [elapsed, setElapsed] = useState(0);
+  const [versionControl, setVersionControl] = useState<AgentVersionControlOptions>({
+    checkpoint: true,
+    commit: false,
+    branch: false,
+    pullRequest: false,
+    pushConfirmed: false,
+    pullRequestConfirmed: false,
+  });
   const currentWorkflow = useAgentStore((state) => state.currentWorkflow);
   const customAgents = useAgentStore((state) => state.customAgents);
   const overrides = useAgentStore((state) => state.overrides);
@@ -81,6 +98,7 @@ export function AgentWorkspace() {
       agents,
       task: task.trim(),
       relevantContext,
+      versionControl,
     });
   };
 
@@ -295,13 +313,75 @@ export function AgentWorkspace() {
             onChange={(event) => setTask(event.target.value)}
             value={task}
           />
+          <details className="mt-2 rounded-lg border border-[rgb(var(--border))] p-2">
+            <summary className="cursor-pointer text-[10px] font-semibold text-[rgb(var(--text-muted))]">
+              Versionamento após a tarefa
+            </summary>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[9px] text-[rgb(var(--text-muted))]">
+              {VERSION_CONTROL_CHOICES.map(([key, label]) => (
+                <label className="flex items-center gap-1.5" key={key}>
+                  <input
+                    checked={versionControl[key as keyof AgentVersionControlOptions]}
+                    onChange={(event) =>
+                      setVersionControl((current) => ({
+                        ...current,
+                        [key]: event.target.checked,
+                        ...(key === 'pullRequest' && event.target.checked
+                          ? { branch: true, commit: true }
+                          : {}),
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+            {versionControl.pullRequest ? (
+              <div className="mt-2 space-y-1.5 border-t border-[rgb(var(--border))] pt-2 text-[9px] text-amber-500">
+                <label className="flex items-start gap-1.5">
+                  <input
+                    checked={versionControl.pushConfirmed}
+                    onChange={(event) =>
+                      setVersionControl((current) => ({
+                        ...current,
+                        pushConfirmed: event.target.checked,
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  Autorizo o push desta tarefa.
+                </label>
+                <label className="flex items-start gap-1.5">
+                  <input
+                    checked={versionControl.pullRequestConfirmed}
+                    onChange={(event) =>
+                      setVersionControl((current) => ({
+                        ...current,
+                        pullRequestConfirmed: event.target.checked,
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  Autorizo criar um pull request draft.
+                </label>
+              </div>
+            ) : null}
+          </details>
           <div className="mt-2 flex gap-2">
             {activeRunId ? (
               <Button onClick={() => void agentApi.cancel(activeRunId)} size="sm" variant="danger">
                 <Square className="size-3 fill-current" /> Cancelar
               </Button>
             ) : (
-              <Button onClick={start} size="sm">
+              <Button
+                disabled={
+                  versionControl.pullRequest &&
+                  (!versionControl.pushConfirmed || !versionControl.pullRequestConfirmed)
+                }
+                onClick={start}
+                size="sm"
+              >
                 <Play className="size-3 fill-current" /> Executar
               </Button>
             )}

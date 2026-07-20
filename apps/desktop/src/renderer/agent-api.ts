@@ -5,6 +5,7 @@ import type {
   WorkflowEvent,
   WorkflowRunResult,
 } from '@visualnscode/agents/browser';
+import type { AgentVersionControlOptions } from '../shared/version-control';
 
 const listeners = new Set<(event: WorkflowEvent) => void>();
 const history: WorkflowRunResult[] = [];
@@ -16,6 +17,7 @@ interface StartPayload {
   readonly agents: readonly AgentDefinition[];
   readonly task: string;
   readonly relevantContext: Readonly<Record<string, string>>;
+  readonly versionControl?: AgentVersionControlOptions;
 }
 
 const emit = (event: WorkflowEvent): void => {

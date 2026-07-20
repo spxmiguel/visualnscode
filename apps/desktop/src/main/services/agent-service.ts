@@ -16,7 +16,12 @@ import {
   type WorkflowRunResult,
 } from '@visualnscode/agents';
 import type { AgentChunk, TokenUsage } from '@visualnscode/providers';
+import type { AgentVersionControlOptions } from '../../shared/version-control';
+import type { CheckpointService } from './checkpoint-service';
 import type { FileEditService } from './file-edit-service';
+import type { FilesystemService } from './filesystem-service';
+import type { GitService } from './git-service';
+import type { GitHubService } from './github-service';
 import type { ProviderService } from './provider-service';
 
 export interface AgentRunRequest {
@@ -25,6 +30,7 @@ export interface AgentRunRequest {
   readonly agents: readonly AgentDefinition[];
   readonly task: string;
   readonly relevantContext: Readonly<Record<string, string>>;
+  readonly versionControl?: AgentVersionControlOptions;
 }
 
 interface PendingApproval {
@@ -170,6 +176,10 @@ export class AgentService {
   constructor(
     private readonly providers: ProviderService,
     private readonly fileEdits?: FileEditService,
+    private readonly filesystem?: FilesystemService,
+    private readonly checkpoints?: CheckpointService,
+    private readonly git?: GitService,
+    private readonly github?: GitHubService,
   ) {}
 
   async start(
@@ -187,14 +197,27 @@ export class AgentService {
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);
     try {
+      const workspace = this.filesystem?.getWorkspace();
+      const automationLogs = workspace ? await this.prepareVersionControl(request, workspace) : [];
       const result = await engine.run(request.workflow, request.agents, request.task, {
         runId: request.runId,
         relevantContext: request.relevantContext,
-        onEvent,
+        onEvent: (event) => {
+          if (event.type !== 'run-completed') onEvent(event);
+        },
       });
-      await this.saveHistory(result);
+      const completedLogs =
+        result.status === 'completed' && workspace
+          ? await this.completeVersionControl(request, workspace)
+          : [];
+      const finalResult = {
+        ...result,
+        logs: [...result.logs, ...automationLogs, ...completedLogs],
+      };
+      onEvent({ type: 'run-completed', runId: request.runId, result: finalResult });
+      await this.saveHistory(finalResult);
       await this.saveMemories();
-      return result;
+      return finalResult;
     } finally {
       this.engines.delete(request.runId);
       this.resolveRunApprovals(request.runId, false);
@@ -274,6 +297,78 @@ export class AgentService {
     await this.fileEdits.propose(`${agent.name}: ${action.description}`, [
       { path: action.path, proposedContent: action.content },
     ]);
+  }
+
+  private async prepareVersionControl(
+    request: AgentRunRequest,
+    workspace: string,
+  ): Promise<string[]> {
+    const options = request.versionControl;
+    if (!options) return [];
+    const logs: string[] = [];
+    if (options.checkpoint && this.checkpoints) {
+      const files = Object.entries(request.relevantContext).map(([relativePath, content]) => ({
+        relativePath,
+        content,
+        existed: true,
+      }));
+      if (files.length) {
+        await this.checkpoints.create(workspace, files, `Before agent task: ${request.task}`);
+        logs.push('Checkpoint local criado antes da tarefa.');
+      }
+    }
+    if (options.branch && this.git) {
+      const taskSlug = request.task
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 36);
+      await this.git.createBranch(workspace, `agent/${taskSlug || request.runId.slice(0, 8)}`);
+      logs.push('Branch isolada criada para a tarefa.');
+    }
+    return logs;
+  }
+
+  private async completeVersionControl(
+    request: AgentRunRequest,
+    workspace: string,
+  ): Promise<string[]> {
+    const options = request.versionControl;
+    if (!options || !this.git) return [];
+    const logs: string[] = [];
+    if (options.commit) {
+      const status = await this.git.status(workspace);
+      if (status.files.length) {
+        await this.git.stage(
+          workspace,
+          status.files.map(({ path }) => path),
+        );
+        await this.git.commit(
+          workspace,
+          `chore(agents): ${request.task.trim().replace(/\s+/g, ' ').slice(0, 180)}`,
+        );
+        logs.push('Commit local criado após a tarefa.');
+      }
+    }
+    if (options.pullRequest) {
+      if (!options.pushConfirmed || !options.pullRequestConfirmed || !this.github) {
+        throw new Error('Push e pull request de agentes exigem confirmações explícitas.');
+      }
+      await this.git.push(workspace, true);
+      const { branch } = await this.git.status(workspace);
+      await this.github.createPullRequest(workspace, {
+        title: request.task.trim().slice(0, 200),
+        body: 'Generated from an explicitly approved VisualnsCode agent task.',
+        base: 'main',
+        head: branch,
+        draft: true,
+        confirmed: true,
+      });
+      logs.push('Branch enviada e pull request draft criado após confirmação.');
+    }
+    return logs;
   }
 
   private memoryKey(runId: string, agent: AgentDefinition): string {

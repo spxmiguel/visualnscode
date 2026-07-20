@@ -1,4 +1,5 @@
 import { dialog, ipcMain, shell } from 'electron';
+import path from 'node:path';
 import {
   getToolDefinition,
   type PermissionId,
@@ -17,6 +18,7 @@ import { EnvironmentService } from './services/environment-service';
 import { FileEditService } from './services/file-edit-service';
 import { FilesystemService } from './services/filesystem-service';
 import { GitService } from './services/git-service';
+import { GitHubService } from './services/github-service';
 import { ProviderService } from './services/provider-service';
 import { RunnerService } from './services/runner-service';
 import { ScaffoldService, PROJECT_TEMPLATES, suggestProject } from './services/scaffold-service';
@@ -37,8 +39,16 @@ const providerService = new ProviderService(secureStorage);
 const fsService = new FilesystemService();
 const checkpointService = new CheckpointService();
 const fileEditService = new FileEditService(fsService, checkpointService);
-const agentService = new AgentService(providerService, fileEditService);
 const gitService = new GitService();
+const githubService = new GitHubService();
+const agentService = new AgentService(
+  providerService,
+  fileEditService,
+  fsService,
+  checkpointService,
+  gitService,
+  githubService,
+);
 const runnerService = new RunnerService();
 const scaffoldService = new ScaffoldService();
 const providerIds = new Set(
@@ -171,6 +181,20 @@ const isValidAgentRunRequest = (value: unknown): value is AgentRunRequest => {
     !request.agents.every(isValidAgentDefinition) ||
     !request.relevantContext ||
     typeof request.relevantContext !== 'object'
+  ) {
+    return false;
+  }
+  const versionControl = request.versionControl;
+  if (
+    versionControl &&
+    (typeof versionControl.checkpoint !== 'boolean' ||
+      typeof versionControl.commit !== 'boolean' ||
+      typeof versionControl.branch !== 'boolean' ||
+      typeof versionControl.pullRequest !== 'boolean' ||
+      typeof versionControl.pushConfirmed !== 'boolean' ||
+      typeof versionControl.pullRequestConfirmed !== 'boolean' ||
+      (versionControl.pullRequest &&
+        (!versionControl.pushConfirmed || !versionControl.pullRequestConfirmed)))
   ) {
     return false;
   }
@@ -496,13 +520,16 @@ export const registerEnvironmentIpc = (): void => {
   });
   ipcMain.handle('git:status', () => {
     const w = fsService.getWorkspace();
-    if (!w) return { branch: '', files: [] };
-    return gitService.status(w).catch(() => ({ branch: '', files: [] }));
+    if (!w) return { branch: '', tracking: null, ahead: 0, behind: 0, files: [] };
+    return gitService
+      .status(w)
+      .catch(() => ({ branch: '', tracking: null, ahead: 0, behind: 0, files: [] }));
   });
-  ipcMain.handle('git:diff', (_event, staged: boolean) => {
+  ipcMain.handle('git:diff', (_event, staged: boolean, filePath?: string) => {
     const w = fsService.getWorkspace();
     if (!w) return '';
-    return gitService.diff(w, Boolean(staged)).catch(() => '');
+    if (filePath !== undefined && typeof filePath !== 'string') throw new Error('Path inválido.');
+    return gitService.diff(w, Boolean(staged), filePath).catch(() => '');
   });
   ipcMain.handle('git:stage', (_event, paths: string[]) => {
     const w = fsService.getWorkspace();
@@ -519,6 +546,12 @@ export const registerEnvironmentIpc = (): void => {
     if (!w || typeof message !== 'string' || message.length > 1000)
       throw new Error('Mensagem inválida.');
     return gitService.commit(w, message);
+  });
+  ipcMain.handle('git:suggest-commit', async () => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Nenhum workspace aberto.');
+    const status = await gitService.status(w);
+    return gitService.suggestCommitMessage(status.files.filter(({ staged }) => staged));
   });
   ipcMain.handle('git:log', (_event, limit: number) => {
     const w = fsService.getWorkspace();
@@ -551,6 +584,122 @@ export const registerEnvironmentIpc = (): void => {
     const w = fsService.getWorkspace();
     if (!w) return;
     return gitService.stashPop(w).catch(() => undefined);
+  });
+  ipcMain.handle('git:merge', (_event, branch: string, confirmed: boolean) => {
+    const w = fsService.getWorkspace();
+    if (!w || typeof branch !== 'string') throw new Error('Branch inválida.');
+    return gitService.merge(w, branch, confirmed === true);
+  });
+  ipcMain.handle('git:tags', () => {
+    const w = fsService.getWorkspace();
+    return w ? gitService.tags(w) : [];
+  });
+  ipcMain.handle('git:create-tag', (_event, name: string, message: string) => {
+    const w = fsService.getWorkspace();
+    if (!w || typeof name !== 'string' || typeof message !== 'string')
+      throw new Error('Tag inválida.');
+    return gitService.createTag(w, name, message);
+  });
+  ipcMain.handle(
+    'git:reset',
+    (_event, reference: string, mode: 'soft' | 'mixed', confirmed: boolean) => {
+      const w = fsService.getWorkspace();
+      if (!w || typeof reference !== 'string') throw new Error('Referência inválida.');
+      return gitService.reset(w, reference, mode, confirmed === true);
+    },
+  );
+  ipcMain.handle('git:revert', (_event, hash: string, confirmed: boolean) => {
+    const w = fsService.getWorkspace();
+    if (!w || typeof hash !== 'string') throw new Error('Commit inválido.');
+    return gitService.revert(w, hash, confirmed === true);
+  });
+  ipcMain.handle('git:conflicts', () => {
+    const w = fsService.getWorkspace();
+    return w ? gitService.conflicts(w) : [];
+  });
+  ipcMain.handle(
+    'git:resolve-conflict',
+    (_event, filePath: string, resolution: 'ours' | 'theirs' | 'manual') => {
+      const w = fsService.getWorkspace();
+      if (!w || typeof filePath !== 'string') throw new Error('Arquivo inválido.');
+      return gitService.resolveConflict(w, filePath, resolution);
+    },
+  );
+  ipcMain.handle('git:push', (_event, confirmed: boolean) => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Nenhum workspace aberto.');
+    return gitService.push(w, confirmed === true);
+  });
+  ipcMain.handle('git:pull', (_event, confirmed: boolean) => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Nenhum workspace aberto.');
+    return gitService.pull(w, confirmed === true);
+  });
+
+  // ── GitHub ───────────────────────────────────────────────────────────────
+  ipcMain.handle('github:auth-status', () =>
+    githubService.authStatus(fsService.getWorkspace() ?? process.cwd()),
+  );
+  ipcMain.handle('github:create-repository', (_event, input: unknown) => {
+    const w = fsService.getWorkspace();
+    if (!w || !input || typeof input !== 'object') throw new Error('Repositório inválido.');
+    return githubService.createRepository(w, input as never);
+  });
+  ipcMain.handle('github:clone', async (_event, repository: string, confirmed: boolean) => {
+    if (typeof repository !== 'string') throw new Error('Repositório inválido.');
+    const selection = await dialog.showOpenDialog({
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    const parent = selection.canceled ? null : selection.filePaths[0];
+    if (!parent) return null;
+    const folder = await githubService.clone(parent, repository, confirmed === true);
+    const workspace = path.join(parent, folder);
+    fsService.setWorkspace(workspace);
+    return workspace;
+  });
+  ipcMain.handle('github:fork', (_event, confirmed: boolean) => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Nenhum workspace aberto.');
+    return githubService.fork(w, confirmed === true);
+  });
+  ipcMain.handle('github:open', async () => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Nenhum workspace aberto.');
+    const url = await githubService.repositoryUrl(w);
+    if (!url.startsWith('https://github.com/')) throw new Error('URL do repositório inválida.');
+    await shell.openExternal(url);
+    return url;
+  });
+  ipcMain.handle('github:issues', () => {
+    const w = fsService.getWorkspace();
+    return w ? githubService.issues(w) : [];
+  });
+  ipcMain.handle('github:create-issue', (_event, input: unknown) => {
+    const w = fsService.getWorkspace();
+    if (!w || !input || typeof input !== 'object') throw new Error('Issue inválida.');
+    return githubService.createIssue(w, input as never);
+  });
+  ipcMain.handle('github:pull-requests', () => {
+    const w = fsService.getWorkspace();
+    return w ? githubService.pullRequests(w) : [];
+  });
+  ipcMain.handle('github:create-pull-request', (_event, input: unknown) => {
+    const w = fsService.getWorkspace();
+    if (!w || !input || typeof input !== 'object') throw new Error('Pull request inválido.');
+    return githubService.createPullRequest(w, input as never);
+  });
+  ipcMain.handle('github:workflow-runs', () => {
+    const w = fsService.getWorkspace();
+    return w ? githubService.workflowRuns(w) : [];
+  });
+  ipcMain.handle('github:releases', () => {
+    const w = fsService.getWorkspace();
+    return w ? githubService.releases(w) : [];
+  });
+  ipcMain.handle('github:create-release', (_event, input: unknown) => {
+    const w = fsService.getWorkspace();
+    if (!w || !input || typeof input !== 'object') throw new Error('Release inválida.');
+    return githubService.createRelease(w, input as never);
   });
 
   // ── Runner ────────────────────────────────────────────────────────────────

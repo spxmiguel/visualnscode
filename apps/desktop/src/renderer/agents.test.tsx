@@ -77,4 +77,19 @@ describe('sistema visual de agentes', () => {
         ),
     ).toBe(true);
   });
+
+  it('exige autorizações separadas antes de permitir PR automático', async () => {
+    const user = userEvent.setup();
+    render(<AgentWorkspace />);
+
+    await user.click(screen.getByText('Versionamento após a tarefa'));
+    await user.click(screen.getByLabelText('Pull request draft'));
+
+    const execute = screen.getByRole('button', { name: 'Executar' }) as HTMLButtonElement;
+    expect(execute.disabled).toBe(true);
+    await user.click(screen.getByLabelText('Autorizo o push desta tarefa.'));
+    expect(execute.disabled).toBe(true);
+    await user.click(screen.getByLabelText('Autorizo criar um pull request draft.'));
+    expect(execute.disabled).toBe(false);
+  });
 });

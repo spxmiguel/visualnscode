@@ -91,16 +91,45 @@ contextBridge.exposeInMainWorld('visualnscode', {
   git: {
     isRepo: () => ipcRenderer.invoke('git:is-repo'),
     status: () => ipcRenderer.invoke('git:status'),
-    diff: (staged: boolean) => ipcRenderer.invoke('git:diff', staged),
+    diff: (staged: boolean, path?: string) => ipcRenderer.invoke('git:diff', staged, path),
     stage: (paths: string[]) => ipcRenderer.invoke('git:stage', paths),
     unstage: (paths: string[]) => ipcRenderer.invoke('git:unstage', paths),
     commit: (message: string) => ipcRenderer.invoke('git:commit', message),
+    suggestCommit: () => ipcRenderer.invoke('git:suggest-commit'),
     log: (limit?: number) => ipcRenderer.invoke('git:log', limit),
     branches: () => ipcRenderer.invoke('git:branches'),
     checkout: (branch: string) => ipcRenderer.invoke('git:checkout', branch),
     createBranch: (name: string) => ipcRenderer.invoke('git:create-branch', name),
+    merge: (branch: string, confirmed: boolean) =>
+      ipcRenderer.invoke('git:merge', branch, confirmed),
     stash: (message?: string) => ipcRenderer.invoke('git:stash', message),
     stashPop: () => ipcRenderer.invoke('git:stash-pop'),
+    tags: () => ipcRenderer.invoke('git:tags'),
+    createTag: (name: string, message: string) =>
+      ipcRenderer.invoke('git:create-tag', name, message),
+    reset: (reference: string, mode: 'soft' | 'mixed', confirmed: boolean) =>
+      ipcRenderer.invoke('git:reset', reference, mode, confirmed),
+    revert: (hash: string, confirmed: boolean) => ipcRenderer.invoke('git:revert', hash, confirmed),
+    conflicts: () => ipcRenderer.invoke('git:conflicts'),
+    resolveConflict: (path: string, resolution: 'ours' | 'theirs' | 'manual') =>
+      ipcRenderer.invoke('git:resolve-conflict', path, resolution),
+    push: (confirmed: boolean) => ipcRenderer.invoke('git:push', confirmed),
+    pull: (confirmed: boolean) => ipcRenderer.invoke('git:pull', confirmed),
+  },
+  github: {
+    authStatus: () => ipcRenderer.invoke('github:auth-status'),
+    createRepository: (input: unknown) => ipcRenderer.invoke('github:create-repository', input),
+    clone: (repository: string, confirmed: boolean) =>
+      ipcRenderer.invoke('github:clone', repository, confirmed),
+    fork: (confirmed: boolean) => ipcRenderer.invoke('github:fork', confirmed),
+    open: () => ipcRenderer.invoke('github:open'),
+    issues: () => ipcRenderer.invoke('github:issues'),
+    createIssue: (input: unknown) => ipcRenderer.invoke('github:create-issue', input),
+    pullRequests: () => ipcRenderer.invoke('github:pull-requests'),
+    createPullRequest: (input: unknown) => ipcRenderer.invoke('github:create-pull-request', input),
+    workflowRuns: () => ipcRenderer.invoke('github:workflow-runs'),
+    releases: () => ipcRenderer.invoke('github:releases'),
+    createRelease: (input: unknown) => ipcRenderer.invoke('github:create-release', input),
   },
   runner: {
     detect: () => ipcRenderer.invoke('runner:detect'),

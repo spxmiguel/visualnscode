@@ -32,6 +32,23 @@ import type {
   ProjectSuggestion,
   ProjectTemplate,
 } from '../shared/project-creation';
+import type {
+  GitBranch,
+  GitConflict,
+  GitHubAuthStatus,
+  GitHubCreateIssueInput,
+  GitHubCreatePullRequestInput,
+  GitHubCreateReleaseInput,
+  GitHubCreateRepositoryInput,
+  GitHubIssue,
+  GitHubPullRequest,
+  GitHubRelease,
+  GitHubWorkflowRun,
+  GitLogEntry,
+  GitStatus,
+  GitTag,
+  AgentVersionControlOptions,
+} from '../shared/version-control';
 
 export interface FileEntry {
   readonly name: string;
@@ -60,26 +77,6 @@ export interface CommandAssessment {
   readonly allowed: boolean;
   readonly requiresConfirmation: boolean;
   readonly reason: string;
-}
-
-export interface GitFileStatus {
-  readonly path: string;
-  readonly staged: boolean;
-  readonly status: string;
-}
-
-export interface GitLogEntry {
-  readonly hash: string;
-  readonly shortHash: string;
-  readonly subject: string;
-  readonly author: string;
-  readonly date: string;
-}
-
-export interface GitBranch {
-  readonly name: string;
-  readonly current: boolean;
-  readonly remote: boolean;
 }
 
 export interface CheckpointSummary {
@@ -131,6 +128,7 @@ declare global {
           agents: readonly AgentDefinition[];
           task: string;
           relevantContext: Readonly<Record<string, string>>;
+          versionControl?: AgentVersionControlOptions;
         }): void;
         cancel(runId: string): Promise<boolean>;
         approve(runId: string, actionId: string, approved: boolean): Promise<boolean>;
@@ -177,17 +175,41 @@ declare global {
       };
       readonly git: {
         isRepo(): Promise<boolean>;
-        status(): Promise<{ branch: string; files: readonly GitFileStatus[] }>;
-        diff(staged: boolean): Promise<string>;
+        status(): Promise<GitStatus>;
+        diff(staged: boolean, path?: string): Promise<string>;
         stage(paths: string[]): Promise<void>;
         unstage(paths: string[]): Promise<void>;
         commit(message: string): Promise<string>;
+        suggestCommit(): Promise<string>;
         log(limit?: number): Promise<readonly GitLogEntry[]>;
         branches(): Promise<readonly GitBranch[]>;
         checkout(branch: string): Promise<void>;
         createBranch(name: string): Promise<void>;
+        merge(branch: string, confirmed: boolean): Promise<void>;
         stash(message?: string): Promise<void>;
         stashPop(): Promise<void>;
+        tags(): Promise<readonly GitTag[]>;
+        createTag(name: string, message: string): Promise<void>;
+        reset(reference: string, mode: 'soft' | 'mixed', confirmed: boolean): Promise<void>;
+        revert(hash: string, confirmed: boolean): Promise<void>;
+        conflicts(): Promise<readonly GitConflict[]>;
+        resolveConflict(path: string, resolution: 'ours' | 'theirs' | 'manual'): Promise<void>;
+        push(confirmed: boolean): Promise<void>;
+        pull(confirmed: boolean): Promise<void>;
+      };
+      readonly github: {
+        authStatus(): Promise<GitHubAuthStatus>;
+        createRepository(input: GitHubCreateRepositoryInput): Promise<string>;
+        clone(repository: string, confirmed: boolean): Promise<string | null>;
+        fork(confirmed: boolean): Promise<string>;
+        open(): Promise<string>;
+        issues(): Promise<readonly GitHubIssue[]>;
+        createIssue(input: GitHubCreateIssueInput): Promise<string>;
+        pullRequests(): Promise<readonly GitHubPullRequest[]>;
+        createPullRequest(input: GitHubCreatePullRequestInput): Promise<string>;
+        workflowRuns(): Promise<readonly GitHubWorkflowRun[]>;
+        releases(): Promise<readonly GitHubRelease[]>;
+        createRelease(input: GitHubCreateReleaseInput): Promise<string>;
       };
       readonly runner: {
         detect(): Promise<{
