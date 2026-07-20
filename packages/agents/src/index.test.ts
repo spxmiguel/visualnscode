@@ -81,6 +81,22 @@ describe('WorkflowEngine', () => {
     expect(executor.rolledBack).toHaveLength(1);
   });
 
+  it('invoca rollback mesmo quando a falha acontece antes de registrar arquivos alterados', async () => {
+    const template = teamTemplates.find(({ id }) => id === 'documentation')!;
+    const firstNode = template.nodes[0]!;
+    const executor = new FakeAgentExecutor({ failAgentId: firstNode.agentId });
+    const engine = new WorkflowEngine(executor);
+    const result = await engine.run(
+      { ...template, nodes: [firstNode], edges: [], retries: 0 },
+      builtInAgents,
+      'Falhar antes do resultado',
+    );
+
+    expect(result.status).toBe('failed');
+    expect(result.rolledBack).toBe(true);
+    expect(executor.rolledBack).toEqual([[]]);
+  });
+
   it('permite cancelamento de uma execução', async () => {
     const template = teamTemplates.find(({ id }) => id === 'documentation')!;
     const executor = new FakeAgentExecutor({ delayMs: 100 });

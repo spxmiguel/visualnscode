@@ -122,12 +122,19 @@ export class WorkflowEngine {
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Falha desconhecida no workflow.';
       logs.push(error);
-      if (workflow.rollbackOnFailure) {
+      if (workflow.rollbackOnFailure && this.executor.rollback) {
         const changed = [...unique(records.flatMap((record) => record.filesChanged))].reverse();
-        if (changed.length > 0) {
-          await this.executor.rollback?.(runId, changed);
-          rolledBack = true;
-          options.onEvent?.({ type: 'rollback', runId, files: changed });
+        try {
+          const restored = await this.executor.rollback(runId, changed);
+          if (restored !== false) {
+            const restoredFiles = Array.isArray(restored) ? restored : changed;
+            rolledBack = true;
+            options.onEvent?.({ type: 'rollback', runId, files: restoredFiles });
+          }
+        } catch (rollbackCause) {
+          logs.push(
+            `Rollback falhou: ${rollbackCause instanceof Error ? rollbackCause.message : 'erro desconhecido'}`,
+          );
         }
       }
     } finally {

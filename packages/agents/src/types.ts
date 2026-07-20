@@ -117,7 +117,7 @@ export interface AgentExecutorInput {
 
 export interface AgentExecutor {
   execute(input: AgentExecutorInput): Promise<AgentExecutionResult>;
-  rollback?(runId: string, files: readonly string[]): Promise<void>;
+  rollback?(runId: string, files: readonly string[]): Promise<readonly string[] | false | void>;
 }
 
 export interface AgentRunRecord extends AgentExecutionResult {

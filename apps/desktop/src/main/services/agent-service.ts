@@ -76,6 +76,7 @@ class ProviderAgentExecutor implements AgentExecutor {
       action: AgentAction,
     ) => Promise<ActionExecution>,
     private readonly workingDirectory?: string,
+    private readonly restoreSafetyCheckpoint?: () => Promise<readonly string[]>,
   ) {}
 
   async execute(input: AgentExecutorInput): Promise<AgentExecutionResult> {
@@ -227,8 +228,9 @@ class ProviderAgentExecutor implements AgentExecutor {
     };
   }
 
-  async rollback(): Promise<void> {
-    // A aplicação de patches será conectada ao workspace real; o engine já preserva o contrato.
+  async rollback(): Promise<readonly string[] | false> {
+    if (!this.restoreSafetyCheckpoint) return false;
+    return this.restoreSafetyCheckpoint();
   }
 }
 
@@ -263,6 +265,9 @@ export class AgentService {
   ): Promise<WorkflowRunResult> {
     await this.loadMemories();
     const workspace = this.filesystem?.getWorkspace() ?? null;
+    const safetyCheckpoint = workspace
+      ? await this.createSafetyCheckpoint(request, workspace)
+      : null;
     const executor = new ProviderAgentExecutor(
       this.providers,
       (input, action, decision) => this.requestApproval(input, action, decision, onEvent),
@@ -270,6 +275,9 @@ export class AgentService {
       (agent, output) => this.remember(request.runId, agent, output, workspace),
       (agent, action) => this.executeAction(agent, action, workspace),
       workspace ?? undefined,
+      safetyCheckpoint && this.fileEdits
+        ? async () => (await this.fileEdits!.rollback(safetyCheckpoint)).restored
+        : undefined,
     );
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);
@@ -465,6 +473,31 @@ export class AgentService {
       logs.push('Branch isolada criada para a tarefa.');
     }
     return logs;
+  }
+
+  private async createSafetyCheckpoint(
+    request: AgentRunRequest,
+    workspace: string,
+  ): Promise<string | null> {
+    if (
+      !request.workflow.rollbackOnFailure ||
+      !this.filesystem ||
+      !this.checkpoints ||
+      !this.fileEdits
+    ) {
+      return null;
+    }
+    const files = [];
+    for (const relativePath of Object.keys(request.relevantContext)) {
+      if (!(await this.filesystem.canRead(relativePath))) continue;
+      files.push({
+        relativePath,
+        content: await this.filesystem.readFileForCheckpoint(relativePath),
+        existed: true,
+      });
+    }
+    if (files.length === 0) return null;
+    return this.checkpoints.create(workspace, files, `Agent rollback: ${request.task}`);
   }
 
   private async completeVersionControl(

@@ -7,8 +7,9 @@ import { builtInAgents, type AgentDefinition, type TeamWorkflow } from '@visualn
 import type { AgentChunk, AgentInput } from '@visualnscode/providers';
 import { AgentService } from './agent-service';
 import type { AgentCommandRunner } from './agent-command-runner';
-import type { FileEditService } from './file-edit-service';
-import type { FilesystemService } from './filesystem-service';
+import { CheckpointService } from './checkpoint-service';
+import { FileEditService } from './file-edit-service';
+import { FilesystemService } from './filesystem-service';
 import type { ProviderService } from './provider-service';
 
 const architect = builtInAgents.find(({ id }) => id === 'architect')!;
@@ -31,10 +32,13 @@ class FakeProviderService {
   readonly inputs: AgentInput[] = [];
   readonly cancelled: string[] = [];
   output = 'Done.';
+  outputs: Array<string | Error> = [];
 
   async stream(_providerId: string, input: AgentInput, onChunk: (chunk: AgentChunk) => void) {
     this.inputs.push(input);
-    onChunk({ type: 'text', requestId: input.requestId, text: this.output });
+    const next = this.outputs.shift() ?? this.output;
+    if (next instanceof Error) throw next;
+    onChunk({ type: 'text', requestId: input.requestId, text: next });
     onChunk({
       type: 'usage',
       requestId: input.requestId,
@@ -204,5 +208,67 @@ describe('AgentService', () => {
     expect(otherWorkspacePayload.memory).toEqual([]);
     workspace = firstWorkspace;
     await fs.rm(secondWorkspace, { recursive: true, force: true });
+  });
+
+  it('restaura arquivos de contexto quando um workflow falha depois de executar comandos', async () => {
+    const workspaceFiles = new FilesystemService();
+    workspaceFiles.setWorkspace(workspace);
+    await fs.mkdir(path.join(workspace, 'src'), { recursive: true });
+    await fs.writeFile(path.join(workspace, 'src', 'App.tsx'), 'original');
+    const checkpointService = new CheckpointService(path.join(dataDirectory, 'checkpoints'));
+    const fileEdits = new FileEditService(workspaceFiles, checkpointService);
+    const commandRunner: AgentCommandRunner = {
+      run: async () => {
+        await fs.writeFile(path.join(workspace, 'src', 'App.tsx'), 'changed by command');
+        return { exitCode: 0, stdout: 'changed', stderr: '' };
+      },
+    };
+    const runner = {
+      ...architect,
+      terminalPermission: 'safe' as const,
+      allowedTools: ['terminal'] as const,
+    };
+    const reviewer = builtInAgents.find(({ id }) => id === 'reviewer')!;
+    providers.outputs = [
+      'Run command.\n<visualnscode-actions>[{"type":"command","description":"Generate files","command":"pnpm generate","risk":"safe"}]</visualnscode-actions>',
+      new Error('Provider unavailable'),
+    ];
+    const service = new AgentService(
+      providers as unknown as ProviderService,
+      fileEdits,
+      workspaceFiles,
+      checkpointService,
+      undefined,
+      undefined,
+      { commandRunner, dataDirectory },
+    );
+    const rollbackFiles: string[][] = [];
+    const result = await service.start(
+      {
+        runId: 'agent-run-rollback',
+        workflow: {
+          ...workflowFor(runner),
+          nodes: [
+            { id: 'node-1', agentId: runner.id, position: { x: 0, y: 0 } },
+            { id: 'node-2', agentId: reviewer.id, position: { x: 200, y: 0 } },
+          ],
+          edges: [{ id: 'edge-1', source: 'node-1', target: 'node-2' }],
+        },
+        agents: [runner, reviewer],
+        task: 'Generate and review',
+        relevantContext: { 'src/App.tsx': 'renderer copy is not trusted for rollback' },
+      },
+      (event) => {
+        if (event.type === 'action-requested') service.approve(event.runId, event.action.id, true);
+        if (event.type === 'rollback') rollbackFiles.push([...event.files]);
+      },
+    );
+
+    expect(result.status).toBe('failed');
+    expect(result.rolledBack).toBe(true);
+    await expect(fs.readFile(path.join(workspace, 'src', 'App.tsx'), 'utf8')).resolves.toBe(
+      'original',
+    );
+    expect(rollbackFiles).toEqual([['src/App.tsx']]);
   });
 });
