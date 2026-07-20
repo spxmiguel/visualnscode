@@ -9,6 +9,7 @@
 ## `spxcode` command not found after install
 
 **macOS:**
+
 ```bash
 ls -la /usr/local/bin/spxcode
 # If missing, create manually:
@@ -16,6 +17,7 @@ sudo ln -sf "/Applications/VisualnsCode.app/Contents/MacOS/spxcode" /usr/local/b
 ```
 
 **Linux:**
+
 ```bash
 which spxcode || echo "~/.local/bin/spxcode"
 # Ensure ~/.local/bin is in PATH:

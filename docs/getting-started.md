@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-| Tool | Minimum version |
-|---|---|
-| Node.js | 20.18.0 |
-| pnpm | 9.0.0 |
-| Git | 2.40.0 |
+| Tool    | Minimum version |
+| ------- | --------------- |
+| Node.js | 20.18.0         |
+| pnpm    | 9.0.0           |
+| Git     | 2.40.0          |
 
 ## Install
 

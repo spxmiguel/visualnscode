@@ -4,20 +4,20 @@ VisualnsCode ships with 12 built-in templates and supports custom templates.
 
 ## Built-in templates
 
-| ID | Name | Description | Manager |
-|---|---|---|---|
-| `react-vite` | React + Vite | SPA with React 19, TypeScript, Vite | pnpm |
-| `nextjs` | Next.js | SSR app with App Router and Tailwind | pnpm |
-| `node-api` | Node.js API | REST API with Express and TypeScript | pnpm |
-| `fastify` | Fastify | High-performance API with Fastify | pnpm |
-| `landing-page` | Landing Page | React + Vite + Tailwind starter | pnpm |
-| `supabase-app` | Supabase App | React + Supabase auth and database | pnpm |
-| `firebase-app` | Firebase App | React + Firebase auth, Firestore | pnpm |
-| `electron` | Electron | Desktop app with Electron | pnpm |
-| `portfolio` | Portfolio | Personal site with customisable sections | pnpm |
-| `dashboard` | Dashboard | Admin panel with tables and charts | pnpm |
-| `static-site` | Static site | HTML + CSS + JS, no framework | none |
-| `empty` | Empty project | Folder + README only | none |
+| ID             | Name          | Description                              | Manager |
+| -------------- | ------------- | ---------------------------------------- | ------- |
+| `react-vite`   | React + Vite  | SPA with React 19, TypeScript, Vite      | pnpm    |
+| `nextjs`       | Next.js       | SSR app with App Router and Tailwind     | pnpm    |
+| `node-api`     | Node.js API   | REST API with Express and TypeScript     | pnpm    |
+| `fastify`      | Fastify       | High-performance API with Fastify        | pnpm    |
+| `landing-page` | Landing Page  | React + Vite + Tailwind starter          | pnpm    |
+| `supabase-app` | Supabase App  | React + Supabase auth and database       | pnpm    |
+| `firebase-app` | Firebase App  | React + Firebase auth, Firestore         | pnpm    |
+| `electron`     | Electron      | Desktop app with Electron                | pnpm    |
+| `portfolio`    | Portfolio     | Personal site with customisable sections | pnpm    |
+| `dashboard`    | Dashboard     | Admin panel with tables and charts       | pnpm    |
+| `static-site`  | Static site   | HTML + CSS + JS, no framework            | none    |
+| `empty`        | Empty project | Folder + README only                     | none    |
 
 ## Creation flow
 

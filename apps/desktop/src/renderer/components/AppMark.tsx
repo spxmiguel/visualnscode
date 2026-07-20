@@ -22,12 +22,7 @@ export function AppMark({ compact = false, size = 28 }: AppMarkProps) {
           strokeLinejoin="round"
           strokeWidth="2"
         />
-        <path
-          d="M15 18h5"
-          stroke="white"
-          strokeLinecap="round"
-          strokeWidth="2"
-        />
+        <path d="M15 18h5" stroke="white" strokeLinecap="round" strokeWidth="2" />
       </svg>
       {!compact ? (
         <span className="text-sm font-semibold tracking-tight text-[rgb(var(--text))]">

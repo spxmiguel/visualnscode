@@ -34,7 +34,8 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     category: 'fullstack',
     tags: ['next', 'react', 'typescript'],
     manager: 'pnpm',
-    createCommand: 'pnpm create next-app . --typescript --tailwind --eslint --app --no-src-dir --import-alias "@/*"',
+    createCommand:
+      'pnpm create next-app . --typescript --tailwind --eslint --app --no-src-dir --import-alias "@/*"',
     files: undefined,
   },
   {
@@ -48,13 +49,45 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     files: [
       {
         path: 'package.json',
-        content: JSON.stringify({ name: '{{name}}', version: '0.1.0', type: 'module', scripts: { dev: 'tsx watch src/index.ts', build: 'tsc', start: 'node dist/index.js' }, dependencies: { express: '^4.21.0' }, devDependencies: { '@types/express': '^4.17.21', '@types/node': '^22.0.0', tsx: '^4.19.0', typescript: '^5.7.0' } }, null, 2),
+        content: JSON.stringify(
+          {
+            name: '{{name}}',
+            version: '0.1.0',
+            type: 'module',
+            scripts: { dev: 'tsx watch src/index.ts', build: 'tsc', start: 'node dist/index.js' },
+            dependencies: { express: '^4.21.0' },
+            devDependencies: {
+              '@types/express': '^4.17.21',
+              '@types/node': '^22.0.0',
+              tsx: '^4.19.0',
+              typescript: '^5.7.0',
+            },
+          },
+          null,
+          2,
+        ),
       },
       {
         path: 'src/index.ts',
-        content: "import express from 'express';\n\nconst app = express();\nconst PORT = process.env.PORT ?? 3000;\n\napp.use(express.json());\n\napp.get('/', (_req, res) => {\n  res.json({ ok: true });\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n",
+        content:
+          "import express from 'express';\n\nconst app = express();\nconst PORT = process.env.PORT ?? 3000;\n\napp.use(express.json());\n\napp.get('/', (_req, res) => {\n  res.json({ ok: true });\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n",
       },
-      { path: 'tsconfig.json', content: JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler', outDir: 'dist', strict: true } }, null, 2) },
+      {
+        path: 'tsconfig.json',
+        content: JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'ES2022',
+              module: 'ESNext',
+              moduleResolution: 'bundler',
+              outDir: 'dist',
+              strict: true,
+            },
+          },
+          null,
+          2,
+        ),
+      },
     ],
   },
   {
@@ -76,8 +109,25 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     manager: 'pnpm',
     createCommand: null,
     files: [
-      { path: 'package.json', content: JSON.stringify({ name: '{{name}}', version: '0.1.0', main: 'main.js', scripts: { start: 'electron .' }, devDependencies: { electron: '^43.0.0' } }, null, 2) },
-      { path: 'main.js', content: "const { app, BrowserWindow } = require('electron');\napp.whenReady().then(() => {\n  const win = new BrowserWindow({ width: 1200, height: 800 });\n  win.loadURL('about:blank');\n});\n" },
+      {
+        path: 'package.json',
+        content: JSON.stringify(
+          {
+            name: '{{name}}',
+            version: '0.1.0',
+            main: 'main.js',
+            scripts: { start: 'electron .' },
+            devDependencies: { electron: '^43.0.0' },
+          },
+          null,
+          2,
+        ),
+      },
+      {
+        path: 'main.js',
+        content:
+          "const { app, BrowserWindow } = require('electron');\napp.whenReady().then(() => {\n  const win = new BrowserWindow({ width: 1200, height: 800 });\n  win.loadURL('about:blank');\n});\n",
+      },
     ],
   },
   {
@@ -89,8 +139,26 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     manager: 'pnpm',
     createCommand: null,
     files: [
-      { path: 'package.json', content: JSON.stringify({ name: '{{name}}', version: '0.1.0', type: 'module', scripts: { dev: 'tsx watch src/index.ts', build: 'tsc', start: 'node dist/index.js' }, dependencies: { fastify: '^5.0.0' }, devDependencies: { '@types/node': '^22.0.0', tsx: '^4.19.0', typescript: '^5.7.0' } }, null, 2) },
-      { path: 'src/index.ts', content: "import Fastify from 'fastify';\n\nconst app = Fastify({ logger: true });\n\napp.get('/', async () => ({ ok: true }));\n\nawait app.listen({ port: 3000 });\n" },
+      {
+        path: 'package.json',
+        content: JSON.stringify(
+          {
+            name: '{{name}}',
+            version: '0.1.0',
+            type: 'module',
+            scripts: { dev: 'tsx watch src/index.ts', build: 'tsc', start: 'node dist/index.js' },
+            dependencies: { fastify: '^5.0.0' },
+            devDependencies: { '@types/node': '^22.0.0', tsx: '^4.19.0', typescript: '^5.7.0' },
+          },
+          null,
+          2,
+        ),
+      },
+      {
+        path: 'src/index.ts',
+        content:
+          "import Fastify from 'fastify';\n\nconst app = Fastify({ logger: true });\n\napp.get('/', async () => ({ ok: true }));\n\nawait app.listen({ port: 3000 });\n",
+      },
     ],
   },
   {
@@ -142,8 +210,16 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     manager: 'none',
     createCommand: null,
     files: [
-      { path: 'index.html', content: '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8" />\n  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n  <title>{{name}}</title>\n  <link rel="stylesheet" href="style.css" />\n</head>\n<body>\n  <h1>{{name}}</h1>\n  <script src="main.js"></script>\n</body>\n</html>\n' },
-      { path: 'style.css', content: '* { box-sizing: border-box; margin: 0; padding: 0; }\nbody { font-family: system-ui, sans-serif; }\n' },
+      {
+        path: 'index.html',
+        content:
+          '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8" />\n  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n  <title>{{name}}</title>\n  <link rel="stylesheet" href="style.css" />\n</head>\n<body>\n  <h1>{{name}}</h1>\n  <script src="main.js"></script>\n</body>\n</html>\n',
+      },
+      {
+        path: 'style.css',
+        content:
+          '* { box-sizing: border-box; margin: 0; padding: 0; }\nbody { font-family: system-ui, sans-serif; }\n',
+      },
       { path: 'main.js', content: "console.log('{{name}} ready');\n" },
     ],
   },
@@ -155,9 +231,7 @@ export const PROJECT_TEMPLATES: readonly ProjectTemplate[] = [
     tags: ['empty'],
     manager: 'none',
     createCommand: null,
-    files: [
-      { path: 'README.md', content: '# {{name}}\n\n> Projeto criado com VisualnsCode.\n' },
-    ],
+    files: [{ path: 'README.md', content: '# {{name}}\n\n> Projeto criado com VisualnsCode.\n' }],
   },
 ];
 
@@ -178,7 +252,10 @@ export class ScaffoldService {
     if (!template) return { success: false, path: projectPath, logs: ['Template não encontrado.'] };
 
     const logs: string[] = [];
-    const log = (msg: string) => { logs.push(msg); onLog(msg); };
+    const log = (msg: string) => {
+      logs.push(msg);
+      onLog(msg);
+    };
 
     try {
       log(`Criando pasta ${projectPath}…`);
@@ -207,11 +284,17 @@ export class ScaffoldService {
 
       log('Inicializando Git…');
       await execAsync('git', ['init'], { cwd: projectPath }).catch(() => undefined);
-      await execAsync('git', ['checkout', '-b', 'main'], { cwd: projectPath }).catch(() => undefined);
+      await execAsync('git', ['checkout', '-b', 'main'], { cwd: projectPath }).catch(
+        () => undefined,
+      );
 
       log('Criando primeiro commit…');
       await execAsync('git', ['add', '.'], { cwd: projectPath }).catch(() => undefined);
-      await execAsync('git', ['commit', '-m', `chore: init ${projectName} from ${template.name} template`], { cwd: projectPath }).catch(() => undefined);
+      await execAsync(
+        'git',
+        ['commit', '-m', `chore: init ${projectName} from ${template.name} template`],
+        { cwd: projectPath },
+      ).catch(() => undefined);
 
       log(`Projeto "${projectName}" pronto em ${projectPath}`);
       return { success: true, path: projectPath, logs };

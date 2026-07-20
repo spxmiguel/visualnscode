@@ -3,8 +3,8 @@
 ```
   ██╗   ██╗███╗   ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
   ██║   ██║████╗  ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
-  ██║   ██║██╔██╗ ██║███████╗██║     ██║   ██║██║  ██║█████╗  
-  ╚██╗ ██╔╝██║╚██╗██║╚════██║██║     ██║   ██║██║  ██║██╔══╝  
+  ██║   ██║██╔██╗ ██║███████╗██║     ██║   ██║██║  ██║█████╗
+  ╚██╗ ██╔╝██║╚██╗██║╚════██║██║     ██║   ██║██║  ██║██╔══╝
    ╚████╔╝ ██║ ╚████║███████║╚██████╗╚██████╔╝██████╔╝███████╗
     ╚═══╝  ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
 ```
@@ -48,14 +48,14 @@ After install, type **`spxcode`** in any terminal to open the app.
 
 ## What it does
 
-| | |
-|---|---|
+|                          |                                                                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | 🤖 **Multi-provider AI** | Switch between Claude, GPT-4o, Gemini, Ollama, OpenRouter and any OpenAI-compatible endpoint without touching a line of code. |
-| 🛠 **Agent teams** | Build workflows with specialized agents — Architect, Frontend Dev, Reviewer, Tester — running in sequence or parallel. |
-| 🎛 **Two modes** | Simple mode shows only what matters. Advanced mode reveals terminal, Git, diffs, logs, permissions, and agent controls. |
-| 🔒 **Safe by default** | AI never edits files silently. Every change goes through diff → approve → checkpoint → apply. |
-| 🚀 **Integrated deploy** | Vercel, Firebase, Supabase, GitHub Pages — from build to production URL with explicit confirmation. |
-| 🛠 **Auto-onboarding** | Detects Git, Node, pnpm, CLIs, and AI providers already installed. Guides through setup in plain language. |
+| 🛠 **Agent teams**        | Build workflows with specialized agents — Architect, Frontend Dev, Reviewer, Tester — running in sequence or parallel.        |
+| 🎛 **Two modes**          | Simple mode shows only what matters. Advanced mode reveals terminal, Git, diffs, logs, permissions, and agent controls.       |
+| 🔒 **Safe by default**   | AI never edits files silently. Every change goes through diff → approve → checkpoint → apply.                                 |
+| 🚀 **Integrated deploy** | Vercel, Firebase, Supabase, GitHub Pages — from build to production URL with explicit confirmation.                           |
+| 🛠 **Auto-onboarding**    | Detects Git, Node, pnpm, CLIs, and AI providers already installed. Guides through setup in plain language.                    |
 
 ## Screenshots
 
@@ -64,16 +64,16 @@ After install, type **`spxcode`** in any terminal to open the app.
 
 ## Tech stack
 
-| Layer | Tech |
-|---|---|
-| Desktop shell | Electron 43, contextIsolation, sandbox |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| Editor | Monaco Editor |
-| State | Zustand |
-| Monorepo | pnpm workspaces |
-| Packaging | electron-builder (.pkg, .AppImage, .deb, .msi) |
-| Testing | Vitest, Playwright |
-| CI | GitHub Actions |
+| Layer         | Tech                                           |
+| ------------- | ---------------------------------------------- |
+| Desktop shell | Electron 43, contextIsolation, sandbox         |
+| Frontend      | React 19, TypeScript, Vite, Tailwind CSS       |
+| Editor        | Monaco Editor                                  |
+| State         | Zustand                                        |
+| Monorepo      | pnpm workspaces                                |
+| Packaging     | electron-builder (.pkg, .AppImage, .deb, .msi) |
+| Testing       | Vitest, Playwright                             |
+| CI            | GitHub Actions                                 |
 
 ## Project structure
 
@@ -139,18 +139,18 @@ tagged release.
 
 ## Roadmap
 
-| Phase | Status |
-|---|---|
-| Monorepo, toolchain, CI | ✅ Done |
-| Workspace UI, themes, modes | ✅ Done |
-| Onboarding & environment setup | ✅ Done |
-| AI providers & streaming chat | ✅ Done |
-| Agent system & workflows | ✅ Done |
+| Phase                                           | Status         |
+| ----------------------------------------------- | -------------- |
+| Monorepo, toolchain, CI                         | ✅ Done        |
+| Workspace UI, themes, modes                     | ✅ Done        |
+| Onboarding & environment setup                  | ✅ Done        |
+| AI providers & streaming chat                   | ✅ Done        |
+| Agent system & workflows                        | ✅ Done        |
 | **Terminal (node-pty), file system, Git panel** | 🔄 In progress |
-| Diff viewer, checkpoints, rollback | 🔜 Next |
-| Project templates, deploy integrations | 🔜 Next |
-| Preview panel, element picker | 📋 Planned |
-| Cross-platform release pipeline | 📋 Planned |
+| Diff viewer, checkpoints, rollback              | 🔜 Next        |
+| Project templates, deploy integrations          | 🔜 Next        |
+| Preview panel, element picker                   | 📋 Planned     |
+| Cross-platform release pipeline                 | 📋 Planned     |
 
 See [ROADMAP.md](./ROADMAP.md) for full details.
 

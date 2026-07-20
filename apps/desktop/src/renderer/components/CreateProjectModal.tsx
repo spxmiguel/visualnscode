@@ -31,11 +31,20 @@ export function CreateProjectModal({ onClose }: Props) {
     const offDone = window.visualnscode?.scaffold.onDone((result) => {
       const r = result as ScaffoldResult;
       if (r.success) {
-        openProject({ id: r.path, name: projectName, path: r.path, lastOpened: 'Agora', color: '#7C5CFC' });
+        openProject({
+          id: r.path,
+          name: projectName,
+          path: r.path,
+          lastOpened: 'Agora',
+          color: '#7C5CFC',
+        });
         onClose();
       }
     });
-    return () => { offLog?.(); offDone?.(); };
+    return () => {
+      offLog?.();
+      offDone?.();
+    };
   }, [openProject, projectName, onClose]);
 
   useEffect(() => {
@@ -62,12 +71,23 @@ export function CreateProjectModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] shadow-2xl" style={{ maxHeight: '85vh' }}>
+      <div
+        className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] shadow-2xl"
+        style={{ maxHeight: '85vh' }}
+      >
         <div className="flex items-center justify-between border-b border-[rgb(var(--border))] px-5 py-4">
           <h2 className="text-base font-semibold">
-            {step === 'template' ? 'Novo projeto' : step === 'config' ? `Configurar — ${selected?.name}` : 'Criando projeto…'}
+            {step === 'template'
+              ? 'Novo projeto'
+              : step === 'config'
+                ? `Configurar — ${selected?.name}`
+                : 'Criando projeto…'}
           </h2>
-          <button className="rounded-md p-1 text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]" onClick={onClose} type="button">
+          <button
+            className="rounded-md p-1 text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--surface-hover))]"
+            onClick={onClose}
+            type="button"
+          >
             <X className="size-4" />
           </button>
         </div>
@@ -90,14 +110,23 @@ export function CreateProjectModal({ onClose }: Props) {
                       >
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-[rgb(var(--text))]">{t.name}</p>
-                          <p className="mt-0.5 text-xs text-[rgb(var(--text-muted))]">{t.description}</p>
+                          <p className="mt-0.5 text-xs text-[rgb(var(--text-muted))]">
+                            {t.description}
+                          </p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {t.tags.map((tag) => (
-                              <span className="rounded px-1.5 py-0.5 text-[10px] bg-[rgb(var(--surface-hover))] text-[rgb(var(--text-muted))]" key={tag}>{tag}</span>
+                              <span
+                                className="rounded px-1.5 py-0.5 text-[10px] bg-[rgb(var(--surface-hover))] text-[rgb(var(--text-muted))]"
+                                key={tag}
+                              >
+                                {tag}
+                              </span>
                             ))}
                           </div>
                         </div>
-                        {selected?.id === t.id ? <ChevronRight className="mt-0.5 size-4 shrink-0 text-[rgb(var(--accent))]" /> : null}
+                        {selected?.id === t.id ? (
+                          <ChevronRight className="mt-0.5 size-4 shrink-0 text-[rgb(var(--accent))]" />
+                        ) : null}
                       </button>
                     ))}
                   </div>
@@ -107,7 +136,12 @@ export function CreateProjectModal({ onClose }: Props) {
           ) : step === 'config' ? (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-[rgb(var(--text-muted))]" htmlFor="proj-name">Nome do projeto</label>
+                <label
+                  className="mb-1 block text-xs font-medium text-[rgb(var(--text-muted))]"
+                  htmlFor="proj-name"
+                >
+                  Nome do projeto
+                </label>
                 <input
                   className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--background))] px-3 py-2 text-sm text-[rgb(var(--text))] outline-none focus:border-[rgb(var(--accent))]"
                   id="proj-name"
@@ -118,7 +152,12 @@ export function CreateProjectModal({ onClose }: Props) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-[rgb(var(--text-muted))]" htmlFor="proj-path">Pasta pai</label>
+                <label
+                  className="mb-1 block text-xs font-medium text-[rgb(var(--text-muted))]"
+                  htmlFor="proj-path"
+                >
+                  Pasta pai
+                </label>
                 <div className="flex gap-2">
                   <input
                     className="min-w-0 flex-1 rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--background))] px-3 py-2 text-sm text-[rgb(var(--text))] outline-none focus:border-[rgb(var(--accent))]"
@@ -133,16 +172,22 @@ export function CreateProjectModal({ onClose }: Props) {
                   </Button>
                 </div>
                 {projectPath && projectName ? (
-                  <p className="mt-1.5 text-xs text-[rgb(var(--text-subtle))]">Será criado em: {projectPath}/{projectName}</p>
+                  <p className="mt-1.5 text-xs text-[rgb(var(--text-subtle))]">
+                    Será criado em: {projectPath}/{projectName}
+                  </p>
                 ) : null}
               </div>
             </div>
           ) : (
             <div className="font-mono text-xs text-[rgb(var(--text-muted))]">
               {logs.map((log, i) => (
-                <p className="mb-1" key={i}>{log}</p>
+                <p className="mb-1" key={i}>
+                  {log}
+                </p>
               ))}
-              {logs.length === 0 ? <Loader2 className="size-4 animate-spin text-[rgb(var(--accent))]" /> : null}
+              {logs.length === 0 ? (
+                <Loader2 className="size-4 animate-spin text-[rgb(var(--accent))]" />
+              ) : null}
               <div ref={logsEndRef} />
             </div>
           )}
@@ -151,13 +196,21 @@ export function CreateProjectModal({ onClose }: Props) {
         <div className="flex justify-end gap-2 border-t border-[rgb(var(--border))] px-5 py-3">
           {step === 'template' ? (
             <>
-              <Button onClick={onClose} variant="secondary">Cancelar</Button>
-              <Button disabled={!selected} onClick={() => setStep('config')}>Próximo</Button>
+              <Button onClick={onClose} variant="secondary">
+                Cancelar
+              </Button>
+              <Button disabled={!selected} onClick={() => setStep('config')}>
+                Próximo
+              </Button>
             </>
           ) : step === 'config' ? (
             <>
-              <Button onClick={() => setStep('template')} variant="secondary">Voltar</Button>
-              <Button disabled={!projectName || !projectPath} onClick={create}>Criar projeto</Button>
+              <Button onClick={() => setStep('template')} variant="secondary">
+                Voltar
+              </Button>
+              <Button disabled={!projectName || !projectPath} onClick={create}>
+                Criar projeto
+              </Button>
             </>
           ) : null}
         </div>

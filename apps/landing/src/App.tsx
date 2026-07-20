@@ -116,8 +116,7 @@ function Hero() {
           </div>
 
           <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl">
-            Build with every AI.{' '}
-            <GradientText>Manage everything from one place.</GradientText>
+            Build with every AI. <GradientText>Manage everything from one place.</GradientText>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400">
@@ -227,17 +226,22 @@ function IDEMockup() {
           <div className="overflow-hidden p-4">
             {[
               { n: 1, segs: [{ t: "import { useState } from 'react'", c: 'text-zinc-500' }] },
-              { n: 2, segs: [{ t: "import { AIProvider } from './providers'", c: 'text-zinc-500' }] },
+              {
+                n: 2,
+                segs: [{ t: "import { AIProvider } from './providers'", c: 'text-zinc-500' }],
+              },
               { n: 3, segs: [{ t: '', c: '' }] },
               {
-                n: 4, segs: [
+                n: 4,
+                segs: [
                   { t: 'export function ', c: 'text-violet-400' },
                   { t: 'App', c: 'text-cyan-300' },
                   { t: '() {', c: 'text-zinc-400' },
                 ],
               },
               {
-                n: 5, segs: [
+                n: 5,
+                segs: [
                   { t: '  const ', c: 'text-violet-400' },
                   { t: '[msg, setMsg]', c: 'text-cyan-300' },
                   { t: ' = ', c: 'text-zinc-500' },
@@ -246,7 +250,8 @@ function IDEMockup() {
                 ],
               },
               {
-                n: 6, segs: [
+                n: 6,
+                segs: [
                   { t: '  const ', c: 'text-violet-400' },
                   { t: 'ai', c: 'text-cyan-300' },
                   { t: ' = new ', c: 'text-zinc-500' },
@@ -258,7 +263,8 @@ function IDEMockup() {
               },
               { n: 7, segs: [{ t: '', c: '' }] },
               {
-                n: 8, segs: [
+                n: 8,
+                segs: [
                   { t: '  return ', c: 'text-violet-400' },
                   { t: '<App ', c: 'text-red-400' },
                   { t: 'ai', c: 'text-cyan-300' },
@@ -271,7 +277,9 @@ function IDEMockup() {
                 <span className="w-4 shrink-0 select-none text-right text-zinc-700">{line.n}</span>
                 <span>
                   {line.segs.map((seg, i) => (
-                    <span className={seg.c} key={i}>{seg.t}</span>
+                    <span className={seg.c} key={i}>
+                      {seg.t}
+                    </span>
                   ))}
                 </span>
               </div>
@@ -290,7 +298,9 @@ function IDEMockup() {
           </div>
           <div className="flex-1 space-y-3 overflow-hidden p-3">
             <div className="flex gap-2">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-500 text-[9px] font-bold text-white">AI</span>
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-500 text-[9px] font-bold text-white">
+                AI
+              </span>
               <div className="rounded-xl rounded-tl-sm bg-zinc-800/80 px-3 py-2 text-[11px] leading-5 text-zinc-300">
                 Detectei React 19. Quer que eu revise a estrutura do componente?
               </div>
@@ -301,7 +311,9 @@ function IDEMockup() {
               </div>
             </div>
             <div className="flex gap-2">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-500 text-[9px] font-bold text-white">AI</span>
+              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-500 text-[9px] font-bold text-white">
+                AI
+              </span>
               <div className="rounded-xl rounded-tl-sm bg-zinc-800/80 px-3 py-2 text-[11px] leading-5 text-zinc-300">
                 <span className="mb-1 block text-[10px] text-violet-400">3 arquivos editados</span>
                 Tipagem adicionada. Zero any, tudo estrito.
@@ -356,7 +368,10 @@ function Integrations() {
         Conecta com as ferramentas que você já usa
       </p>
       <div className="overflow-hidden">
-        <div className="flex gap-3" style={{ animation: 'ticker 32s linear infinite', width: 'max-content' }}>
+        <div
+          className="flex gap-3"
+          style={{ animation: 'ticker 32s linear infinite', width: 'max-content' }}
+        >
           {doubled.map((tool, i) => (
             <div
               className="flex shrink-0 items-center gap-2 rounded-xl border border-white/5 bg-zinc-900/60 px-4 py-2.5 text-sm font-medium text-zinc-400"
@@ -413,8 +428,7 @@ function Features() {
         <div className="mx-auto max-w-2xl text-center">
           <SectionLabel>Funcionalidades</SectionLabel>
           <h2 className="text-4xl font-bold tracking-tight text-white">
-            Tudo o que você precisa,{' '}
-            <GradientText>em um lugar só</GradientText>
+            Tudo o que você precisa, <GradientText>em um lugar só</GradientText>
           </h2>
           <p className="mt-4 text-zinc-400">
             Do setup do ambiente ao deploy em produção, sem trocar de janela.
@@ -430,7 +444,10 @@ function Features() {
               <div
                 aria-hidden
                 className="absolute inset-0 opacity-0 transition group-hover:opacity-100"
-                style={{ background: 'radial-gradient(ellipse at 0% 0%, rgba(124,92,246,0.07) 0%, transparent 70%)' }}
+                style={{
+                  background:
+                    'radial-gradient(ellipse at 0% 0%, rgba(124,92,246,0.07) 0%, transparent 70%)',
+                }}
               />
               <div className="relative">
                 <span className="text-3xl">{f.icon}</span>
@@ -472,8 +489,7 @@ function Modes() {
         <div className="mx-auto max-w-2xl text-center">
           <SectionLabel>Modos</SectionLabel>
           <h2 className="text-4xl font-bold tracking-tight text-white">
-            Simples pra começar.{' '}
-            <GradientText>Poderoso pra escalar.</GradientText>
+            Simples pra começar. <GradientText>Poderoso pra escalar.</GradientText>
           </h2>
           <p className="mt-4 text-zinc-400">
             Um botão muda tudo — sem forçar o usuário a aprender o que ele não precisa agora.
@@ -497,7 +513,9 @@ function Modes() {
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60">
             <div className="border-b border-white/5 bg-zinc-950/50 px-6 py-4">
               <div className="flex items-center gap-2">
-                <span className={`size-2 rounded-full ${active === 'simple' ? 'bg-emerald-400' : 'bg-violet-400'}`} />
+                <span
+                  className={`size-2 rounded-full ${active === 'simple' ? 'bg-emerald-400' : 'bg-violet-400'}`}
+                />
                 <span className="text-sm font-medium text-white">
                   {active === 'simple' ? 'Modo Simples' : 'Modo Avançado'}
                 </span>
@@ -506,7 +524,9 @@ function Modes() {
             <ul className="grid gap-2 p-6 sm:grid-cols-2">
               {(active === 'simple' ? simpleItems : advancedItems).map((item) => (
                 <li className="flex items-center gap-3 text-sm text-zinc-300" key={item}>
-                  <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-xs ${active === 'simple' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-violet-500/15 text-violet-400'}`}>
+                  <span
+                    className={`flex size-5 shrink-0 items-center justify-center rounded-full text-xs ${active === 'simple' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-violet-500/15 text-violet-400'}`}
+                  >
                     ✓
                   </span>
                   {item}
@@ -555,7 +575,9 @@ function Agents() {
         <div className="mt-16 flex flex-col items-center gap-3">
           {agentFlow.map((agent, i) => (
             <div className="flex w-full max-w-lg flex-col items-center gap-3" key={agent.role}>
-              <div className={`flex w-full items-start gap-4 rounded-2xl border p-5 ${agentColorCls[agent.color]}`}>
+              <div
+                className={`flex w-full items-start gap-4 rounded-2xl border p-5 ${agentColorCls[agent.color]}`}
+              >
                 <span className="text-2xl">{agent.emoji}</span>
                 <div>
                   <p className="font-semibold">{agent.role}</p>
@@ -608,8 +630,7 @@ function Security() {
             <div>
               <SectionLabel>Segurança</SectionLabel>
               <h2 className="text-3xl font-bold tracking-tight text-white lg:text-4xl">
-                Você sempre está{' '}
-                <GradientText>no controle</GradientText>
+                Você sempre está <GradientText>no controle</GradientText>
               </h2>
               <p className="mt-4 text-zinc-400">
                 A IA propõe. Você decide. Sem surpresas, sem alterações silenciosas, sem segredos
@@ -619,7 +640,9 @@ function Security() {
             <ul className="space-y-4">
               {securityItems.map((item) => (
                 <li className="flex items-start gap-3 text-sm text-zinc-300" key={item}>
-                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs">✓</span>
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 text-xs">
+                    ✓
+                  </span>
                   {item}
                 </li>
               ))}
@@ -637,19 +660,35 @@ const phases = [
     phase: 'Fase 1–2',
     title: 'Fundação & Agentes',
     status: 'done',
-    items: ['Monorepo e toolchain', 'UI e design system', 'Sistema de providers', 'Chat streaming', 'Agentes e workflows'],
+    items: [
+      'Monorepo e toolchain',
+      'UI e design system',
+      'Sistema de providers',
+      'Chat streaming',
+      'Agentes e workflows',
+    ],
   },
   {
     phase: 'Fase 3',
     title: 'Editor & Git',
     status: 'current',
-    items: ['Diff side-by-side', 'Checkpoints e rollback', 'Git integrado', 'Terminal com node-pty'],
+    items: [
+      'Diff side-by-side',
+      'Checkpoints e rollback',
+      'Git integrado',
+      'Terminal com node-pty',
+    ],
   },
   {
     phase: 'Fase 4',
     title: 'Deploy & Preview',
     status: 'upcoming',
-    items: ['Preview embutido', 'Vercel, Firebase, Supabase', 'Templates de projeto', 'GitHub Pages'],
+    items: [
+      'Preview embutido',
+      'Vercel, Firebase, Supabase',
+      'Templates de projeto',
+      'GitHub Pages',
+    ],
   },
   {
     phase: 'Fase 5',
@@ -666,8 +705,7 @@ function Roadmap() {
         <div className="mx-auto max-w-2xl text-center">
           <SectionLabel>Roadmap</SectionLabel>
           <h2 className="text-4xl font-bold tracking-tight text-white">
-            O que está sendo{' '}
-            <GradientText>construído</GradientText>
+            O que está sendo <GradientText>construído</GradientText>
           </h2>
           <p className="mt-4 text-zinc-400">
             Cada fase funcional antes de avançar. Sem features pela metade.
@@ -681,23 +719,30 @@ function Roadmap() {
                 phase.status === 'done'
                   ? 'border-emerald-500/20 bg-emerald-500/5'
                   : phase.status === 'current'
-                  ? 'border-violet-500/30 bg-violet-500/8'
-                  : 'border-white/5 bg-zinc-900/40'
+                    ? 'border-violet-500/30 bg-violet-500/8'
+                    : 'border-white/5 bg-zinc-900/40'
               }`}
               key={phase.phase}
             >
               <div className="mb-4 flex items-center justify-between">
-                <span className={`text-xs font-semibold ${phase.status === 'done' ? 'text-emerald-400' : phase.status === 'current' ? 'text-violet-400' : 'text-zinc-600'}`}>
+                <span
+                  className={`text-xs font-semibold ${phase.status === 'done' ? 'text-emerald-400' : phase.status === 'current' ? 'text-violet-400' : 'text-zinc-600'}`}
+                >
                   {phase.phase}
                 </span>
-                <span className={`flex size-6 items-center justify-center rounded-full text-xs ${phase.status === 'done' ? 'bg-emerald-500/20 text-emerald-400' : phase.status === 'current' ? 'bg-violet-500/20 text-violet-400' : 'bg-zinc-800 text-zinc-600'}`}>
+                <span
+                  className={`flex size-6 items-center justify-center rounded-full text-xs ${phase.status === 'done' ? 'bg-emerald-500/20 text-emerald-400' : phase.status === 'current' ? 'bg-violet-500/20 text-violet-400' : 'bg-zinc-800 text-zinc-600'}`}
+                >
                   {phase.status === 'done' ? '✓' : phase.status === 'current' ? '→' : '○'}
                 </span>
               </div>
               <h3 className="mb-3 font-semibold text-white">{phase.title}</h3>
               <ul className="space-y-1.5">
                 {phase.items.map((item) => (
-                  <li className={`text-xs ${phase.status === 'upcoming' ? 'text-zinc-600' : 'text-zinc-400'}`} key={item}>
+                  <li
+                    className={`text-xs ${phase.status === 'upcoming' ? 'text-zinc-600' : 'text-zinc-400'}`}
+                    key={item}
+                  >
                     {item}
                   </li>
                 ))}
@@ -743,14 +788,21 @@ function FAQ() {
 
         <div className="mt-12 space-y-3">
           {faqs.map((faq, i) => (
-            <div className="overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/60" key={i}>
+            <div
+              className="overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/60"
+              key={i}
+            >
               <button
                 className="flex w-full items-center justify-between px-6 py-4 text-left text-sm font-medium text-white"
                 onClick={() => setOpen(open === i ? null : i)}
                 type="button"
               >
                 {faq.q}
-                <span className={`ml-4 shrink-0 text-lg text-zinc-400 transition-transform ${open === i ? 'rotate-45' : ''}`}>+</span>
+                <span
+                  className={`ml-4 shrink-0 text-lg text-zinc-400 transition-transform ${open === i ? 'rotate-45' : ''}`}
+                >
+                  +
+                </span>
               </button>
               {open === i ? (
                 <div className="border-t border-white/5 px-6 pb-5 pt-3 text-sm leading-6 text-zinc-400">
@@ -773,19 +825,22 @@ function CTA() {
         <div
           className="relative overflow-hidden rounded-3xl px-8 py-16 text-center md:px-16"
           style={{
-            background: 'linear-gradient(135deg, rgba(124,92,246,0.18) 0%, rgba(6,182,212,0.08) 100%)',
+            background:
+              'linear-gradient(135deg, rgba(124,92,246,0.18) 0%, rgba(6,182,212,0.08) 100%)',
             border: '1px solid rgba(124,92,246,0.25)',
           }}
         >
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-3xl"
-            style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(124,92,246,0.22) 0%, transparent 60%)' }}
+            style={{
+              background:
+                'radial-gradient(ellipse at 50% 0%, rgba(124,92,246,0.22) 0%, transparent 60%)',
+            }}
           />
           <div className="relative">
             <h2 className="text-4xl font-bold tracking-tight text-white lg:text-5xl">
-              Pronto para codar{' '}
-              <GradientText>diferente?</GradientText>
+              Pronto para codar <GradientText>diferente?</GradientText>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-400">
               Código aberto, sem lock-in, direto no seu ambiente.
@@ -827,13 +882,39 @@ function Footer() {
             <span className="text-sm font-semibold text-white">VisualnsCode</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-600">
-            <a className="transition hover:text-white" href={GITHUB} rel="noopener noreferrer" target="_blank">GitHub</a>
-            <a className="transition hover:text-white" href={`${GITHUB}/issues`} rel="noopener noreferrer" target="_blank">Issues</a>
-            <a className="transition hover:text-white" href={`${GITHUB}/blob/main/LICENSE`} rel="noopener noreferrer" target="_blank">MIT License</a>
+            <a
+              className="transition hover:text-white"
+              href={GITHUB}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              GitHub
+            </a>
+            <a
+              className="transition hover:text-white"
+              href={`${GITHUB}/issues`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Issues
+            </a>
+            <a
+              className="transition hover:text-white"
+              href={`${GITHUB}/blob/main/LICENSE`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              MIT License
+            </a>
           </div>
           <p className="text-sm text-zinc-600">
             Built by{' '}
-            <a className="text-zinc-400 transition hover:text-white" href="https://github.com/spxmiguel" rel="noopener noreferrer" target="_blank">
+            <a
+              className="text-zinc-400 transition hover:text-white"
+              href="https://github.com/spxmiguel"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               @spxmiguel
             </a>
           </p>
@@ -848,7 +929,13 @@ function LogoMark() {
   return (
     <svg fill="none" height="28" viewBox="0 0 28 28" width="28">
       <rect fill="#7C5CFC" height="28" rx="8" width="28" />
-      <path d="M8 10l4 4-4 4M14 18h6" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      <path
+        d="M8 10l4 4-4 4M14 18h6"
+        stroke="white"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
     </svg>
   );
 }
@@ -894,7 +981,11 @@ function MockSettingsIcon() {
   return (
     <svg fill="none" height="16" viewBox="0 0 16 16" width="16">
       <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.6 3.6l1 1M11.4 11.4l1 1M12.4 3.6l-1 1M4.6 11.4l-1 1" stroke="currentColor" strokeWidth="1.2" />
+      <path
+        d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.6 3.6l1 1M11.4 11.4l1 1M12.4 3.6l-1 1M4.6 11.4l-1 1"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
     </svg>
   );
 }

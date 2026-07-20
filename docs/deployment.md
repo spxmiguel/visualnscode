@@ -2,12 +2,12 @@
 
 ## Supported targets
 
-| Service | Status |
-|---|---|
-| Vercel | Available |
+| Service          | Status    |
+| ---------------- | --------- |
+| Vercel           | Available |
 | Firebase Hosting | Available |
-| GitHub Pages | Planned |
-| Supabase | Planned |
+| GitHub Pages     | Planned   |
+| Supabase         | Planned   |
 
 ## Deploy flow
 

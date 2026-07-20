@@ -2,11 +2,11 @@
 
 ## Test stack
 
-| Tool | Purpose |
-|---|---|
-| Vitest | Unit and integration tests |
-| Testing Library | React component tests |
-| Playwright | End-to-end tests |
+| Tool            | Purpose                    |
+| --------------- | -------------------------- |
+| Vitest          | Unit and integration tests |
+| Testing Library | React component tests      |
+| Playwright      | End-to-end tests           |
 
 ## Run tests
 

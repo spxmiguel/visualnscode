@@ -2,12 +2,12 @@
 
 ## Release types
 
-| Type | Tag pattern | Description |
-|---|---|---|
-| Alpha | `v0.x.y-alpha.N` | Early feature preview, may break |
-| Beta | `v0.x.y-beta.N` | Feature complete, stabilising |
-| RC | `v0.x.y-rc.N` | Release candidate |
-| Stable | `v0.x.y` | Production ready |
+| Type   | Tag pattern      | Description                      |
+| ------ | ---------------- | -------------------------------- |
+| Alpha  | `v0.x.y-alpha.N` | Early feature preview, may break |
+| Beta   | `v0.x.y-beta.N`  | Feature complete, stabilising    |
+| RC     | `v0.x.y-rc.N`    | Release candidate                |
+| Stable | `v0.x.y`         | Production ready                 |
 
 ## Release process
 
@@ -34,15 +34,15 @@ pnpm changeset publish  # publishes
 
 ## Artifacts per release
 
-| File | Platform |
-|---|---|
-| `VisualnsCode-{version}-arm64.pkg` | macOS Apple Silicon |
-| `VisualnsCode-{version}-x64.pkg` | macOS Intel |
-| `VisualnsCode-{version}-x86_64.AppImage` | Linux |
-| `VisualnsCode-{version}-amd64.deb` | Debian/Ubuntu |
-| `VisualnsCode-{version}.rpm` | Fedora/RHEL |
-| `VisualnsCode-{version}.msi` | Windows |
-| `VisualnsCode-{version}-Setup.exe` | Windows (NSIS) |
+| File                                     | Platform            |
+| ---------------------------------------- | ------------------- |
+| `VisualnsCode-{version}-arm64.pkg`       | macOS Apple Silicon |
+| `VisualnsCode-{version}-x64.pkg`         | macOS Intel         |
+| `VisualnsCode-{version}-x86_64.AppImage` | Linux               |
+| `VisualnsCode-{version}-amd64.deb`       | Debian/Ubuntu       |
+| `VisualnsCode-{version}.rpm`             | Fedora/RHEL         |
+| `VisualnsCode-{version}.msi`             | Windows             |
+| `VisualnsCode-{version}-Setup.exe`       | Windows (NSIS)      |
 
 ## Auto-update (planned)
 

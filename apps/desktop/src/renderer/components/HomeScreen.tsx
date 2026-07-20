@@ -79,7 +79,13 @@ export function HomeScreen() {
       const folderPath = await window.visualnscode?.fs.openFolder();
       if (folderPath) {
         const name = folderPath.split('/').pop() ?? 'Projeto';
-        openProject({ id: folderPath, name, path: folderPath, lastOpened: 'Agora', color: '#8b6af6' });
+        openProject({
+          id: folderPath,
+          name,
+          path: folderPath,
+          lastOpened: 'Agora',
+          color: '#8b6af6',
+        });
       }
     } catch {
       setError('Não foi possível abrir a pasta.');
@@ -161,7 +167,9 @@ export function HomeScreen() {
             </div>
           </section>
 
-          {showCreateModal ? <CreateProjectModal onClose={() => setShowCreateModal(false)} /> : null}
+          {showCreateModal ? (
+            <CreateProjectModal onClose={() => setShowCreateModal(false)} />
+          ) : null}
 
           <section aria-labelledby="recent-title" className="mt-10">
             <div className="mb-3 flex items-center justify-between">

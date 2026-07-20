@@ -3,8 +3,8 @@
 ```
   ██╗   ██╗███╗   ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
   ██║   ██║████╗  ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
-  ██║   ██║██╔██╗ ██║███████╗██║     ██║   ██║██║  ██║█████╗  
-  ╚██╗ ██╔╝██║╚██╗██║╚════██║██║     ██║   ██║██║  ██║██╔══╝  
+  ██║   ██║██╔██╗ ██║███████╗██║     ██║   ██║██║  ██║█████╗
+  ╚██╗ ██╔╝██║╚██╗██║╚════██║██║     ██║   ██║██║  ██║██╔══╝
    ╚████╔╝ ██║ ╚████║███████║╚██████╗╚██████╔╝██████╔╝███████╗
     ╚═══╝  ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
 ```
@@ -40,27 +40,27 @@ Após a instalação, digite **`spxcode`** em qualquer terminal para abrir o app
 
 ## O que ele faz
 
-| | |
-|---|---|
-| 🤖 **IA multi-provider** | Alterne entre Claude, GPT-4o, Gemini, Ollama, OpenRouter e qualquer endpoint compatível com OpenAI. |
-| 🛠 **Equipes de agentes** | Monte workflows com agentes especializados — Architect, Frontend Dev, Revisor, Tester. |
-| 🎛 **Dois modos** | Modo simples mostra só o essencial. Modo avançado exibe terminal, Git, diffs, logs e controles de agentes. |
-| 🔒 **Seguro por padrão** | A IA nunca edita arquivos silenciosamente. Cada mudança passa por diff → aprovar → checkpoint → salvar. |
-| 🚀 **Deploy integrado** | Vercel, Firebase, Supabase, GitHub Pages — do build à URL de produção com confirmação explícita. |
-| 🛠 **Onboarding automático** | Detecta Git, Node, pnpm, CLIs e providers de IA já instalados. Guia a configuração em linguagem simples. |
+|                             |                                                                                                            |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 🤖 **IA multi-provider**    | Alterne entre Claude, GPT-4o, Gemini, Ollama, OpenRouter e qualquer endpoint compatível com OpenAI.        |
+| 🛠 **Equipes de agentes**    | Monte workflows com agentes especializados — Architect, Frontend Dev, Revisor, Tester.                     |
+| 🎛 **Dois modos**            | Modo simples mostra só o essencial. Modo avançado exibe terminal, Git, diffs, logs e controles de agentes. |
+| 🔒 **Seguro por padrão**    | A IA nunca edita arquivos silenciosamente. Cada mudança passa por diff → aprovar → checkpoint → salvar.    |
+| 🚀 **Deploy integrado**     | Vercel, Firebase, Supabase, GitHub Pages — do build à URL de produção com confirmação explícita.           |
+| 🛠 **Onboarding automático** | Detecta Git, Node, pnpm, CLIs e providers de IA já instalados. Guia a configuração em linguagem simples.   |
 
 ## Tecnologias
 
-| Camada | Tecnologia |
-|---|---|
-| Shell desktop | Electron 43, contextIsolation, sandbox |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| Editor | Monaco Editor |
-| Estado | Zustand |
-| Monorepo | pnpm workspaces |
+| Camada        | Tecnologia                                     |
+| ------------- | ---------------------------------------------- |
+| Shell desktop | Electron 43, contextIsolation, sandbox         |
+| Frontend      | React 19, TypeScript, Vite, Tailwind CSS       |
+| Editor        | Monaco Editor                                  |
+| Estado        | Zustand                                        |
+| Monorepo      | pnpm workspaces                                |
 | Empacotamento | electron-builder (.pkg, .AppImage, .deb, .msi) |
-| Testes | Vitest, Playwright |
-| CI | GitHub Actions |
+| Testes        | Vitest, Playwright                             |
+| CI            | GitHub Actions                                 |
 
 ## Desenvolvimento
 

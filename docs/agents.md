@@ -2,18 +2,18 @@
 
 ## Built-in agents
 
-| Agent | Role | Default autonomy |
-|---|---|---|
-| Architect | Designs system structure and ADRs | Ask |
-| Frontend Developer | Implements UI components | Guided |
-| Backend Developer | Implements APIs and services | Guided |
-| Debugger | Finds and fixes bugs | Ask |
-| Reviewer | Reviews code quality | Ask |
-| Tester | Generates and runs tests | Guided |
-| Documentation Writer | Writes and updates docs | Guided |
-| Security Auditor | Audits code for vulnerabilities | Ask |
-| DevOps | Configures CI/CD and infra | Ask |
-| Project Manager | Tracks tasks and coordinates | Guided |
+| Agent                | Role                              | Default autonomy |
+| -------------------- | --------------------------------- | ---------------- |
+| Architect            | Designs system structure and ADRs | Ask              |
+| Frontend Developer   | Implements UI components          | Guided           |
+| Backend Developer    | Implements APIs and services      | Guided           |
+| Debugger             | Finds and fixes bugs              | Ask              |
+| Reviewer             | Reviews code quality              | Ask              |
+| Tester               | Generates and runs tests          | Guided           |
+| Documentation Writer | Writes and updates docs           | Guided           |
+| Security Auditor     | Audits code for vulnerabilities   | Ask              |
+| DevOps               | Configures CI/CD and infra        | Ask              |
+| Project Manager      | Tracks tasks and coordinates      | Guided           |
 
 ## Autonomy levels
 

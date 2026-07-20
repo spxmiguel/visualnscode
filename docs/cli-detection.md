@@ -30,27 +30,27 @@ The environment service runs `versionCommand` using `execFile` (no shell injecti
 
 ## Detected tools
 
-| ID | Tool | Version flag |
-|---|---|---|
-| `git` | Git | `git --version` |
-| `gh` | GitHub CLI | `gh --version` |
-| `node` | Node.js | `node --version` |
-| `npm` | npm | `npm --version` |
-| `pnpm` | pnpm | `pnpm --version` |
-| `yarn` | Yarn | `yarn --version` |
-| `bun` | Bun | `bun --version` |
+| ID         | Tool         | Version flag         |
+| ---------- | ------------ | -------------------- |
+| `git`      | Git          | `git --version`      |
+| `gh`       | GitHub CLI   | `gh --version`       |
+| `node`     | Node.js      | `node --version`     |
+| `npm`      | npm          | `npm --version`      |
+| `pnpm`     | pnpm         | `pnpm --version`     |
+| `yarn`     | Yarn         | `yarn --version`     |
+| `bun`      | Bun          | `bun --version`      |
 | `firebase` | Firebase CLI | `firebase --version` |
-| `vercel` | Vercel CLI | `vercel --version` |
+| `vercel`   | Vercel CLI   | `vercel --version`   |
 | `supabase` | Supabase CLI | `supabase --version` |
-| `docker` | Docker | `docker --version` |
-| `python` | Python | `python3 --version` |
-| `claude` | Claude Code | `claude --version` |
-| `codex` | Codex CLI | `codex --version` |
-| `gemini` | Gemini CLI | `gemini --version` |
-| `aider` | Aider | `aider --version` |
-| `opencode` | OpenCode | `opencode --version` |
-| `ollama` | Ollama | `ollama --version` |
-| `lmstudio` | LM Studio | `lms --version` |
+| `docker`   | Docker       | `docker --version`   |
+| `python`   | Python       | `python3 --version`  |
+| `claude`   | Claude Code  | `claude --version`   |
+| `codex`    | Codex CLI    | `codex --version`    |
+| `gemini`   | Gemini CLI   | `gemini --version`   |
+| `aider`    | Aider        | `aider --version`    |
+| `opencode` | OpenCode     | `opencode --version` |
+| `ollama`   | Ollama       | `ollama --version`   |
+| `lmstudio` | LM Studio    | `lms --version`      |
 
 ## Adding a new tool
 

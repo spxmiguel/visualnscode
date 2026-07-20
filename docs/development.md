@@ -10,17 +10,17 @@ pnpm install
 
 ## Dev commands
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Electron app with hot-reload |
-| `pnpm dev:landing` | Landing page (Vite dev server) |
-| `pnpm test` | Unit tests (Vitest) |
-| `pnpm test:watch` | Tests in watch mode |
-| `pnpm test:e2e` | End-to-end tests (Playwright) |
-| `pnpm lint` | ESLint (zero warnings) |
-| `pnpm typecheck` | TypeScript `tsc --noEmit` across all packages |
-| `pnpm format` | Prettier |
-| `pnpm build` | Production build |
+| Command            | What it does                                  |
+| ------------------ | --------------------------------------------- |
+| `pnpm dev`         | Electron app with hot-reload                  |
+| `pnpm dev:landing` | Landing page (Vite dev server)                |
+| `pnpm test`        | Unit tests (Vitest)                           |
+| `pnpm test:watch`  | Tests in watch mode                           |
+| `pnpm test:e2e`    | End-to-end tests (Playwright)                 |
+| `pnpm lint`        | ESLint (zero warnings)                        |
+| `pnpm typecheck`   | TypeScript `tsc --noEmit` across all packages |
+| `pnpm format`      | Prettier                                      |
+| `pnpm build`       | Production build                              |
 
 ## Repository structure
 

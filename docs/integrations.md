@@ -38,10 +38,18 @@ import type { ToolIntegration } from '../types';
 export const myTool: ToolIntegration = {
   id: 'my-tool',
   name: 'My Tool',
-  detect: async () => { /* shell detection */ },
-  install: async () => { /* install instructions */ },
-  authenticate: async () => { /* auth flow */ },
-  test: async () => { /* connection test */ },
+  detect: async () => {
+    /* shell detection */
+  },
+  install: async () => {
+    /* install instructions */
+  },
+  authenticate: async () => {
+    /* auth flow */
+  },
+  test: async () => {
+    /* connection test */
+  },
 };
 ```
 
@@ -52,11 +60,11 @@ export const myTool: ToolIntegration = {
 
 Each integration action maps to a permission level:
 
-| Action | Required permission |
-|---|---|
-| Read project info | `read` |
-| Write files | `write` |
-| Run safe commands | `commands-safe` |
-| Install packages | `install` |
-| Access credentials | `credentials` |
-| Admin operations | `admin` |
+| Action             | Required permission |
+| ------------------ | ------------------- |
+| Read project info  | `read`              |
+| Write files        | `write`             |
+| Run safe commands  | `commands-safe`     |
+| Install packages   | `install`           |
+| Access credentials | `credentials`       |
+| Admin operations   | `admin`             |

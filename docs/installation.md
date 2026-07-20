@@ -4,14 +4,14 @@
 
 Download the latest release from [GitHub Releases](https://github.com/spxmiguel/visualnscode/releases).
 
-| Platform | File | Notes |
-|---|---|---|
-| macOS (Apple Silicon) | `VisualnsCode-*-arm64.pkg` | Signed + notarized (planned) |
-| macOS (Intel) | `VisualnsCode-*-x64.pkg` | |
-| Linux (any distro) | `VisualnsCode-*.AppImage` | Mark as executable before running |
-| Linux (Debian/Ubuntu) | `VisualnsCode-*.deb` | |
-| Linux (Fedora/RHEL) | `VisualnsCode-*.rpm` | |
-| Windows | `VisualnsCode-*.msi` | Adds `spxcode` to PATH automatically |
+| Platform              | File                       | Notes                                |
+| --------------------- | -------------------------- | ------------------------------------ |
+| macOS (Apple Silicon) | `VisualnsCode-*-arm64.pkg` | Signed + notarized (planned)         |
+| macOS (Intel)         | `VisualnsCode-*-x64.pkg`   |                                      |
+| Linux (any distro)    | `VisualnsCode-*.AppImage`  | Mark as executable before running    |
+| Linux (Debian/Ubuntu) | `VisualnsCode-*.deb`       |                                      |
+| Linux (Fedora/RHEL)   | `VisualnsCode-*.rpm`       |                                      |
+| Windows               | `VisualnsCode-*.msi`       | Adds `spxcode` to PATH automatically |
 
 ### macOS
 
