@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import {
   createProvider,
   defaultProviderSettings,
+  ensureSafeBaseUrl,
   getProviderDescriptor,
   providerCatalog,
   SanitizedLogger,
@@ -20,11 +21,8 @@ import { prepareRemoteContext, redactContent } from './secret-scanner';
 const validateSettings = (settings: ProviderSettings): ProviderSettings => {
   const descriptor = getProviderDescriptor(settings.providerId);
   if (!descriptor) throw new Error('Provider desconhecido.');
-  const baseUrl = settings.baseUrl.trim();
-  if (baseUrl) {
-    const url = new URL(baseUrl);
-    if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Endpoint inválido.');
-  }
+  const inputBaseUrl = settings.baseUrl.trim();
+  const baseUrl = inputBaseUrl ? ensureSafeBaseUrl(inputBaseUrl, descriptor.execution) : '';
   return {
     providerId: descriptor.id,
     enabled: Boolean(settings.enabled),

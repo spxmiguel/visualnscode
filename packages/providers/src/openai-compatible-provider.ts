@@ -32,7 +32,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
     this.type = options.descriptor.type;
     this.capabilities = options.descriptor.capabilities;
     this.execution = options.descriptor.execution;
-    this.baseUrl = ensureSafeBaseUrl(options.baseUrl);
+    this.baseUrl = ensureSafeBaseUrl(options.baseUrl, options.descriptor.execution);
     this.apiKey = options.apiKey ?? null;
     this.extraHeaders = options.extraHeaders ?? {};
   }

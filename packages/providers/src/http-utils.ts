@@ -1,7 +1,17 @@
-export const ensureSafeBaseUrl = (value: string): string => {
+import type { ExecutionLocation } from './types';
+
+export const ensureSafeBaseUrl = (
+  value: string,
+  execution: ExecutionLocation = 'remote',
+): string => {
   const url = new URL(value);
   if (!['http:', 'https:'].includes(url.protocol))
     throw new Error('O endpoint deve usar HTTP ou HTTPS.');
+  if (url.username || url.password) throw new Error('O endpoint não pode conter credenciais.');
+  const loopback = ['localhost', '127.0.0.1', '::1'].includes(url.hostname);
+  if (execution === 'remote' && url.protocol !== 'https:' && !loopback) {
+    throw new Error('Providers remotos exigem HTTPS; HTTP é aceito apenas em loopback.');
+  }
   return url.toString().replace(/\/$/, '');
 };
 

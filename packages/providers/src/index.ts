@@ -3,6 +3,7 @@ export * from './catalog';
 export * from './factory';
 export * from './fake-provider';
 export * from './gemini-provider';
+export { ensureSafeBaseUrl } from './http-utils';
 export * from './openai-compatible-provider';
 export * from './registry';
 export * from './sanitized-logger';
