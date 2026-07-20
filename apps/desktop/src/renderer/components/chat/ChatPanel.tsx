@@ -6,7 +6,7 @@ import { useChatStore } from '../../chat-store';
 import { providerApi } from '../../provider-api';
 import { useWorkspaceStore } from '../../workspace-store';
 
-export function ChatPanel() {
+export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
   const [providers, setProviders] = useState<readonly ProviderSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messages = useChatStore((state) => state.messages);
@@ -127,31 +127,48 @@ export function ChatPanel() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-1.5 border-b border-[rgb(var(--border))] px-2 py-1.5">
-        <select
-          aria-label="Provider do chat"
-          className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
-          onChange={(event) => {
-            const next = enabledProviders.find(({ id }) => id === event.target.value);
-            if (next) useChatStore.getState().setSelection(next.id, next.settings.defaultModel);
-          }}
-          value={selected?.id ?? ''}
-        >
-          {enabledProviders.length === 0 ? <option value="">Configure um provider</option> : null}
-          {enabledProviders.map((provider) => (
-            <option key={provider.id} value={provider.id}>
-              {provider.settings.alias || provider.name}
-            </option>
-          ))}
-        </select>
-        <input
-          aria-label="Modelo do chat"
-          className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
-          onChange={(event) =>
-            selected && useChatStore.getState().setSelection(selected.id, event.target.value)
-          }
-          placeholder="Modelo"
-          value={selectedModel}
-        />
+        {simple ? (
+          <div className="min-w-0 flex-1 px-1 py-1">
+            <p className="truncate text-[11px] font-medium text-[rgb(var(--text))]">
+              Assistente do projeto
+            </p>
+            <p className="truncate text-[9px] text-[rgb(var(--text-subtle))]">
+              {selected
+                ? `${selected.settings.alias || selected.name} · ${selectedModel}`
+                : 'Configure um provider para conversar'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <select
+              aria-label="Provider do chat"
+              className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
+              onChange={(event) => {
+                const next = enabledProviders.find(({ id }) => id === event.target.value);
+                if (next) useChatStore.getState().setSelection(next.id, next.settings.defaultModel);
+              }}
+              value={selected?.id ?? ''}
+            >
+              {enabledProviders.length === 0 ? (
+                <option value="">Configure um provider</option>
+              ) : null}
+              {enabledProviders.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.settings.alias || provider.name}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label="Modelo do chat"
+              className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
+              onChange={(event) =>
+                selected && useChatStore.getState().setSelection(selected.id, event.target.value)
+              }
+              placeholder="Modelo"
+              value={selectedModel}
+            />
+          </>
+        )}
         <button
           aria-label="Reenviar última mensagem"
           className="rounded-md p-1.5 hover:bg-[rgb(var(--surface-hover))]"
@@ -185,10 +202,12 @@ export function ChatPanel() {
         {messages.length === 0 ? (
           <div className="border-l border-[rgb(var(--border-strong))] pl-3">
             <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[rgb(var(--text-subtle))]">
-              Assistente / novo contexto
+              {simple ? 'O que vamos mudar?' : 'Assistente / novo contexto'}
             </p>
             <p className="mt-2 max-w-[28rem] text-xs leading-5 text-[rgb(var(--text-muted))]">
-              Abra os arquivos relevantes, escolha um provider e descreva a tarefa.
+              {simple
+                ? 'Descreva o resultado em linguagem normal. Toda alteração em arquivo será mostrada para sua revisão antes de ser aplicada.'
+                : 'Abra os arquivos relevantes, escolha um provider e descreva a tarefa.'}
             </p>
           </div>
         ) : null}
@@ -248,13 +267,19 @@ export function ChatPanel() {
             disabled={!selected}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={
-              selected ? 'Pergunte sobre seu projeto…' : 'Ative um provider nas configurações'
+              selected
+                ? simple
+                  ? 'Ex.: deixe a página inicial mais clara e organizada…'
+                  : 'Pergunte sobre seu projeto…'
+                : 'Ative um provider nas configurações'
             }
             value={draft}
           />
           <div className="flex items-center justify-between">
             <span className="px-1 text-[10px] text-[rgb(var(--text-subtle))]">
-              {contextFiles.length} arquivo(s) no contexto
+              {simple
+                ? 'Contexto do projeto protegido'
+                : `${contextFiles.length} arquivo(s) no contexto`}
             </span>
             {activeRequestId ? (
               <Button

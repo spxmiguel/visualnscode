@@ -98,7 +98,7 @@ function PanelTab({
   );
 }
 
-function PreviewPanel() {
+export function PreviewPanel() {
   const [device, setDevice] = useState<DeviceMode>('desktop');
   const [customSize, setCustomSize] = useState<readonly [number, number]>([1280, 720]);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);

@@ -45,6 +45,7 @@ afterEach(() => cleanup());
 describe('workspace', () => {
   it('abre e fecha os painéis principais', async () => {
     const user = userEvent.setup();
+    useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
     expect(screen.queryByText('Meu projeto')).not.toBeNull();
@@ -53,7 +54,6 @@ describe('workspace', () => {
     await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
     expect(screen.queryByText('Meu projeto')).not.toBeNull();
 
-    await user.click(screen.getByRole('button', { name: 'Avançado' }));
     expect(screen.queryByText('Terminal via node-pty chegará na próxima fase.')).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar painel inferior (⌘J)' }));
     expect(screen.queryByText('Terminal via node-pty chegará na próxima fase.')).toBeNull();
@@ -64,6 +64,8 @@ describe('workspace', () => {
     render(<WorkspaceScreen />);
 
     expect(screen.queryByRole('navigation', { name: 'Ferramentas avançadas' })).toBeNull();
+    expect(screen.queryByLabelText('Mock Monaco editor')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Resultado do projeto' })).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Avançado' }));
     expect(screen.queryByRole('navigation', { name: 'Ferramentas avançadas' })).not.toBeNull();
     expect(useAppStore.getState().mode).toBe('advanced');
@@ -71,6 +73,7 @@ describe('workspace', () => {
 
   it('abre um arquivo pelo explorador', async () => {
     const user = userEvent.setup();
+    useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
     await user.click(screen.getByRole('button', { name: 'styles.css' }));
@@ -80,6 +83,7 @@ describe('workspace', () => {
 
   it('cria e fecha abas de arquivo', async () => {
     const user = userEvent.setup();
+    useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
     await user.click(screen.getByRole('button', { name: 'README.md' }));

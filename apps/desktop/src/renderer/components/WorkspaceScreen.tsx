@@ -29,10 +29,16 @@ import { BottomPanel } from './BottomPanel';
 import { ExplorerPanel } from './ExplorerPanel';
 import { FileTabs } from './FileTabs';
 import { RightWorkspacePanel } from './RightWorkspacePanel';
+import { SimpleProjectScreen } from './SimpleProjectScreen';
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 export function WorkspaceScreen() {
+  const mode = useAppStore((state) => state.mode);
+  return mode === 'simple' ? <SimpleProjectScreen /> : <AdvancedWorkspaceScreen />;
+}
+
+function AdvancedWorkspaceScreen() {
   const activeProject = useAppStore((state) => state.activeProject);
   const mode = useAppStore((state) => state.mode);
   const navigate = useAppStore((state) => state.navigate);
