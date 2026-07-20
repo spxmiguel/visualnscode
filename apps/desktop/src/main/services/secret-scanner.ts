@@ -150,8 +150,15 @@ export interface CommandAssessment {
 }
 
 const BLOCKED_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
-  [/\brm\s+(?:-[a-z]*r[a-z]*f|-[a-z]*f[a-z]*r)\b/i, 'Exclusão recursiva forçada bloqueada.'],
+  [
+    /\brm\b(?=[^\n]*(?:--recursive\b|-[a-z]*r))(?=[^\n]*(?:--force\b|-[a-z]*f))/i,
+    'Exclusão recursiva forçada bloqueada.',
+  ],
   [/\bdel\s+\/(?:s|q(?:\s+\/s)?)\b/i, 'Exclusão recursiva do Windows bloqueada.'],
+  [
+    /\b(?:rd|rmdir)\b(?=[^\n]*\/s\b)(?=[^\n]*\/q\b)/i,
+    'Exclusão recursiva forçada do Windows bloqueada.',
+  ],
   [
     /\b(?:format(?:\.com)?\s+[a-z]:|diskpart|mkfs(?:\.[a-z0-9]+)?|shutdown)(?:\s|$)/i,
     'Comando destrutivo do sistema bloqueado.',
@@ -170,6 +177,12 @@ const DANGEROUS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
     /\bchmod\s+(?:-R\s+)?777\b|\bchown\s+-R\b/i,
     'Alteração ampla de permissões exige confirmação reforçada.',
   ],
+  [/\brm\b[^\n]*(?:--recursive\b|-[a-z]*r)/i, 'Exclusão recursiva exige confirmação reforçada.'],
+  [
+    /\bgit\s+clean\b[^\n]*(?:--force\b|-[a-z]*f)/i,
+    'Git clean pode excluir arquivos não rastreados.',
+  ],
+  [/\bfind\b[^\n]*\s-delete\b/i, 'Exclusão em lote exige confirmação reforçada.'],
   [/\bgit\s+push\b[^\n]*(?:--force|-f\b)/i, 'Push forçado pode reescrever o histórico remoto.'],
   [/\b(?:npm|pnpm|yarn)\s+publish\b/i, 'Publicação de pacote exige confirmação reforçada.'],
   [

@@ -10,7 +10,7 @@ const forbiddenNames = [
   /(^|\/)\.env(?:\..+)?$/,
   /(^|\/)(?:credentials|service-account|serviceAccount).*\.json$/i,
   /(^|\/)firebase-adminsdk.*\.json$/i,
-  /\.(?:pem|key|p12|pfx|jks|keystore)$/i,
+  /\.(?:pem|key|p12|pfx|jks|keystore|crt|cer)$/i,
   /(^|\/)\.netrc$/,
 ];
 
@@ -26,8 +26,10 @@ const binaryExtensions = new Set([
   '.webp',
 ]);
 
+const privateKeyHeader = `-----BEGIN (RSA |EC |OPENSSH |DSA )?${'PRIVATE'} KEY-----`;
+
 const secretPatterns = [
-  ['chave privada', new RegExp(`-----BEGIN ${'PRIVATE'} KEY-----`)],
+  ['chave privada', new RegExp(privateKeyHeader)],
   ['token GitHub', new RegExp(`gh[opusr]_[A-Za-z0-9_]{20,}`)],
   ['chave OpenAI', new RegExp(`sk-${'(?:proj-|svcacct-)?'}[A-Za-z0-9_-]{20,}`)],
   ['chave Anthropic', new RegExp(`sk-${'ant-'}[A-Za-z0-9_-]{20,}`)],
@@ -36,7 +38,7 @@ const secretPatterns = [
 ];
 
 const historyPattern = [
-  `-----BEGIN ${'PRIVATE'} KEY-----`,
+  privateKeyHeader,
   `gh[opusr]_[A-Za-z0-9_]{20,}`,
   `sk-${'(proj-|svcacct-)?'}[A-Za-z0-9_-]{20,}`,
   `sk-${'ant-'}[A-Za-z0-9_-]{20,}`,
