@@ -86,8 +86,8 @@ All notable changes are documented here. The format follows
   AppImage configuration; local artifacts remain unsigned by default.
 - Electron Builder and its Windows packaging dependency were upgraded to address high-severity
   transitive vulnerabilities.
-- Vulnerable transitive DOMPurify and UUID versions are overridden with patched releases; the
-  remaining audit finding is a low-severity development-server advisory.
+- Vulnerable transitive DOMPurify, UUID, and esbuild versions are overridden with patched releases;
+  the resolved dependency graph has no known audit advisory.
 - The runtime runner accepts only detected actions and starts processes without a shell.
 - Provider context is redacted in the main process before remote transmission.
 - Desktop development and packaging use a dedicated tsup runtime configuration that bundles internal

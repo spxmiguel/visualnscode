@@ -67,11 +67,18 @@ and unknown permission identifiers are rejected.
 The incomplete generic terminal remains a functional alpha limitation tracked by
 [#1](https://github.com/spxmiguel/visualnscode/issues/1), not an exposed arbitrary-shell feature.
 
+## Low — resolved after the audit
+
+| ID   | Area         | Finding                                                                         | Resolution                                                                                                      |
+| ---- | ------------ | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| L-01 | Dependencies | Vite's dependency graph resolved a vulnerable esbuild development-server build. | The lockfile now overrides the affected range to esbuild 0.28.1; `pnpm audit` reports no known vulnerabilities. |
+
+The original follow-up is [#23](https://github.com/spxmiguel/visualnscode/issues/23).
+
 ## Low — open
 
 | ID   | Area              | Finding                                                                                                   | Issue                                                                                                   |
 | ---- | ----------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| L-01 | Dependencies      | `pnpm audit` reports one Low esbuild development-server advisory through Vite.                            | [#23 — compatible Vite upgrade](https://github.com/spxmiguel/visualnscode/issues/23).                   |
 | L-02 | Local persistence | Checkpoints and histories are owner-only but normal source content is not encrypted and lacks migrations. | [#27 — confidential storage and SQLite](https://github.com/spxmiguel/visualnscode/issues/27).           |
 | L-03 | Maintainability   | Five source modules exceed 650 lines; small clones exist in providers, onboarding, environment, and CSS.  | [#26 — split modules and consolidate duplication](https://github.com/spxmiguel/visualnscode/issues/26). |
 
@@ -152,7 +159,7 @@ Electron credential wrapper remain the most important gaps.
 
 ## Dependencies and compatibility
 
-- 962 resolved dependencies; audit result: 0 Critical, 0 High, 0 Moderate, 1 Low.
+- Resolved dependency graph audit result: 0 Critical, 0 High, 0 Moderate, 0 Low.
 - No direct dependency is flagged as deprecated by `pnpm outdated`.
 - Five deprecated transitive utilities remain in packaging/tooling trees; none introduces a separate
   audit advisory.
@@ -180,9 +187,8 @@ pnpm security:audit
 pnpm dependencies:audit
 ```
 
-All project checks and builds pass. `pnpm audit` exits non-zero only for the documented Low esbuild
-advisory. The repository secret audit scanned the complete tracked tree and every Git revision without
-finding a known secret.
+All project checks, builds, and the dependency audit pass. The repository secret audit scanned the
+complete tracked tree and every Git revision without finding a known secret.
 
 ## Release recommendation
 
