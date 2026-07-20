@@ -12,6 +12,8 @@ const application = await electron.launch({
 try {
   const page = await application.firstWindow();
   await page.waitForLoadState('domcontentloaded');
+  // This callback runs inside Electron's browser context, not in this Node.js process.
+  // eslint-disable-next-line no-undef
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
   await page.getByRole('heading', { name: 'Seu ambiente, sem complicação.' }).waitFor();

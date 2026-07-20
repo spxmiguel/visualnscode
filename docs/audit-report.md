@@ -132,8 +132,8 @@ not exist; users must build from source and keep independent backups.
 - A complete desktop keyboard and WCAG 2.2 AA audit is still required in issue #25.
 
 Visual tokens and shared controls are consistent across desktop and the UI catalog. The landing uses
-the same restrained neutral/accent system and presents a working product rather than claiming the UI
-is a mockup. The largest UX limitation is the non-functional generic terminal surface; provider CLIs
+the same restrained neutral/accent system and represents the running desktop product. The largest UX
+limitation is the non-functional generic terminal surface; provider CLIs
 remain functional through constrained PTYs.
 
 ## Test coverage

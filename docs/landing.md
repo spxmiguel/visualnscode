@@ -17,7 +17,7 @@ The page follows the product story instead of reproducing the desktop navigation
 7. roadmap, FAQ, and final open-source call to action.
 
 Reusable layout primitives are in `src/components/Primitives.tsx`. The header and footer are in
-`Layout.tsx`, the product visualization is in `ProductDemo.tsx`, and the content sections are in
+`Layout.tsx`, the product workspace representation is in `ProductWorkspace.tsx`, and the content sections are in
 `Sections.tsx`. Product URLs and integration labels are centralized in `src/constants.ts`.
 
 ## Themes and accessibility

@@ -42,7 +42,7 @@ começando; o modo Avançado mantém controles detalhados para desenvolvedores e
 
 ## Capturas reais
 
-Estas imagens foram capturadas da aplicação desktop atual; não são mockups de design.
+Estas capturas foram geradas diretamente pelo aplicativo Electron em execução.
 
 ![Tela inicial do VisualnsCode](./assets/home.png)
 

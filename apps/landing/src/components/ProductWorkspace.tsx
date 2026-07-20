@@ -21,7 +21,7 @@ const code = [
   ['});', 'plain'],
 ] as const;
 
-export function ProductDemo() {
+export function ProductWorkspace() {
   return (
     <section
       className="scroll-mt-20 border-y border-[rgb(var(--line))] py-20 sm:py-28"
@@ -35,7 +35,7 @@ export function ProductDemo() {
           label="Produto real"
           title="Uma bancada de desenvolvimento, não outra janela de chat."
         />
-        <div className="demo-shell mt-12 overflow-hidden border border-[rgb(var(--line-strong))] bg-[rgb(var(--panel))] shadow-2xl shadow-black/10">
+        <div className="product-shell mt-12 overflow-hidden border border-[rgb(var(--line-strong))] bg-[rgb(var(--panel))] shadow-2xl shadow-black/10">
           <div className="flex h-11 items-center border-b border-[rgb(var(--line))] px-3">
             <div aria-hidden className="flex gap-1.5">
               <span className="size-2.5 rounded-full bg-[#ff6b68]" />
@@ -48,7 +48,7 @@ export function ProductDemo() {
           </div>
           <div className="grid min-h-[420px] grid-cols-[44px_minmax(0,1fr)] sm:grid-cols-[44px_170px_minmax(0,1fr)] lg:grid-cols-[44px_180px_minmax(0,1fr)_270px]">
             <aside
-              aria-label="Ferramentas da demonstração"
+              aria-label="Ferramentas do VisualnsCode"
               className="flex flex-col items-center gap-1 border-r border-[rgb(var(--line))] py-2 text-[rgb(var(--subtle))]"
             >
               {[PanelLeft, FileCode2, GitBranch, MessageSquare].map((Icon, index) => (

@@ -79,7 +79,7 @@ export function App() {
                 value={mode}
               />
               <SelectField label="Modelo" defaultValue="local">
-                <option value="local">Demonstração local</option>
+                <option value="local">Ambiente local</option>
                 <option disabled>Providers em breve</option>
               </SelectField>
             </div>

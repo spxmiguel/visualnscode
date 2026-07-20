@@ -56,7 +56,7 @@ security boundaries and plain-language actions.
 
 ## Screenshots
 
-These images are captured from the current desktop application, not a design mockup.
+These screenshots were captured directly from the running Electron application.
 
 ### Home and recent projects
 

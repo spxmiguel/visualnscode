@@ -135,7 +135,7 @@ export function WorkspaceScreen() {
               onChange={(event) => setModel(event.target.value)}
               value={model}
             >
-              <option value="local">Modelo · Demo local</option>
+              <option value="local">Modelo · Local</option>
               <option disabled value="future">
                 Providers em breve
               </option>

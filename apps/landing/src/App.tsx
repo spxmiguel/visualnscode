@@ -1,5 +1,5 @@
 import { Footer, Navigation } from './components/Layout';
-import { ProductDemo } from './components/ProductDemo';
+import { ProductWorkspace } from './components/ProductWorkspace';
 import {
   AgentsSection,
   AutomaticSetupSection,
@@ -24,7 +24,7 @@ export function App() {
       <Navigation />
       <main id="main-content">
         <Hero />
-        <ProductDemo />
+        <ProductWorkspace />
         <ProblemSection />
         <SolutionSection />
         <IntegrationsSection />
