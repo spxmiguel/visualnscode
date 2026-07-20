@@ -6,7 +6,12 @@ VisualnsCode integrates with the services most used in modern web development. A
 
 - Detected via: `gh auth status`
 - Auth: `gh auth login` (browser-based OAuth)
-- Features: create repo, clone, fork, create PR, list issues, view Actions
+- Read features: authentication status, username, issues, pull requests, Actions, and releases
+- Write features: create repo, clone, fork, issue, pull request, and release, each explicitly confirmed
+- Source control: status, diffs, commits, branches, merge, stash, tags, safe reset, revert, conflicts,
+  push, and pull
+
+See [Git and GitHub](./git-and-github.md) for UI modes, safety guarantees, and agent automation.
 
 ## Firebase
 

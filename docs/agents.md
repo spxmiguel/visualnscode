@@ -45,6 +45,13 @@ Chain multiple agents into a workflow. Each step receives:
 - A list of files that were changed
 - Any errors from the previous step
 
+### Optional version control
+
+Each task can create a local checkpoint, an isolated branch, and a reviewed Conventional Commit.
+Creating a draft pull request is also available, but requires two explicit task-level confirmations:
+one for `push` and one for creating the pull request. Agent autonomy never bypasses these gates, and
+no agent task pushes by default.
+
 ### Example — Full Stack feature
 
 ```

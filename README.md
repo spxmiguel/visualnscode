@@ -48,15 +48,16 @@ After install, type **`spxcode`** in any terminal to open the app.
 
 ## What it does
 
-|                          |                                                                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| 🤖 **Multi-provider AI** | Switch between Claude, GPT-4o, Gemini, Ollama, OpenRouter and any OpenAI-compatible endpoint without touching a line of code. |
-| 🛠 **Agent teams**        | Build workflows with specialized agents — Architect, Frontend Dev, Reviewer, Tester — running in sequence or parallel.        |
-| 🎛 **Two modes**          | Simple mode shows only what matters. Advanced mode reveals terminal, Git, diffs, logs, permissions, and agent controls.       |
-| 🔒 **Safe by default**   | AI never edits files silently. Every change goes through diff → approve → checkpoint → apply.                                 |
-| 🚀 **Integrated deploy** | Vercel, Firebase, Supabase, GitHub Pages — from build to production URL with explicit confirmation.                           |
-| 🛠 **Auto-onboarding**    | Detects Git, Node, pnpm, CLIs, and AI providers already installed. Guides through setup in plain language.                    |
-| 🧱 **Guided projects**   | Describe an idea, review the suggested stack, then create from 13 versioned templates with explicit external-action consent.  |
+|                             |                                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 🤖 **Multi-provider AI**    | Switch between Claude, GPT-4o, Gemini, Ollama, OpenRouter and any OpenAI-compatible endpoint without touching a line of code. |
+| 🛠 **Agent teams**           | Build workflows with specialized agents — Architect, Frontend Dev, Reviewer, Tester — running in sequence or parallel.        |
+| 🎛 **Two modes**             | Simple mode shows only what matters. Advanced mode reveals terminal, Git, diffs, logs, permissions, and agent controls.       |
+| 🔒 **Safe by default**      | AI never edits files silently. Every change goes through diff → approve → checkpoint → apply.                                 |
+| 🚀 **Integrated deploy**    | Vercel, Firebase, Supabase, GitHub Pages — from build to production URL with explicit confirmation.                           |
+| 🛠 **Auto-onboarding**       | Detects Git, Node, pnpm, CLIs, and AI providers already installed. Guides through setup in plain language.                    |
+| 🧱 **Guided projects**      | Describe an idea, review the suggested stack, then create from 13 versioned templates with explicit external-action consent.  |
+| 🌿 **Git without friction** | Save versions simply or use branches, tags, merges, conflicts, GitHub issues, PRs, Actions, and releases.                     |
 
 ## Screenshots
 
@@ -140,19 +141,19 @@ tagged release.
 
 ## Roadmap
 
-| Phase                                           | Status         |
-| ----------------------------------------------- | -------------- |
-| Monorepo, toolchain, CI                         | ✅ Done        |
-| Workspace UI, themes, modes                     | ✅ Done        |
-| Onboarding & environment setup                  | ✅ Done        |
-| AI providers & streaming chat                   | ✅ Done        |
-| Agent system & workflows                        | ✅ Done        |
-| **Terminal (node-pty), file system, Git panel** | 🔄 In progress |
-| Diff viewer, checkpoints, rollback              | 🔜 Next        |
-| Guided creation and 13 versioned templates      | ✅ Done        |
-| Optional deploy integrations                    | 🔜 Next        |
-| Preview panel, element picker                   | 📋 Planned     |
-| Cross-platform release pipeline                 | 📋 Planned     |
+| Phase                                           | Status     |
+| ----------------------------------------------- | ---------- |
+| Monorepo, toolchain, CI                         | ✅ Done    |
+| Workspace UI, themes, modes                     | ✅ Done    |
+| Onboarding & environment setup                  | ✅ Done    |
+| AI providers & streaming chat                   | ✅ Done    |
+| Agent system & workflows                        | ✅ Done    |
+| File system, secure runner, complete Git/GitHub | ✅ Done    |
+| Diff viewer, checkpoints, rollback              | 🔜 Next    |
+| Guided creation and 13 versioned templates      | ✅ Done    |
+| Optional deploy integrations                    | 🔜 Next    |
+| Preview panel, element picker                   | 📋 Planned |
+| Cross-platform release pipeline                 | 📋 Planned |
 
 See [ROADMAP.md](./ROADMAP.md) for full details.
 

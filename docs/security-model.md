@@ -106,6 +106,12 @@ The integrated project runner accepts only the development, build, or test comma
 the current project. It starts the executable without a shell, which prevents a renderer payload
 from appending shell operators.
 
+Git and GitHub use a second fixed command boundary. The renderer selects named operations, while the
+main process builds argument arrays for `git` or `gh` and validates paths, refs, text lengths, and
+confirmation flags. Hard reset and force push are not exposed. Pull uses `--ff-only`. Push, merge,
+revert, repository creation, fork, clone, issues, pull requests, and releases require an explicit
+action; every remote mutation also carries a confirmation checked by the service itself.
+
 ## YOLO mode
 
 YOLO mode is disabled globally by default. Enabling it requires two separate states:

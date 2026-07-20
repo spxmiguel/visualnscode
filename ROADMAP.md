@@ -50,9 +50,13 @@ pesquisa com usuários e revisão de segurança.
 - [x] log de histórico visual;
 - [x] branches, checkout, criar branch;
 - [x] stash / stash pop;
-- [ ] merge e resolução de conflitos;
-- [ ] push / pull via `gh` CLI;
-- [ ] criar PR e issue pelo app.
+- [x] merge, diff, tags, reset seguro, revert e resolução de conflitos;
+- [x] push confirmado e pull `--ff-only`;
+- [x] autenticação, criar/clonar/forkar repositório e abrir no navegador;
+- [x] listar e criar issues, pull requests e releases, além de visualizar Actions;
+- [x] modo simples com Salvar versão, Enviar, Baixar, Backup e Histórico;
+- [x] commits, branches, checkpoints e pull requests opcionais por tarefa de agentes;
+- [x] bloqueio de push automático sem autorização específica da tarefa.
 
 ## Preview e execução — completo
 

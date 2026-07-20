@@ -8,6 +8,15 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- integração Git completa com status sincronizado, stage, unstage, diff, Conventional Commits,
+  histórico visual, branches, merge, stash, tags, reset seguro, revert e conflitos;
+- integração GitHub via `gh` para autenticação, repositório, clone, fork, push/pull, issues, pull
+  requests, Actions e releases;
+- painel de versionamento em linguagem simples e painel avançado com conceitos reais de Git/GitHub;
+- versionamento opt-in de tarefas de agentes com checkpoint, branch, commit e pull request draft,
+  exigindo confirmação separada para push e PR;
+- testes com executores falsos para Git/GitHub e testes de interface dos modos simples e avançado,
+  sem efeitos remotos;
 - criação guiada por descrição em linguagem natural, com recomendação local de nome, stack,
   estrutura, banco, autenticação, deploy e agente;
 - catálogo de 13 templates versionados, agora separando Node.js API e Express e registrando a origem
@@ -48,6 +57,8 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Changed
 
+- `electron-builder` e o target Squirrel atualizados para 26.15.3, removendo vulnerabilidades altas
+  transitivas do empacotador antigo;
 - `FilesystemService` agora valida o caminho lexical e o destino real, rejeita symlinks inseguros,
   grava atomicamente e protege arquivos de credenciais contra leitura e sobrescrita;
 - providers remotos recebem mensagens e arquivos de contexto redigidos no processo principal;
