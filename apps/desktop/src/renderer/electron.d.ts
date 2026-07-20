@@ -49,6 +49,8 @@ import type {
   GitTag,
   AgentVersionControlOptions,
 } from '../shared/version-control';
+import type { DeployEvent, DeployPlan, DeployRecord, DeployRequest } from '../shared/deployment';
+import type { ProjectRuntime, RuntimeAction } from '../shared/runtime';
 
 export interface FileEntry {
   readonly name: string;
@@ -212,17 +214,28 @@ declare global {
         createRelease(input: GitHubCreateReleaseInput): Promise<string>;
       };
       readonly runner: {
-        detect(): Promise<{
-          manager: string;
-          devCommand: string;
-          buildCommand: string;
-          testCommand: string;
-          port: number | null;
-        } | null>;
-        start(processId: string, command: string): void;
+        detect(): Promise<ProjectRuntime | null>;
+        start(processId: string, action: RuntimeAction): void;
+        restart(processId: string, action: RuntimeAction): Promise<boolean>;
         stop(processId: string): Promise<boolean>;
         isRunning(processId: string): Promise<boolean>;
         onEvent(listener: (event: RunnerEvent) => void): () => void;
+      };
+      readonly preview: {
+        connect(target: string): Promise<string>;
+        openExternal(target: string): Promise<boolean>;
+        screenshot(rect: {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+        }): Promise<string | null>;
+      };
+      readonly deploy: {
+        plan(request: DeployRequest): Promise<DeployPlan>;
+        start(request: DeployRequest): Promise<DeployRecord>;
+        history(): Promise<readonly DeployRecord[]>;
+        onEvent(listener: (event: DeployEvent) => void): () => void;
       };
       readonly scaffold: {
         templates(): Promise<readonly ProjectTemplate[]>;

@@ -133,14 +133,31 @@ contextBridge.exposeInMainWorld('visualnscode', {
   },
   runner: {
     detect: () => ipcRenderer.invoke('runner:detect'),
-    start: (processId: string, command: string) =>
-      ipcRenderer.send('runner:start', processId, command),
+    start: (processId: string, action: string) =>
+      ipcRenderer.send('runner:start', processId, action),
+    restart: (processId: string, action: string) =>
+      ipcRenderer.invoke('runner:restart', processId, action),
     stop: (processId: string) => ipcRenderer.invoke('runner:stop', processId),
     isRunning: (processId: string) => ipcRenderer.invoke('runner:is-running', processId),
     onEvent: (listener: (event: unknown) => void) => {
       const handler = (_e: Electron.IpcRendererEvent, ev: unknown) => listener(ev);
       ipcRenderer.on('runner:event', handler);
       return () => ipcRenderer.removeListener('runner:event', handler);
+    },
+  },
+  preview: {
+    connect: (target: string) => ipcRenderer.invoke('preview:connect', target),
+    openExternal: (target: string) => ipcRenderer.invoke('preview:open-external', target),
+    screenshot: (rect: unknown) => ipcRenderer.invoke('preview:screenshot', rect),
+  },
+  deploy: {
+    plan: (request: unknown) => ipcRenderer.invoke('deploy:plan', request),
+    start: (request: unknown) => ipcRenderer.invoke('deploy:start', request),
+    history: () => ipcRenderer.invoke('deploy:history'),
+    onEvent: (listener: (event: unknown) => void) => {
+      const handler = (_e: Electron.IpcRendererEvent, event: unknown) => listener(event);
+      ipcRenderer.on('deploy:event', handler);
+      return () => ipcRenderer.removeListener('deploy:event', handler);
     },
   },
   scaffold: {

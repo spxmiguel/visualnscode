@@ -24,6 +24,7 @@ interface BeginRequest {
 
 interface ChatState {
   readonly activeRequestId: string | null;
+  readonly draft: string;
   readonly messages: readonly ChatMessage[];
   readonly selectedModel: string;
   readonly selectedProviderId: string;
@@ -34,6 +35,7 @@ interface ChatState {
   readonly fail: (requestId: string, message: string) => void;
   readonly finish: (requestId: string) => void;
   readonly setSelection: (providerId: string, model: string) => void;
+  readonly setDraft: (draft: string) => void;
   readonly setUsage: (requestId: string, usage: TokenUsage) => void;
 }
 
@@ -45,6 +47,7 @@ export const useChatStore = create<ChatState>()(
   persist(
     (set) => ({
       activeRequestId: null,
+      draft: '',
       messages: [],
       selectedModel: '',
       selectedProviderId: '',
@@ -117,6 +120,7 @@ export const useChatStore = create<ChatState>()(
         })),
       setSelection: (selectedProviderId, selectedModel) =>
         set({ selectedProviderId, selectedModel }),
+      setDraft: (draft) => set({ draft }),
       setUsage: (id, usage) =>
         set((state) => ({
           messages: state.messages.map((message) =>

@@ -1,4 +1,5 @@
 import { dialog, ipcMain, shell } from 'electron';
+import { promises as nodeFs } from 'node:fs';
 import path from 'node:path';
 import {
   getToolDefinition,
@@ -21,8 +22,12 @@ import { GitService } from './services/git-service';
 import { GitHubService } from './services/github-service';
 import { ProviderService } from './services/provider-service';
 import { RunnerService } from './services/runner-service';
+import { PreviewService, isLocalUrl } from './services/preview-service';
+import { DeploymentService } from './services/deployment-service';
 import { ScaffoldService, PROJECT_TEMPLATES, suggestProject } from './services/scaffold-service';
 import type { ProjectCreationOptions } from '../shared/project-creation';
+import type { DeployRequest } from '../shared/deployment';
+import type { RuntimeAction } from '../shared/runtime';
 import {
   assessCommand,
   scanForSecrets,
@@ -50,6 +55,8 @@ const agentService = new AgentService(
   githubService,
 );
 const runnerService = new RunnerService();
+const previewService = new PreviewService();
+const deploymentService = new DeploymentService(runnerService);
 const scaffoldService = new ScaffoldService();
 const providerIds = new Set(
   providerCatalog.filter(({ type }) => type === 'api').map(({ id }) => id),
@@ -84,6 +91,22 @@ const isValidAgentInput = (value: unknown): value is AgentInput => {
     ) &&
     (input.contextFiles?.length ?? 0) <= 20 &&
     contextLength <= 1_000_000
+  );
+};
+
+const isValidDeployRequest = (value: unknown): value is DeployRequest => {
+  if (!value || typeof value !== 'object') return false;
+  const request = value as Partial<DeployRequest>;
+  if (
+    !['vercel', 'firebase', 'supabase', 'github-pages'].includes(request.provider ?? '') ||
+    !['preview', 'production'].includes(request.environment ?? '') ||
+    typeof request.confirmed !== 'boolean' ||
+    !request.config ||
+    typeof request.config !== 'object'
+  )
+    return false;
+  return Object.values(request.config).every(
+    (entry) => entry === undefined || (typeof entry === 'string' && entry.length <= 500),
   );
 };
 
@@ -708,31 +731,77 @@ export const registerEnvironmentIpc = (): void => {
     if (!w) return null;
     return runnerService.detectProject(w).catch(() => null);
   });
-  ipcMain.on('runner:start', (event, processId: string, command: string) => {
+  ipcMain.on('runner:start', (event, processId: string, action: RuntimeAction) => {
     const w = fsService.getWorkspace();
-    if (!w || typeof processId !== 'string' || typeof command !== 'string') return;
-    void runnerService.detectProject(w).then((detected) => {
-      const allowlisted = [detected.devCommand, detected.buildCommand, detected.testCommand]
-        .filter(Boolean)
-        .includes(command);
-      if (!allowlisted || classifyCommand(command) === 'blocked') {
-        event.sender.send('runner:event', {
-          type: 'error',
-          processId,
-          payload: 'Comando recusado: use um script detectado no workspace.',
-        });
-        return;
-      }
-      runnerService.start(processId, w, command, (ev) => event.sender.send('runner:event', ev));
-    });
+    if (
+      !w ||
+      typeof processId !== 'string' ||
+      !['install', 'dev', 'build', 'test'].includes(action)
+    )
+      return;
+    void runnerService.start(processId, w, action, (ev) => event.sender.send('runner:event', ev));
   });
-  ipcMain.handle('runner:stop', (_event, processId: string) => {
-    runnerService.stop(processId);
+  ipcMain.handle('runner:restart', async (_event, processId: string, action: RuntimeAction) => {
+    const w = fsService.getWorkspace();
+    if (!w || !['install', 'dev', 'build', 'test'].includes(action)) return false;
+    await runnerService.restart(processId, w, action);
+    return true;
+  });
+  ipcMain.handle('runner:stop', async (_event, processId: string) => {
+    await runnerService.stop(processId);
     return true;
   });
   ipcMain.handle('runner:is-running', (_event, processId: string) =>
     runnerService.isRunning(processId),
   );
+
+  // ── Preview ───────────────────────────────────────────────────────────────
+  ipcMain.handle('preview:connect', (_event, target: string) => previewService.connect(target));
+  ipcMain.handle('preview:open-external', async (_event, target: string) => {
+    const url = isLocalUrl(target);
+    await shell.openExternal(url.toString());
+    return true;
+  });
+  ipcMain.handle(
+    'preview:screenshot',
+    async (event, rect: { x: number; y: number; width: number; height: number }) => {
+      if (
+        !rect ||
+        [rect.x, rect.y, rect.width, rect.height].some((value) => !Number.isFinite(value)) ||
+        rect.width < 1 ||
+        rect.height < 1 ||
+        rect.width > 10_000 ||
+        rect.height > 10_000
+      )
+        throw new Error('Área de captura inválida.');
+      const image = await event.sender.capturePage(rect);
+      const choice = await dialog.showSaveDialog({
+        defaultPath: `visualnscode-preview-${new Date().toISOString().replaceAll(':', '-').slice(0, 19)}.png`,
+        filters: [{ name: 'PNG', extensions: ['png'] }],
+      });
+      if (choice.canceled || !choice.filePath) return null;
+      await nodeFs.writeFile(choice.filePath, image.toPNG());
+      return choice.filePath;
+    },
+  );
+
+  // ── Deploy ────────────────────────────────────────────────────────────────
+  ipcMain.handle('deploy:plan', (_event, request: DeployRequest) => {
+    if (!isValidDeployRequest(request)) throw new Error('Serviço de deploy inválido.');
+    return deploymentService.plan(request);
+  });
+  ipcMain.handle('deploy:start', async (event, request: DeployRequest) => {
+    const w = fsService.getWorkspace();
+    if (!w) throw new Error('Abra um projeto antes de publicar.');
+    if (!isValidDeployRequest(request)) throw new Error('Configuração de deploy inválida.');
+    return deploymentService.deploy(w, request, (deployEvent) =>
+      event.sender.send('deploy:event', deployEvent),
+    );
+  });
+  ipcMain.handle('deploy:history', () => {
+    const w = fsService.getWorkspace();
+    return w ? deploymentService.history(w) : [];
+  });
 
   // ── Scaffold ──────────────────────────────────────────────────────────────
   ipcMain.handle('scaffold:templates', () => PROJECT_TEMPLATES);

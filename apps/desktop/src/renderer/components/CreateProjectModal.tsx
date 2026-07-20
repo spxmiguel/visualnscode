@@ -149,7 +149,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
     });
     if (result.runCommand) {
       window.setTimeout(() => {
-        window.visualnscode?.runner.start('workspace-dev-server', result.runCommand!);
+        window.visualnscode?.runner.start('workspace-dev-server', 'dev');
       }, 250);
     }
     onClose();

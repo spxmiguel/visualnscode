@@ -7,13 +7,14 @@ import { providerApi } from '../../provider-api';
 import { useWorkspaceStore } from '../../workspace-store';
 
 export function ChatPanel() {
-  const [draft, setDraft] = useState('');
   const [providers, setProviders] = useState<readonly ProviderSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messages = useChatStore((state) => state.messages);
   const activeRequestId = useChatStore((state) => state.activeRequestId);
   const selectedProviderId = useChatStore((state) => state.selectedProviderId);
   const selectedModel = useChatStore((state) => state.selectedModel);
+  const draft = useChatStore((state) => state.draft);
+  const setDraft = useChatStore((state) => state.setDraft);
   const files = useWorkspaceStore((state) => state.files);
   const openTabs = useWorkspaceStore((state) => state.openTabs);
   const contextFiles = useMemo(
