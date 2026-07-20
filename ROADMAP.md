@@ -8,12 +8,14 @@ security review, and packaged-app testing.
 - [x] pnpm monorepo with separate desktop, landing, and shared packages.
 - [x] Electron security boundary, React workspace, Monaco editor, themes, tabs, and resizable panels.
 - [x] Result-oriented Simple mode without IDE chrome, full Advanced IDE, onboarding, and 19-tool detection.
-- [x] Remote API, local server, and CLI provider adapters with streaming chat and secure credentials.
+- [x] Remote API, local server, and CLI provider adapters with normalized structured output, desktop
+      executable discovery, streaming chat, cancellation, and secure credentials.
 - [x] Built-in/custom agents, visual DAG, live telemetry/actions, parallel stages, approval, retries,
-      active timeout cancellation, budgets, scoped memory, history, and rollback hooks.
+      active timeout cancellation, budgets, scoped memory, history, and workspace checkpoint restore.
 - [x] Review-first AI editing, diffs, hunk selection, checkpoints, snapshots, rollback, and secret redaction.
 - [x] Safe workspace filesystem, command classification, permission gates, and constrained YOLO mode.
-- [x] Guided project creation with 13 versioned, executable templates and local no-publish tests.
+- [x] Guided project creation with 13 versioned, executable templates, independent install/Git
+      choices, automatic preview handoff, and local no-publish tests.
 - [x] Git and GitHub operations in the Advanced workspace with reviewed, confirmed remote effects.
 - [x] Project runtime detection, process control, preview bridge, responsive sizes, and element picker.
 - [x] Confirmed deploy plans for Vercel, Firebase Hosting, Supabase, and GitHub Pages.

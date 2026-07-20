@@ -48,8 +48,16 @@ token limit, timeout, and concurrency. Non-secret settings are persisted in
 configured flag returns to the renderer.
 
 Local base URLs must resolve to an allowed local endpoint. Remote context passes through the secret
-scanner. CLI adapters receive a filtered environment and structured arguments; Codex uses a read-only
-sandbox and Aider starts in dry-run mode.
+scanner. CLI adapters receive a filtered environment and structured arguments. Executable discovery
+combines the Electron PATH with standard Homebrew, npm, pnpm, Bun, Volta, asdf, and NVM locations so
+a CLI launched successfully in the user's terminal is also visible to the packaged app. The current
+workspace is selected by the main process; the renderer cannot supply an arbitrary working directory.
+
+Claude Code and Codex use their JSONL protocols, Gemini uses its documented JSON response, and
+OpenCode uses JSON events. The decoder exposes only assistant text and measured usage when available,
+instead of showing protocol records in chat. Codex runs in a read-only ephemeral sandbox, Claude has
+its direct tools disabled for chat, and Aider starts in dry-run mode. AI-requested edits therefore go
+through VisualnsCode's diff review rather than a CLI writing silently.
 
 ## Chat behavior
 
@@ -78,7 +86,8 @@ enabled, configured, and available.
 
 For HTTP adapters, validate the base URL and never log headers or authenticated bodies. For CLI
 adapters, keep the executable and arguments fixed by the adapter, preserve the filtered environment,
-and select read-only or dry-run flags when available.
+select read-only or dry-run flags when available, and add protocol fixtures for text, usage, and error
+events. `pnpm install` repairs the native `node-pty` spawn helper permission on Unix-like systems.
 
 Relevant implementation files:
 

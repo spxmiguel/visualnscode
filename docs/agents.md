@@ -51,7 +51,7 @@ flowchart TD
     Execute --> Result["Output, files, commands, errors, cost, and steps"]
     Result --> Next["Pass accumulated context to dependent nodes"]
     Next --> Ready
-    Result -->|"failure after retries"| Rollback["Run rollback hook when enabled"]
+    Result -->|"failure after retries"| Rollback["Restore the pre-run workspace checkpoint"]
     Result -->|"all nodes complete"| History["Store bounded run history"]
 ```
 
@@ -72,8 +72,11 @@ Cycles and missing agent references are rejected before execution.
 
 The builder shows queued, running, completed, and failed nodes. Each completed node exposes output,
 attempts, duration, steps, estimated cost, files read, proposed files, commands, actions, and errors.
-Connections can be removed without deleting agents. Run history is bounded and expandable; rollback
-is available when the workflow requested it and a rollback hook exists.
+Connections can be removed without deleting agents. Run history is bounded and expandable. When
+rollback is enabled, the main process snapshots readable context files from the real workspace before
+execution and restores that checkpoint after a final failure or cancellation. It does not trust the
+renderer copy as checkpoint content. Edit actions remain pending proposals, so they need no rollback
+until the user applies them.
 
 ## Action execution and memory
 

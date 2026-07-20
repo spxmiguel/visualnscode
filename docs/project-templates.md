@@ -65,10 +65,15 @@ generic Vite screen. Every recommended agent name is validated against the built
 - Renderer input can select a catalog ID but cannot supply an arbitrary command.
 - Dependency installation can be disabled.
 - Git initialization and the first Conventional Commit can be disabled.
+- Next.js scaffolding always uses `--skip-install` and `--disable-git`; VisualnsCode performs those
+  steps later only when their individual options are enabled.
 - A Git failure is reported as a warning and never disguised as success.
 - GitHub, Supabase, and Vercel actions require explicit confirmation.
 - `gh repo create` creates the remote and configures `origin`, but does not use `--push`.
 - Firebase setup writes local configuration only; production deploy is outside this flow.
+- Static HTML projects use the built-in loopback server and can open their preview without a package
+  manager. Automatic preview starts only after the preview panel has registered its process listener,
+  so the initial URL and logs are not lost.
 - Tests inject a fake command runner, so they never install packages, authenticate, or publish.
 
 ## Adding a template

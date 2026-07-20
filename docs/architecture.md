@@ -81,6 +81,10 @@ enter `FileEditService` as review proposals; commands pass through a shell-free,
 runner; provider cancellation is forwarded when a run or timeout aborts. The renderer receives
 status and metadata, never secret content or an edit body in an approval event.
 
+For rollback-enabled runs, the main process creates a checkpoint from readable files in the relevant
+context before invoking a provider. A final failure restores that checkpoint even when the failing
+agent did not produce a completed run record.
+
 ## Files, preview, and deployment
 
 Runtime actions form a closed union: install, development, build, and test. The main process detects
@@ -93,7 +97,9 @@ requires confirmation in the main process, runs the build first when required, r
 writes bounded history.
 
 Every spawned project, Git, integration, and deploy process receives a shared allowlisted environment
-rather than the Electron process environment. Provider endpoints are normalized centrally; remote
+rather than the Electron process environment. Its PATH is augmented with standard package-manager and
+version-manager locations because GUI applications do not inherit an interactive shell PATH. API
+keys and service tokens remain excluded. Provider endpoints are normalized centrally; remote
 execution requires HTTPS except for loopback development endpoints.
 
 ## State and persistence

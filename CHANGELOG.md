@@ -46,6 +46,18 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- Local AI CLI adapters now resolve executables from desktop-safe Homebrew and user tool locations,
+  decode vendor JSON/JSONL into chat text and measured usage, run in the active workspace, and report
+  native PTY failures separately from a missing executable.
+- Unix installs repair the executable bit on the native `node-pty` spawn helper, preventing a valid
+  Claude Code, Codex, or OpenCode installation from being reported as unavailable.
+- Failed or cancelled agent workflows now restore a real pre-run checkpoint made from readable
+  workspace context, including failures that happen before a changed-file record is returned.
+- Next.js project creation keeps dependency installation and Git initialization under separate user
+  choices, static projects can auto-start the built-in preview, and preview startup waits for its
+  event listener before launching the process.
+- Local project and integration processes now discover tools in standard Homebrew, pnpm, npm, Bun,
+  Volta, asdf, and NVM locations while continuing to exclude credentials from the child environment.
 - Light and dark theme controls are now directly available from both workspace modes, not only Home
   and Settings.
 - Documentation now matches the result-oriented Simple mode, current terminal limitation, measured
