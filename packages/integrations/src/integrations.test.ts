@@ -95,5 +95,6 @@ describe('permissões', () => {
     expect(manager.has('install-dependencies')).toBe(true);
     manager.set('install-dependencies', false);
     expect(manager.has('install-dependencies')).toBe(false);
+    expect(() => manager.set('unknown' as never, true)).toThrow('Permissão desconhecida');
   });
 });

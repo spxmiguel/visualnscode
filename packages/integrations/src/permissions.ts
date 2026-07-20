@@ -45,12 +45,15 @@ const definitions: readonly Omit<PermissionState, 'granted'>[] = [
   },
 ];
 
+const permissionIds = new Set<PermissionId>(definitions.map(({ id }) => id));
+
 export class PermissionManager {
   private readonly granted = new Set<PermissionId>(['read', 'execute-safe']);
   list(): readonly PermissionState[] {
     return definitions.map((item) => ({ ...item, granted: this.granted.has(item.id) }));
   }
   set(id: PermissionId, granted: boolean): void {
+    if (!permissionIds.has(id)) throw new Error('Permissão desconhecida.');
     if (granted) this.granted.add(id);
     else this.granted.delete(id);
   }

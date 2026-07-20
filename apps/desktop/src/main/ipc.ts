@@ -38,10 +38,10 @@ import {
 } from './services/secret-scanner';
 import { SecureStorage } from './services/secure-storage';
 
-const service = new EnvironmentService();
+const fsService = new FilesystemService();
+const service = new EnvironmentService(() => fsService.getWorkspace());
 const secureStorage = new SecureStorage();
 const providerService = new ProviderService(secureStorage);
-const fsService = new FilesystemService();
 const checkpointService = new CheckpointService();
 const fileEditService = new FileEditService(fsService, checkpointService);
 const gitService = new GitService();
@@ -61,6 +61,30 @@ const scaffoldService = new ScaffoldService();
 const providerIds = new Set(
   providerCatalog.filter(({ type }) => type === 'api').map(({ id }) => id),
 );
+
+const isValidToolActionRequest = (value: unknown): value is ToolActionRequest => {
+  if (!value || typeof value !== 'object') return false;
+  const request = value as Partial<ToolActionRequest>;
+  if (
+    typeof request.toolId !== 'string' ||
+    request.toolId.length > 100 ||
+    !['install', 'authenticate', 'test', 'logout', 'configure'].includes(request.action ?? '') ||
+    typeof request.confirmed !== 'boolean'
+  ) {
+    return false;
+  }
+  if (request.parameters === undefined) return true;
+  if (!request.parameters || typeof request.parameters !== 'object') return false;
+  const entries = Object.entries(request.parameters);
+  return (
+    entries.length <= 20 &&
+    entries.every(
+      ([key, value]) =>
+        key.length <= 100 &&
+        (typeof value === 'boolean' || (typeof value === 'string' && value.length <= 2000)),
+    )
+  );
+};
 
 const isValidAgentInput = (value: unknown): value is AgentInput => {
   if (!value || typeof value !== 'object') return false;
@@ -258,9 +282,10 @@ const isValidProjectCreationOptions = (value: unknown): value is ProjectCreation
 export const registerEnvironmentIpc = (): void => {
   ipcMain.handle('environment:detect-all', () => service.detectAll());
   ipcMain.handle('environment:detect', (_event, toolId: string) => service.detect(toolId));
-  ipcMain.handle('environment:perform', (_event, request: ToolActionRequest) =>
-    service.perform(request),
-  );
+  ipcMain.handle('environment:perform', (_event, request: unknown) => {
+    if (!isValidToolActionRequest(request)) throw new Error('Ação de ferramenta inválida.');
+    return service.perform(request);
+  });
   ipcMain.handle('environment:permissions', () => service.permissions.list());
   ipcMain.handle('environment:set-permission', (_event, id: PermissionId, granted: boolean) => {
     service.setPermission(id, granted);

@@ -1,3 +1,5 @@
+import { realpathSync, statSync } from 'node:fs';
+import path from 'node:path';
 import {
   FirebaseIntegration,
   GenericToolIntegration,
@@ -8,6 +10,7 @@ import {
   VercelIntegration,
   getToolDefinition,
   toolCatalog,
+  type CommandRunner,
   type PermissionId,
   type ToolActionRequest,
   type ToolActionResult,
@@ -16,7 +19,11 @@ import {
 
 export class EnvironmentService {
   readonly permissions = new PermissionManager();
-  private readonly runner = new SystemCommandRunner();
+
+  constructor(
+    private readonly workspacePath: () => string | null = () => null,
+    private readonly runner: CommandRunner = new SystemCommandRunner(),
+  ) {}
 
   async detectAll(): Promise<readonly ToolDetectionResult[]> {
     return Promise.all(
@@ -48,7 +55,8 @@ export class EnvironmentService {
     if (request.toolId === 'vercel') return this.performVercel(request);
     if (request.toolId === 'supabase') return this.performSupabase(request);
     if (request.action === 'test') return integration.test();
-    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.confirmed !== true)
+      return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
         return { ok: false, message: 'Autorize a permissão de instalação antes de continuar.' };
@@ -68,7 +76,8 @@ export class EnvironmentService {
         return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
       return integration.test();
     }
-    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.confirmed !== true)
+      return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
         return { ok: false, message: 'Autorize instalações antes de continuar.' };
@@ -117,7 +126,7 @@ export class EnvironmentService {
     if (!this.permissions.has('write'))
       return { ok: false, message: 'Autorize escrita no projeto antes de continuar.' };
     const projectId = String(request.parameters?.projectId ?? '');
-    const cwd = String(request.parameters?.trustedWorkspacePath ?? '');
+    const cwd = this.resolveWorkspacePath(request.parameters?.trustedWorkspacePath);
     if (operation === 'select') return integration.selectProject(projectId, cwd);
     if (operation === 'initialize') return integration.initialize(projectId, cwd);
     return { ok: false, message: 'Operação Firebase não reconhecida.' };
@@ -130,7 +139,8 @@ export class EnvironmentService {
         return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
       return integration.test();
     }
-    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.confirmed !== true)
+      return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
         return { ok: false, message: 'Autorize instalações antes de continuar.' };
@@ -145,7 +155,7 @@ export class EnvironmentService {
     if (operation === 'projects') return integration.listProjects();
     if (!this.permissions.has('write'))
       return { ok: false, message: 'Autorize escrita no projeto antes de continuar.' };
-    const cwd = String(request.parameters?.trustedWorkspacePath ?? '');
+    const cwd = this.resolveWorkspacePath(request.parameters?.trustedWorkspacePath);
     const name = String(request.parameters?.projectName ?? '');
     if (operation === 'link') return integration.link(name, cwd);
     if (operation === 'create') return integration.create(name, cwd);
@@ -161,7 +171,8 @@ export class EnvironmentService {
         return { ok: false, message: 'Autorize o acesso a credenciais antes de testar a conta.' };
       return integration.test();
     }
-    if (!request.confirmed) return { ok: false, message: 'Confirme a ação antes de continuar.' };
+    if (request.confirmed !== true)
+      return { ok: false, message: 'Confirme a ação antes de continuar.' };
     if (request.action === 'install') {
       if (!this.permissions.has('install-dependencies'))
         return { ok: false, message: 'Autorize instalações antes de continuar.' };
@@ -176,12 +187,31 @@ export class EnvironmentService {
     if (operation === 'projects') return integration.listProjects();
     if (!this.permissions.has('write'))
       return { ok: false, message: 'Autorize escrita no projeto antes de continuar.' };
-    const cwd = String(request.parameters?.trustedWorkspacePath ?? '');
+    const cwd = this.resolveWorkspacePath(request.parameters?.trustedWorkspacePath);
     const projectRef = String(request.parameters?.projectRef ?? '');
     if (operation === 'link') return integration.link(projectRef, cwd);
     if (operation === 'start') return integration.start(cwd);
     if (operation === 'migrate') return integration.migrate(cwd);
     if (operation === 'types') return integration.generateTypes(cwd);
     return { ok: false, message: 'Operação Supabase não reconhecida.' };
+  }
+
+  private resolveWorkspacePath(value: string | boolean | undefined): string {
+    if (typeof value !== 'string' || !value || value.includes('\0')) {
+      throw new Error('Abra um workspace real antes de executar esta ação.');
+    }
+    const candidate = realpathSync(path.resolve(value));
+    if (!statSync(candidate).isDirectory()) throw new Error('O workspace precisa ser uma pasta.');
+    const workspace = this.workspacePath();
+    if (workspace) {
+      const root = realpathSync(path.resolve(workspace));
+      const relative = path.relative(root, candidate);
+      const inside =
+        relative === '' ||
+        (!relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative));
+      if (inside) return candidate;
+    }
+    if (this.permissions.has('outside-workspace')) return candidate;
+    throw new Error('Acesso fora do workspace bloqueado. Autorize essa permissão para continuar.');
   }
 }
