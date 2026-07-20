@@ -5,6 +5,11 @@
   "description": "Uma IDE desktop orientada por IA, simples para começar e poderosa para evoluir.",
   "license": "MIT",
   "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "tmp@<0.2.6": "0.2.7"
+    }
+  },
   "engines": {
     "node": ">=20.18.0",
     "pnpm": ">=9.0.0"
