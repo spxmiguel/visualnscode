@@ -129,7 +129,7 @@ export function ProductDemo() {
                 <div className="border-l-2 border-emerald-500 bg-emerald-500/5 p-3 text-[rgb(var(--muted))]">
                   Permissões validadas.
                   <br />
-                  <span className="font-mono text-[9px] text-emerald-700 dark:text-emerald-400">
+                  <span className="font-mono text-[9px] text-emerald-800 dark:text-emerald-300">
                     READY FOR REVIEW
                   </span>
                 </div>
