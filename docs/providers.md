@@ -57,6 +57,11 @@ The workspace chat supports streaming, cancellation, retry, provider/model label
 files, estimated usage, local history, Markdown export, and clear. Open tabs are the only automatic
 file context. Interrupted streams are marked cancelled after hydration rather than resumed silently.
 
+The provider picker keeps every catalog entry visible, even before configuration. Each entry shows
+its provider icon and a concrete next action: add an API key, start a local server, configure a CLI,
+or activate an already detected provider. Sending stays disabled until the selected provider is
+enabled, configured, and available.
+
 ## Adding a provider
 
 1. Add a conservative `ProviderDescriptor` to

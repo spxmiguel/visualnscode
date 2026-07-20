@@ -8,6 +8,12 @@ All notable changes are documented here. The format follows
 
 ### Added
 
+- System theme mode that follows the operating-system light/dark preference and reacts to changes
+  while the desktop app is open.
+- Complete provider picker in the workspace chat, including provider-specific icons and setup
+  guidance for API keys, local servers, and CLIs that are not ready yet.
+- First-run Ollama fallback that activates the local endpoint and selects a detected model when no
+  other AI provider is ready.
 - Provider-aware brand icons for Ollama, Claude, Codex, Gemini, OpenAI, OpenRouter, LM Studio, and
   OpenCode across chat and model settings, with a lightweight CLI fallback.
 - Complete agent orchestration with ten built-in roles, custom definitions, visual team DAGs,

@@ -24,8 +24,9 @@ flowchart LR
 
 The home screen opens folders, begins guided creation, starts a confirmed GitHub clone, and lists
 recent projects. Settings controls theme, interface mode, providers, permissions, and onboarding.
-The light/dark theme switch remains available in both Simple and Advanced workspace headers; the
-persisted preference updates every application surface and the Monaco theme.
+The light/dark theme switch remains available in both Simple and Advanced workspace headers. The
+persisted preference can be System, Dark, or Light. System follows `prefers-color-scheme`, reacts to
+operating-system changes while the app is open, and updates every application surface and Monaco.
 
 ## Simple project experience
 
@@ -39,7 +40,9 @@ persisted preference updates every application surface and the Monaco theme.
 
 - Full Explorer and activity rail.
 - Monaco editor with file tabs, empty/loading/error states, and manual save.
-- Streaming chat with provider/model selection and explicit context files.
+- Streaming chat with provider/model selection and explicit context files. The provider picker always
+  lists the complete catalog, uses the matching provider icon, and explains whether an unavailable
+  option needs an API key, a running local server, CLI setup, or activation.
 - Preview with process controls, responsive sizes, diagnostics, screenshot, and element selection.
 - Diff review for AI proposals and checkpoint rollback.
 - Advanced bottom panel for runtime output, tasks, logs, Git, and the planned interactive terminal.

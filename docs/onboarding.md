@@ -74,6 +74,12 @@ Remote provider keys are encrypted through Electron `safeStorage`. When saving, 
 the input and subsequently receives only configuration status. If secure OS encryption is unavailable,
 credential storage fails closed. Ollama and LM Studio can be configured without a token.
 
+Saving an OpenAI, Anthropic, Gemini, or OpenRouter key during onboarding also activates that provider
+and attempts to discover its default model. At completion, the assistant checks whether any provider
+is configured, enabled, and reachable. If none is ready, it enables the loopback Ollama endpoint and
+selects the first detected local model. This fallback only changes VisualnsCode configuration: it
+does not install Ollama or download a model without the user's confirmation.
+
 ## Tests
 
 Integration tests replace operating-system execution with a fake `CommandRunner`. They cover all 19
