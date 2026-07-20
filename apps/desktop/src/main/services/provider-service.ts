@@ -53,17 +53,18 @@ export class ProviderService {
       providerCatalog.map(async (descriptor) => {
         const settings = stored[descriptor.id] ?? defaultProviderSettings(descriptor);
         const secret = await this.secrets.get(`provider:${descriptor.id}`);
-        const configured = descriptor.requiresSecret
+        const hasConfiguration = descriptor.requiresSecret
           ? Boolean(secret)
           : descriptor.type === 'cli' || Boolean(settings.baseUrl);
         let available = false;
-        if (configured) {
+        if (hasConfiguration) {
           try {
             available = await createProvider(descriptor, settings, secret).isAvailable();
           } catch {
             available = false;
           }
         }
+        const configured = descriptor.type === 'cli' ? available : hasConfiguration;
         return { ...descriptor, available, configured, settings };
       }),
     );

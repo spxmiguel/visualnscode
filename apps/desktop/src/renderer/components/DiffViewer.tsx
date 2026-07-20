@@ -2,7 +2,7 @@ import Editor, { DiffEditor } from '@monaco-editor/react';
 import { Columns2, FilePenLine, Rows3 } from 'lucide-react';
 import { Button } from '@visualnscode/ui';
 import type { ReviewFileChange } from '../../shared/edit-model';
-import { useAppStore } from '../store';
+import { useResolvedTheme } from '../theme';
 
 interface DiffViewerProps {
   readonly file: ReviewFileChange;
@@ -44,7 +44,7 @@ export function DiffViewer({
   selectedBlockIds,
   view,
 }: DiffViewerProps) {
-  const theme = useAppStore((state) => state.theme);
+  const theme = useResolvedTheme();
   const language = languageForPath(file.path);
 
   return (

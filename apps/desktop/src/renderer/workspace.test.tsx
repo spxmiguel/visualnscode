@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -42,7 +42,10 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('workspace', () => {
   it('abre e fecha os painéis principais', async () => {
@@ -97,6 +100,34 @@ describe('workspace', () => {
 });
 
 describe('tema', () => {
+  it('acompanha mudanças do tema do computador no modo Sistema', async () => {
+    let dark = false;
+    const listeners = new Set<() => void>();
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: dark,
+        media: '(prefers-color-scheme: dark)',
+        onchange: null,
+        addEventListener: (_event: string, listener: () => void) => listeners.add(listener),
+        removeEventListener: (_event: string, listener: () => void) => listeners.delete(listener),
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => true,
+      })),
+    );
+    useAppStore.setState({ screen: 'home', theme: 'system' });
+    render(<App />);
+
+    expect(document.documentElement.dataset.theme).toBe('light');
+    act(() => {
+      dark = true;
+      listeners.forEach((listener) => listener());
+    });
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(useAppStore.getState().theme).toBe('system');
+  });
+
   it('troca o tema e persiste a preferência', async () => {
     const user = userEvent.setup();
     useAppStore.setState({ screen: 'home', theme: 'dark' });

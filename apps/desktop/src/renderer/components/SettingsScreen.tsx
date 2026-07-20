@@ -10,6 +10,7 @@ export function SettingsScreen() {
   const setMode = useAppStore((state) => state.setMode);
   const setTheme = useAppStore((state) => state.setTheme);
   const restartOnboarding = useAppStore((state) => state.restartOnboarding);
+  const settingsProviderId = useAppStore((state) => state.settingsProviderId);
   const theme = useAppStore((state) => state.theme);
   const yoloEnabled = useAppStore((state) => state.yoloEnabled);
   const yoloGloballyAllowed = useAppStore((state) => state.yoloGloballyAllowed);
@@ -64,7 +65,7 @@ export function SettingsScreen() {
                 <div>
                   <h2 className="text-sm font-semibold">Aparência</h2>
                   <p className="mt-1 text-xs text-[rgb(var(--text-muted))]">
-                    A preferência é salva neste dispositivo.
+                    Siga automaticamente o computador ou escolha uma preferência fixa.
                   </p>
                 </div>
               </div>
@@ -72,6 +73,7 @@ export function SettingsScreen() {
                 label="Tema"
                 onChange={setTheme}
                 options={[
+                  { label: 'Sistema', value: 'system' },
                   { label: 'Escuro', value: 'dark' },
                   { label: 'Claro', value: 'light' },
                 ]}
@@ -103,7 +105,7 @@ export function SettingsScreen() {
               />
             </Surface>
 
-            <ModelSettings />
+            <ModelSettings initialProviderId={settingsProviderId ?? undefined} />
 
             <Surface
               className={`flex flex-col gap-5 p-5 ${yoloEnabled ? 'border-amber-500/50' : ''}`}

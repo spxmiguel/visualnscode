@@ -4,8 +4,10 @@ import type { ProviderSummary } from '@visualnscode/providers/browser';
 import { Button } from '@visualnscode/ui';
 import { useChatStore } from '../../chat-store';
 import { providerApi } from '../../provider-api';
+import { useAppStore } from '../../store';
 import { useWorkspaceStore } from '../../workspace-store';
 import { ProviderIcon } from '../providers/ProviderIcon';
+import { isProviderReady, ProviderPicker, providerSetupHint } from './ProviderPicker';
 
 export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
   const [providers, setProviders] = useState<readonly ProviderSummary[]>([]);
@@ -16,29 +18,33 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
   const selectedModel = useChatStore((state) => state.selectedModel);
   const draft = useChatStore((state) => state.draft);
   const setDraft = useChatStore((state) => state.setDraft);
+  const openProviderSettings = useAppStore((state) => state.openProviderSettings);
   const files = useWorkspaceStore((state) => state.files);
   const openTabs = useWorkspaceStore((state) => state.openTabs);
   const contextFiles = useMemo(
     () => openTabs.flatMap((id) => files.find((file) => file.id === id) ?? []),
     [files, openTabs],
   );
-  const enabledProviders = providers.filter(({ settings }) => settings.enabled);
-  const selected =
-    enabledProviders.find(({ id }) => id === selectedProviderId) ?? enabledProviders[0];
+  const selected = providers.find(({ id }) => id === selectedProviderId) ?? providers[0];
+  const selectedReady = selected ? isProviderReady(selected) : false;
 
   useEffect(() => {
     void providerApi.providers.list().then((result) => {
       setProviders(result);
-      const enabled = result.filter(({ settings }) => settings.enabled);
-      const current = enabled.find(({ id }) => id === useChatStore.getState().selectedProviderId);
-      const first = current ?? enabled[0];
+      const current = result.find(({ id }) => id === useChatStore.getState().selectedProviderId);
+      const first =
+        current ??
+        result.find(isProviderReady) ??
+        result.find(({ id }) => id === 'ollama') ??
+        result[0];
       if (first) {
+        const previousModel =
+          first.id === useChatStore.getState().selectedProviderId
+            ? useChatStore.getState().selectedModel
+            : '';
         useChatStore
           .getState()
-          .setSelection(
-            first.id,
-            useChatStore.getState().selectedModel || first.settings.defaultModel,
-          );
+          .setSelection(first.id, previousModel || first.settings.defaultModel);
       }
     });
   }, []);
@@ -63,7 +69,7 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
 
   const send = (content: string) => {
     const prompt = content.trim();
-    if (!prompt || activeRequestId || !selected || !selectedModel) return;
+    if (!prompt || activeRequestId || !selected || !selectedReady || !selectedModel) return;
     const context = contextFiles.map(({ path, content: fileContent }) => ({
       path,
       content: fileContent,
@@ -129,46 +135,25 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-1.5 border-b border-[rgb(var(--border))] px-2 py-1.5">
         {simple ? (
-          <div className="flex min-w-0 flex-1 items-center gap-2 px-1 py-1">
-            <ProviderIcon
-              className="size-4 text-[rgb(var(--text-muted))]"
-              providerId={selected?.id}
-            />
-            <div className="min-w-0">
-              <p className="truncate text-[11px] font-medium text-[rgb(var(--text))]">
-                Assistente do projeto
-              </p>
-              <p className="truncate text-[9px] text-[rgb(var(--text-subtle))]">
-                {selected
-                  ? `${selected.settings.alias || selected.name} · ${selectedModel}`
-                  : 'Configure um provider para conversar'}
-              </p>
-            </div>
-          </div>
+          <ProviderPicker
+            compact
+            onConfigure={() => selected && openProviderSettings(selected.id)}
+            onSelect={(provider) =>
+              useChatStore.getState().setSelection(provider.id, provider.settings.defaultModel)
+            }
+            providers={providers}
+            selected={selected}
+          />
         ) : (
           <>
-            <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md bg-[rgb(var(--surface-sunken))] pl-2">
-              <ProviderIcon className="size-3.5" providerId={selected?.id} />
-              <select
-                aria-label="Provider do chat"
-                className="min-w-0 flex-1 bg-transparent py-1 pr-1 text-[10px] outline-none"
-                onChange={(event) => {
-                  const next = enabledProviders.find(({ id }) => id === event.target.value);
-                  if (next)
-                    useChatStore.getState().setSelection(next.id, next.settings.defaultModel);
-                }}
-                value={selected?.id ?? ''}
-              >
-                {enabledProviders.length === 0 ? (
-                  <option value="">Configure um provider</option>
-                ) : null}
-                {enabledProviders.map((provider) => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.settings.alias || provider.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <ProviderPicker
+              onConfigure={() => selected && openProviderSettings(selected.id)}
+              onSelect={(provider) =>
+                useChatStore.getState().setSelection(provider.id, provider.settings.defaultModel)
+              }
+              providers={providers}
+              selected={selected}
+            />
             <input
               aria-label="Modelo do chat"
               className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
@@ -208,6 +193,22 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
           <Trash2 className="size-3.5" />
         </button>
       </div>
+
+      {selected && !selectedReady ? (
+        <div className="flex items-center justify-between gap-3 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] px-3 py-2">
+          <div className="min-w-0">
+            <p className="truncate text-[10px] font-medium">{providerSetupHint(selected)}</p>
+            <p className="truncate text-[9px] text-[rgb(var(--text-subtle))]">
+              {selected.type === 'cli'
+                ? 'A CLI precisa estar instalada, autenticada e ativa.'
+                : 'A configuração é feita sem expor credenciais ao chat.'}
+            </p>
+          </div>
+          <Button onClick={() => openProviderSettings(selected.id)} size="sm" variant="secondary">
+            Configurar
+          </Button>
+        </div>
+      ) : null}
 
       <div className="min-h-0 flex-1 overflow-auto p-4">
         {messages.length === 0 ? (
@@ -278,14 +279,16 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
           <textarea
             aria-label="Mensagem para o chat"
             className="h-16 w-full resize-none bg-transparent px-1 text-xs outline-none placeholder:text-[rgb(var(--text-subtle))]"
-            disabled={!selected}
+            disabled={!selectedReady}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={
-              selected
+              selectedReady
                 ? simple
                   ? 'Ex.: deixe a página inicial mais clara e organizada…'
                   : 'Pergunte sobre seu projeto…'
-                : 'Ative um provider nas configurações'
+                : selected
+                  ? providerSetupHint(selected)
+                  : 'Escolha uma IA'
             }
             value={draft}
           />
@@ -310,7 +313,7 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
               <Button
                 aria-label="Enviar mensagem"
                 className="size-7 p-0"
-                disabled={!draft.trim() || !selected || !selectedModel}
+                disabled={!draft.trim() || !selectedReady || !selectedModel}
                 size="sm"
                 type="submit"
               >

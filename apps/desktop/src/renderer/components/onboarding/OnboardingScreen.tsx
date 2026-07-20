@@ -7,6 +7,7 @@ import {
   type ToolDetectionResult,
 } from '@visualnscode/integrations/browser';
 import { environmentApi } from '../../environment-api';
+import { ensureOllamaFallback } from '../../onboarding-provider';
 import { useAppStore } from '../../store';
 import { AppMark } from '../AppMark';
 import { FirebaseSetup } from './FirebaseSetup';
@@ -55,6 +56,7 @@ export function OnboardingScreen() {
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [permissionsOpen, setPermissionsOpen] = useState(false);
   const [permissions, setPermissions] = useState<readonly PermissionState[]>([]);
+  const [finishing, setFinishing] = useState(false);
   const step = steps[stepIndex] ?? steps[0];
 
   useEffect(() => {
@@ -143,6 +145,21 @@ export function OnboardingScreen() {
     setBusyTool(null);
   };
 
+  const finishOnboarding = async () => {
+    setFinishing(true);
+    setError(null);
+    try {
+      await ensureOllamaFallback();
+      complete();
+    } catch {
+      setError(
+        'Não consegui configurar o provider local padrão. Tente novamente ou configure uma IA nas configurações.',
+      );
+    } finally {
+      setFinishing(false);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-[rgb(var(--background))] text-[rgb(var(--text))]">
       <aside className="hidden w-64 shrink-0 border-r border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] p-4 lg:flex lg:flex-col">
@@ -227,8 +244,9 @@ export function OnboardingScreen() {
             {Math.round(((stepIndex + 1) / steps.length) * 100)}%
           </div>
           {stepIndex === steps.length - 1 ? (
-            <Button onClick={complete}>
-              Entrar no VisualnsCode <ChevronRight className="size-4" />
+            <Button disabled={finishing} onClick={() => void finishOnboarding()}>
+              {finishing ? 'Configurando IA local…' : 'Entrar no VisualnsCode'}{' '}
+              <ChevronRight className="size-4" />
             </Button>
           ) : (
             <Button onClick={() => setStepIndex((index) => Math.min(steps.length - 1, index + 1))}>

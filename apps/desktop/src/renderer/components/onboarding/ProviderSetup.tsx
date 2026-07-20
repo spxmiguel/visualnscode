@@ -2,11 +2,13 @@ import { KeyRound, LockKeyhole, Trash2 } from 'lucide-react';
 import { Button, Surface } from '@visualnscode/ui';
 import { useEffect, useState } from 'react';
 import { environmentApi } from '../../environment-api';
+import { providerApi } from '../../provider-api';
 
 const providers = [
   { id: 'openai', name: 'OpenAI' },
   { id: 'anthropic', name: 'Anthropic' },
   { id: 'gemini', name: 'Google Gemini' },
+  { id: 'openrouter', name: 'OpenRouter' },
 ] as const;
 export function ProviderSetup() {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -25,12 +27,27 @@ export function ProviderSetup() {
   const save = async (id: string) => {
     await environmentApi.setPermission('credentials', true);
     const ok = await environmentApi.storeSecret(id, values[id] ?? '');
+    let connectionMessage = '';
+    if (ok) {
+      const provider = (await providerApi.providers.list()).find((item) => item.id === id);
+      if (provider) {
+        const connection = await providerApi.providers.test(id);
+        await providerApi.providers.update({
+          ...provider.settings,
+          enabled: true,
+          defaultModel: provider.settings.defaultModel || connection.models[0]?.id || '',
+        });
+        connectionMessage = connection.ok
+          ? ` ${connection.models.length} modelo(s) encontrado(s).`
+          : ' Revise a chave nas configurações antes de usar.';
+      }
+    }
     setValues((current) => ({ ...current, [id]: '' }));
     setConfigured((current) => ({ ...current, [id]: ok }));
     setPending(null);
     setMessage(
       ok
-        ? 'Credencial criptografada e salva no cofre do sistema.'
+        ? `Credencial criptografada, salva e provider ativado.${connectionMessage}`
         : 'Não foi possível usar um cofre seguro neste sistema. A credencial não foi salva.',
     );
   };
@@ -55,6 +72,10 @@ export function ProviderSetup() {
           </p>
         </div>
       </Surface>
+      <p className="mb-3 text-xs leading-5 text-[rgb(var(--text-muted))]">
+        Se nenhuma IA estiver pronta ao concluir o assistente, o VisualnsCode configura o Ollama
+        como opção local padrão. Nenhuma instalação é executada sem sua confirmação.
+      </p>
       {message ? (
         <p className="mb-3 rounded-lg bg-[rgb(var(--surface-sunken))] p-3 text-xs">{message}</p>
       ) : null}

@@ -1,6 +1,7 @@
 import { ArrowLeft, Check, Moon, Settings2, SlidersHorizontal, Sun } from 'lucide-react';
 import { Button, IconButton, SegmentedControl } from '@visualnscode/ui';
 import { useAppStore } from '../store';
+import { useResolvedTheme } from '../theme';
 import { AppMark } from './AppMark';
 import { ChatPanel } from './chat/ChatPanel';
 import { PreviewPanel } from './RightWorkspacePanel';
@@ -9,7 +10,8 @@ export function SimpleProjectScreen() {
   const activeProject = useAppStore((state) => state.activeProject);
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
-  const theme = useAppStore((state) => state.theme);
+  const themePreference = useAppStore((state) => state.theme);
+  const theme = useResolvedTheme();
   const toggleTheme = useAppStore((state) => state.toggleTheme);
 
   return (
@@ -28,7 +30,7 @@ export function SimpleProjectScreen() {
           <Settings2 className="size-3.5" /> Configurações
         </Button>
         <IconButton
-          label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+          label={`${themePreference === 'system' ? 'Tema automático. ' : ''}${theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}`}
           onClick={toggleTheme}
         >
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}

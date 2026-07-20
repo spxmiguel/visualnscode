@@ -29,6 +29,7 @@ import {
 } from '@visualnscode/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store';
+import { useResolvedTheme } from '../theme';
 import { useWorkspaceStore } from '../workspace-store';
 import { ActivityRail } from './ActivityRail';
 import { AgentWorkspace } from './agents/AgentWorkspace';
@@ -56,7 +57,8 @@ export function AdvancedWorkspaceScreen() {
   const mode = useAppStore((state) => state.mode);
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
-  const theme = useAppStore((state) => state.theme);
+  const themePreference = useAppStore((state) => state.theme);
+  const theme = useResolvedTheme();
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   const yoloEnabled = useAppStore((state) => state.yoloEnabled);
   const setYoloEnabled = useAppStore((state) => state.setYoloEnabled);
@@ -193,7 +195,7 @@ export function AdvancedWorkspaceScreen() {
           ) : null}
         </div>
         <IconButton
-          label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+          label={`${themePreference === 'system' ? 'Tema automático. ' : ''}${theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}`}
           onClick={toggleTheme}
         >
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}

@@ -2,6 +2,7 @@ import { ArrowLeft, Moon, Settings, Sun } from 'lucide-react';
 import { IconButton } from '@visualnscode/ui';
 import type { ReactNode } from 'react';
 import { useAppStore } from '../store';
+import { useResolvedTheme } from '../theme';
 import { AppMark } from './AppMark';
 
 interface WindowHeaderProps {
@@ -18,7 +19,8 @@ export function WindowHeader({
   showSettings = true,
 }: WindowHeaderProps) {
   const navigate = useAppStore((state) => state.navigate);
-  const theme = useAppStore((state) => state.theme);
+  const themePreference = useAppStore((state) => state.theme);
+  const theme = useResolvedTheme();
   const toggleTheme = useAppStore((state) => state.toggleTheme);
 
   return (
@@ -34,7 +36,7 @@ export function WindowHeader({
       <div className="min-w-0">{center}</div>
       <div className="flex justify-end gap-1">
         <IconButton
-          label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+          label={`${themePreference === 'system' ? 'Tema automático. ' : ''}${theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}`}
           onClick={toggleTheme}
         >
           {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}

@@ -9,9 +9,13 @@ import { ProviderIcon } from '../providers/ProviderIcon';
 const fieldClass =
   'mt-1.5 w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] px-3 py-2 text-xs outline-none focus:border-[rgb(var(--accent))]';
 
-export function ModelSettings() {
+export function ModelSettings({
+  initialProviderId = 'openai',
+}: {
+  readonly initialProviderId?: string | undefined;
+}) {
   const [providers, setProviders] = useState<readonly ProviderSummary[]>([]);
-  const [selectedId, setSelectedId] = useState('openai');
+  const [selectedId, setSelectedId] = useState(initialProviderId);
   const [draft, setDraft] = useState<ProviderSettings | null>(null);
   const [models, setModels] = useState<readonly AIModel[]>([]);
   const [secret, setSecret] = useState('');

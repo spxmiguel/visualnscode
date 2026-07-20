@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
@@ -45,7 +45,7 @@ describe('assistente inicial', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: '12Tudo pronto' }));
     await user.click(screen.getByRole('button', { name: 'Entrar no VisualnsCode' }));
-    expect(useAppStore.getState().onboardingCompleted).toBe(true);
-    expect(screen.queryByRole('heading', { name: 'Comece um projeto.' })).not.toBeNull();
+    await waitFor(() => expect(useAppStore.getState().onboardingCompleted).toBe(true));
+    expect(await screen.findByRole('heading', { name: 'Comece um projeto.' })).not.toBeNull();
   });
 });

@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type AppScreen = 'home' | 'settings' | 'workspace';
 export type ExperienceMode = 'simple' | 'advanced';
-export type ThemePreference = 'dark' | 'light';
+export type ThemePreference = 'system' | 'dark' | 'light';
 
 export interface RecentProject {
   readonly id: string;
@@ -20,6 +20,7 @@ interface AppState {
   readonly onboardingCompleted: boolean;
   readonly recentProjects: readonly RecentProject[];
   readonly screen: AppScreen;
+  readonly settingsProviderId: string | null;
   readonly theme: ThemePreference;
   readonly yoloEnabled: boolean;
   readonly yoloGloballyAllowed: boolean;
@@ -27,6 +28,7 @@ interface AppState {
   readonly clearError: () => void;
   readonly completeOnboarding: () => void;
   readonly navigate: (screen: AppScreen) => void;
+  readonly openProviderSettings: (providerId: string) => void;
   readonly restartOnboarding: () => void;
   readonly openProject: (project: RecentProject) => void;
   readonly setError: (error: string | null) => void;
@@ -70,19 +72,30 @@ export const useAppStore = create<AppState>()(
       onboardingCompleted: false,
       recentProjects: demoProjects,
       screen: 'home',
-      theme: 'dark',
+      settingsProviderId: null,
+      theme: 'system',
       yoloEnabled: false,
       yoloGloballyAllowed: false,
       yoloAcknowledged: false,
       clearError: () => set({ error: null }),
       completeOnboarding: () => set({ onboardingCompleted: true, screen: 'home' }),
-      navigate: (screen) => set({ screen, error: null }),
+      navigate: (screen) => set({ screen, error: null, settingsProviderId: null }),
+      openProviderSettings: (settingsProviderId) =>
+        set({ screen: 'settings', error: null, settingsProviderId }),
       restartOnboarding: () => set({ onboardingCompleted: false }),
       openProject: (project) => set({ activeProject: project, screen: 'workspace', error: null }),
       setError: (error) => set({ error }),
       setMode: (mode) => set({ mode }),
       setTheme: (theme) => set({ theme }),
-      toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      toggleTheme: () =>
+        set((state) => {
+          const systemIsDark =
+            typeof window !== 'undefined' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const isDark = state.theme === 'system' ? systemIsDark : state.theme === 'dark';
+          return { theme: isDark ? 'light' : 'dark' };
+        }),
       setYoloGloballyAllowed: (allowed) =>
         set((state) => ({
           yoloGloballyAllowed: allowed,
@@ -114,7 +127,7 @@ export const useAppStore = create<AppState>()(
         yoloGloballyAllowed,
       }),
       storage: createJSONStorage(() => window.localStorage),
-      version: 3,
+      version: 4,
     },
   ),
 );
