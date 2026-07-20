@@ -14,20 +14,29 @@ import type { AgentDefinition, TeamWorkflow } from '@visualnscode/agents';
 import { AgentService, type AgentRunRequest } from './services/agent-service';
 import { CheckpointService } from './services/checkpoint-service';
 import { EnvironmentService } from './services/environment-service';
+import { FileEditService } from './services/file-edit-service';
 import { FilesystemService } from './services/filesystem-service';
 import { GitService } from './services/git-service';
 import { ProviderService } from './services/provider-service';
 import { RunnerService } from './services/runner-service';
 import { ScaffoldService, PROJECT_TEMPLATES } from './services/scaffold-service';
-import { scanForSecrets, redactContent, classifyCommand } from './services/secret-scanner';
+import {
+  assessCommand,
+  scanForSecrets,
+  redactContent,
+  classifyCommand,
+  prepareRemoteContext,
+  type CommandPolicy,
+} from './services/secret-scanner';
 import { SecureStorage } from './services/secure-storage';
 
 const service = new EnvironmentService();
 const secureStorage = new SecureStorage();
 const providerService = new ProviderService(secureStorage);
-const agentService = new AgentService(providerService);
 const fsService = new FilesystemService();
 const checkpointService = new CheckpointService();
+const fileEditService = new FileEditService(fsService, checkpointService);
+const agentService = new AgentService(providerService, fileEditService);
 const gitService = new GitService();
 const runnerService = new RunnerService();
 const scaffoldService = new ScaffoldService();
@@ -312,24 +321,30 @@ export const registerEnvironmentIpc = (): void => {
     return fsService.listDir(relative).catch(() => []);
   });
   ipcMain.handle('fs:read-file', (_event, relative: string) => {
-    if (typeof relative !== 'string' || relative.length > 2000) throw new Error('Caminho inválido.');
+    if (typeof relative !== 'string' || relative.length > 2000)
+      throw new Error('Caminho inválido.');
     return fsService.readFile(relative);
   });
   ipcMain.handle('fs:write-file', (_event, relative: string, content: string) => {
-    if (typeof relative !== 'string' || relative.length > 2000) throw new Error('Caminho inválido.');
-    if (typeof content !== 'string' || content.length > 5_000_000) throw new Error('Conteúdo inválido.');
+    if (typeof relative !== 'string' || relative.length > 2000)
+      throw new Error('Caminho inválido.');
+    if (typeof content !== 'string' || content.length > 5_000_000)
+      throw new Error('Conteúdo inválido.');
     return fsService.writeFile(relative, content);
   });
   ipcMain.handle('fs:create-dir', (_event, relative: string) => {
-    if (typeof relative !== 'string' || relative.length > 2000) throw new Error('Caminho inválido.');
+    if (typeof relative !== 'string' || relative.length > 2000)
+      throw new Error('Caminho inválido.');
     return fsService.createDir(relative);
   });
-  ipcMain.handle('fs:delete', (_event, relative: string) => {
-    if (typeof relative !== 'string' || relative.length > 2000) throw new Error('Caminho inválido.');
-    return fsService.deleteEntry(relative);
+  ipcMain.handle('fs:delete', (_event, relative: string, confirmed: boolean) => {
+    if (typeof relative !== 'string' || relative.length > 2000)
+      throw new Error('Caminho inválido.');
+    return fsService.deleteEntry(relative, confirmed === true);
   });
   ipcMain.handle('fs:rename', (_event, oldPath: string, newPath: string) => {
-    if (typeof oldPath !== 'string' || typeof newPath !== 'string') throw new Error('Caminho inválido.');
+    if (typeof oldPath !== 'string' || typeof newPath !== 'string')
+      throw new Error('Caminho inválido.');
     return fsService.rename(oldPath, newPath);
   });
   ipcMain.handle('fs:scan-secrets', (_event, filename: string, content: string) => {
@@ -343,6 +358,85 @@ export const registerEnvironmentIpc = (): void => {
   ipcMain.handle('fs:classify-command', (_event, command: string) => {
     if (typeof command !== 'string' || command.length > 4000) return 'blocked';
     return classifyCommand(command);
+  });
+  ipcMain.handle('fs:prepare-remote-context', (_event, files: unknown) => {
+    if (!Array.isArray(files) || files.length > 20) throw new Error('Contexto inválido.');
+    const safeFiles = files.filter(
+      (file): file is { path: string; content: string } =>
+        Boolean(file) &&
+        typeof file.path === 'string' &&
+        file.path.length <= 2000 &&
+        typeof file.content === 'string' &&
+        file.content.length <= 200_000,
+    );
+    if (safeFiles.length !== files.length) throw new Error('Contexto inválido.');
+    return prepareRemoteContext(safeFiles);
+  });
+  ipcMain.handle('security:assess-command', (_event, command: string, policy: CommandPolicy) => {
+    if (
+      typeof command !== 'string' ||
+      !policy ||
+      typeof policy.globallyAllowed !== 'boolean' ||
+      typeof policy.yoloEnabled !== 'boolean' ||
+      typeof policy.explicitAcknowledgement !== 'boolean'
+    ) {
+      return assessCommand('', {
+        globallyAllowed: false,
+        yoloEnabled: false,
+        explicitAcknowledgement: false,
+      });
+    }
+    return assessCommand(command, policy);
+  });
+
+  // ── AI edit review ───────────────────────────────────────────────────────
+  ipcMain.handle('edits:list', () => fileEditService.list());
+  ipcMain.handle('edits:propose', (_event, title: string, files: unknown) => {
+    if (typeof title !== 'string' || !Array.isArray(files)) throw new Error('Proposta inválida.');
+    const valid = files.every(
+      (file) =>
+        Boolean(file) &&
+        typeof file === 'object' &&
+        typeof (file as { path?: unknown }).path === 'string' &&
+        (file as { path: string }).path.length <= 2000 &&
+        ((file as { proposedContent?: unknown }).proposedContent === null ||
+          (typeof (file as { proposedContent?: unknown }).proposedContent === 'string' &&
+            (file as { proposedContent: string }).proposedContent.length <= 5_000_000)),
+    );
+    if (!valid) throw new Error('Proposta inválida.');
+    return fileEditService.propose(title, files as never);
+  });
+  ipcMain.handle('edits:apply', (_event, id: string, selections: unknown) => {
+    if (typeof id !== 'string' || !Array.isArray(selections)) throw new Error('Revisão inválida.');
+    const valid =
+      selections.length <= 25 &&
+      selections.every(
+        (selection) =>
+          Boolean(selection) &&
+          typeof selection === 'object' &&
+          typeof (selection as { path?: unknown }).path === 'string' &&
+          typeof (selection as { accepted?: unknown }).accepted === 'boolean' &&
+          ((selection as { blockIds?: unknown }).blockIds === undefined ||
+            (Array.isArray((selection as { blockIds?: unknown }).blockIds) &&
+              (selection as { blockIds: unknown[] }).blockIds.length <= 500 &&
+              (selection as { blockIds: unknown[] }).blockIds.every(
+                (blockId) => typeof blockId === 'string',
+              ))) &&
+          ((selection as { editedContent?: unknown }).editedContent === undefined ||
+            (typeof (selection as { editedContent?: unknown }).editedContent === 'string' &&
+              (selection as { editedContent: string }).editedContent.length <= 5_000_000)),
+      );
+    if (!valid) throw new Error('Revisão inválida.');
+    return fileEditService.apply(id, selections as never);
+  });
+  ipcMain.handle('edits:reject', (_event, id: string) => {
+    if (typeof id !== 'string') throw new Error('Proposta inválida.');
+    return fileEditService.reject(id);
+  });
+  ipcMain.handle('edits:history', () => fileEditService.history());
+  ipcMain.handle('edits:rollback', (_event, id: string) => {
+    if (typeof id !== 'string') throw new Error('Checkpoint inválido.');
+    return fileEditService.rollback(id);
   });
 
   // ── Checkpoints ───────────────────────────────────────────────────────────
@@ -359,16 +453,13 @@ export const registerEnvironmentIpc = (): void => {
     return checkpointService.list(workspace);
   });
   ipcMain.handle('checkpoint:restore', async (_event, id: string) => {
-    if (typeof id !== 'string' || !/^cp-/.test(id)) throw new Error('ID inválido.');
-    const entry = await checkpointService.restore(id);
-    for (const file of entry.files) {
-      await fsService.writeFile(file.relativePath, file.content).catch(() => undefined);
-    }
-    return entry;
+    if (typeof id !== 'string') throw new Error('ID inválido.');
+    return fileEditService.rollback(id);
   });
   ipcMain.handle('checkpoint:remove', (_event, id: string) => {
-    if (typeof id !== 'string' || !/^cp-/.test(id)) throw new Error('ID inválido.');
-    return checkpointService.remove(id);
+    const workspace = fsService.getWorkspace();
+    if (typeof id !== 'string' || !workspace) throw new Error('ID inválido.');
+    return checkpointService.remove(id, workspace);
   });
 
   // ── Git ───────────────────────────────────────────────────────────────────
@@ -398,7 +489,8 @@ export const registerEnvironmentIpc = (): void => {
   });
   ipcMain.handle('git:commit', (_event, message: string) => {
     const w = fsService.getWorkspace();
-    if (!w || typeof message !== 'string' || message.length > 1000) throw new Error('Mensagem inválida.');
+    if (!w || typeof message !== 'string' || message.length > 1000)
+      throw new Error('Mensagem inválida.');
     return gitService.commit(w, message);
   });
   ipcMain.handle('git:log', (_event, limit: number) => {
@@ -414,7 +506,8 @@ export const registerEnvironmentIpc = (): void => {
   });
   ipcMain.handle('git:checkout', (_event, branch: string) => {
     const w = fsService.getWorkspace();
-    if (!w || typeof branch !== 'string' || branch.length > 200) throw new Error('Branch inválida.');
+    if (!w || typeof branch !== 'string' || branch.length > 200)
+      throw new Error('Branch inválida.');
     return gitService.checkout(w, branch);
   });
   ipcMain.handle('git:create-branch', (_event, name: string) => {
@@ -442,38 +535,60 @@ export const registerEnvironmentIpc = (): void => {
   ipcMain.on('runner:start', (event, processId: string, command: string) => {
     const w = fsService.getWorkspace();
     if (!w || typeof processId !== 'string' || typeof command !== 'string') return;
-    runnerService.start(processId, w, command, (ev) => event.sender.send('runner:event', ev));
+    void runnerService.detectProject(w).then((detected) => {
+      const allowlisted = [detected.devCommand, detected.buildCommand, detected.testCommand]
+        .filter(Boolean)
+        .includes(command);
+      if (!allowlisted || classifyCommand(command) === 'blocked') {
+        event.sender.send('runner:event', {
+          type: 'error',
+          processId,
+          payload: 'Comando recusado: use um script detectado no workspace.',
+        });
+        return;
+      }
+      runnerService.start(processId, w, command, (ev) => event.sender.send('runner:event', ev));
+    });
   });
   ipcMain.handle('runner:stop', (_event, processId: string) => {
     runnerService.stop(processId);
     return true;
   });
-  ipcMain.handle('runner:is-running', (_event, processId: string) => runnerService.isRunning(processId));
+  ipcMain.handle('runner:is-running', (_event, processId: string) =>
+    runnerService.isRunning(processId),
+  );
 
   // ── Scaffold ──────────────────────────────────────────────────────────────
   ipcMain.handle('scaffold:templates', () => PROJECT_TEMPLATES);
   ipcMain.handle('scaffold:choose-dir', async () => {
-    const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] });
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory', 'createDirectory'],
+    });
     return result.canceled ? null : (result.filePaths[0] ?? null);
   });
-  ipcMain.on('scaffold:create', (event, templateId: string, projectPath: string, projectName: string) => {
-    if (
-      typeof templateId !== 'string' ||
-      typeof projectPath !== 'string' ||
-      typeof projectName !== 'string' ||
-      projectName.length > 100 ||
-      projectPath.length > 2000
-    ) {
-      event.sender.send('scaffold:log', 'Parâmetros inválidos.');
-      return;
-    }
-    void scaffoldService.scaffold(templateId, projectPath, projectName, (msg) => {
-      event.sender.send('scaffold:log', msg);
-    }).then((result) => {
-      event.sender.send('scaffold:done', result);
-      if (result.success) {
-        fsService.setWorkspace(result.path);
+  ipcMain.on(
+    'scaffold:create',
+    (event, templateId: string, projectPath: string, projectName: string) => {
+      if (
+        typeof templateId !== 'string' ||
+        typeof projectPath !== 'string' ||
+        typeof projectName !== 'string' ||
+        projectName.length > 100 ||
+        projectPath.length > 2000
+      ) {
+        event.sender.send('scaffold:log', 'Parâmetros inválidos.');
+        return;
       }
-    });
-  });
+      void scaffoldService
+        .scaffold(templateId, projectPath, projectName, (msg) => {
+          event.sender.send('scaffold:log', msg);
+        })
+        .then((result) => {
+          event.sender.send('scaffold:done', result);
+          if (result.success) {
+            fsService.setWorkspace(result.path);
+          }
+        });
+    },
+  );
 };

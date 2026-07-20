@@ -41,6 +41,11 @@ export const parseAgentOutput = (value: string): ParsedAgentOutput => {
         description: candidate.description.slice(0, 500),
         risk: candidate.risk as AgentAction['risk'],
         ...(typeof candidate.path === 'string' ? { path: candidate.path.slice(0, 1000) } : {}),
+        ...(candidate.content === null
+          ? { content: null }
+          : typeof candidate.content === 'string'
+            ? { content: candidate.content.slice(0, 5_000_000) }
+            : {}),
         ...(typeof candidate.command === 'string'
           ? { command: candidate.command.slice(0, 2000) }
           : {}),

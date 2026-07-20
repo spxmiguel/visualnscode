@@ -16,7 +16,6 @@ interface PackageJson {
   devDependencies?: Record<string, string>;
 }
 
-const PORT_RE = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d+)/;
 const URL_RE = /https?:\/\/[^\s"]+/;
 
 export class RunnerService {
@@ -29,11 +28,23 @@ export class RunnerService {
     testCommand: string;
     port: number | null;
   }> {
-    const hasPkg = await fs.access(path.join(workspacePath, 'package.json')).then(() => true).catch(() => false);
-    const hasPyproject = await fs.access(path.join(workspacePath, 'pyproject.toml')).then(() => true).catch(() => false);
+    const hasPkg = await fs
+      .access(path.join(workspacePath, 'package.json'))
+      .then(() => true)
+      .catch(() => false);
+    const hasPyproject = await fs
+      .access(path.join(workspacePath, 'pyproject.toml'))
+      .then(() => true)
+      .catch(() => false);
 
     if (hasPyproject) {
-      return { manager: 'python', devCommand: 'python -m uvicorn main:app --reload', buildCommand: '', testCommand: 'pytest', port: 8000 };
+      return {
+        manager: 'python',
+        devCommand: 'python -m uvicorn main:app --reload',
+        buildCommand: '',
+        testCommand: 'pytest',
+        port: 8000,
+      };
     }
 
     if (!hasPkg) {
@@ -44,16 +55,29 @@ export class RunnerService {
     const pkg = JSON.parse(raw) as PackageJson;
     const scripts = pkg.scripts ?? {};
 
-    const hasPnpmLock = await fs.access(path.join(workspacePath, 'pnpm-lock.yaml')).then(() => true).catch(() => false);
-    const hasYarnLock = await fs.access(path.join(workspacePath, 'yarn.lock')).then(() => true).catch(() => false);
-    const hasBunLock = await fs.access(path.join(workspacePath, 'bun.lock')).then(() => true).catch(() => false);
+    const hasPnpmLock = await fs
+      .access(path.join(workspacePath, 'pnpm-lock.yaml'))
+      .then(() => true)
+      .catch(() => false);
+    const hasYarnLock = await fs
+      .access(path.join(workspacePath, 'yarn.lock'))
+      .then(() => true)
+      .catch(() => false);
+    const hasBunLock = await fs
+      .access(path.join(workspacePath, 'bun.lock'))
+      .then(() => true)
+      .catch(() => false);
 
     const manager = hasPnpmLock ? 'pnpm' : hasYarnLock ? 'yarn' : hasBunLock ? 'bun' : 'npm';
     const runPrefix = manager === 'npm' ? 'npm run' : `${manager} run`;
 
     return {
       manager,
-      devCommand: scripts['dev'] ? `${runPrefix} dev` : scripts['start'] ? `${runPrefix} start` : '',
+      devCommand: scripts['dev']
+        ? `${runPrefix} dev`
+        : scripts['start']
+          ? `${runPrefix} start`
+          : '',
       buildCommand: scripts['build'] ? `${runPrefix} build` : '',
       testCommand: scripts['test'] ? `${runPrefix} test` : '',
       port: null,
@@ -68,13 +92,13 @@ export class RunnerService {
   ): void {
     this.stop(processId);
 
-    const [cmd, ...args] = command.split(' ');
+    const [cmd, ...args] = command.trim().split(/\s+/u);
     if (!cmd) return;
 
     const child = spawn(cmd, args, {
       cwd: workspacePath,
       env: { ...process.env, FORCE_COLOR: '1' },
-      shell: true,
+      shell: false,
     });
 
     this.processes.set(processId, child);

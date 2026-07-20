@@ -79,6 +79,7 @@ export interface AgentAction {
   readonly type: 'read' | 'edit' | 'command' | 'tool';
   readonly description: string;
   readonly path?: string;
+  readonly content?: string | null;
   readonly command?: string;
   readonly tool?: AgentTool;
   readonly risk: 'safe' | 'important' | 'destructive';

@@ -56,16 +56,34 @@ contextBridge.exposeInMainWorld('visualnscode', {
     getWorkspace: () => ipcRenderer.invoke('fs:get-workspace'),
     listDir: (relative: string) => ipcRenderer.invoke('fs:list-dir', relative),
     readFile: (relative: string) => ipcRenderer.invoke('fs:read-file', relative),
-    writeFile: (relative: string, content: string) => ipcRenderer.invoke('fs:write-file', relative, content),
+    writeFile: (relative: string, content: string) =>
+      ipcRenderer.invoke('fs:write-file', relative, content),
     createDir: (relative: string) => ipcRenderer.invoke('fs:create-dir', relative),
-    delete: (relative: string) => ipcRenderer.invoke('fs:delete', relative),
+    delete: (relative: string, confirmed: boolean) =>
+      ipcRenderer.invoke('fs:delete', relative, confirmed),
     rename: (oldPath: string, newPath: string) => ipcRenderer.invoke('fs:rename', oldPath, newPath),
-    scanSecrets: (filename: string, content: string) => ipcRenderer.invoke('fs:scan-secrets', filename, content),
+    scanSecrets: (filename: string, content: string) =>
+      ipcRenderer.invoke('fs:scan-secrets', filename, content),
     redact: (content: string) => ipcRenderer.invoke('fs:redact', content),
     classifyCommand: (command: string) => ipcRenderer.invoke('fs:classify-command', command),
+    prepareRemoteContext: (files: unknown) =>
+      ipcRenderer.invoke('fs:prepare-remote-context', files),
+  },
+  security: {
+    assessCommand: (command: string, policy: unknown) =>
+      ipcRenderer.invoke('security:assess-command', command, policy),
+  },
+  edits: {
+    list: () => ipcRenderer.invoke('edits:list'),
+    propose: (title: string, files: unknown) => ipcRenderer.invoke('edits:propose', title, files),
+    apply: (id: string, selections: unknown) => ipcRenderer.invoke('edits:apply', id, selections),
+    reject: (id: string) => ipcRenderer.invoke('edits:reject', id),
+    history: () => ipcRenderer.invoke('edits:history'),
+    rollback: (id: string) => ipcRenderer.invoke('edits:rollback', id),
   },
   checkpoint: {
-    create: (label: string, files: unknown) => ipcRenderer.invoke('checkpoint:create', label, files),
+    create: (label: string, files: unknown) =>
+      ipcRenderer.invoke('checkpoint:create', label, files),
     list: () => ipcRenderer.invoke('checkpoint:list'),
     restore: (id: string) => ipcRenderer.invoke('checkpoint:restore', id),
     remove: (id: string) => ipcRenderer.invoke('checkpoint:remove', id),
@@ -86,7 +104,8 @@ contextBridge.exposeInMainWorld('visualnscode', {
   },
   runner: {
     detect: () => ipcRenderer.invoke('runner:detect'),
-    start: (processId: string, command: string) => ipcRenderer.send('runner:start', processId, command),
+    start: (processId: string, command: string) =>
+      ipcRenderer.send('runner:start', processId, command),
     stop: (processId: string) => ipcRenderer.invoke('runner:stop', processId),
     isRunning: (processId: string) => ipcRenderer.invoke('runner:is-running', processId),
     onEvent: (listener: (event: unknown) => void) => {

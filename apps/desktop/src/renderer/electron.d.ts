@@ -19,6 +19,12 @@ import type {
   WorkflowEvent,
   WorkflowRunResult,
 } from '@visualnscode/agents/browser';
+import type {
+  ApplyProposalResult,
+  EditProposal,
+  FileReviewSelection,
+  ProposedFileInput,
+} from '../shared/edit-model';
 
 export interface FileEntry {
   readonly name: string;
@@ -35,6 +41,19 @@ export interface SecretMatch {
 }
 
 export type CommandClassification = 'safe' | 'confirm' | 'dangerous' | 'blocked';
+
+export interface CommandPolicy {
+  readonly globallyAllowed: boolean;
+  readonly yoloEnabled: boolean;
+  readonly explicitAcknowledgement: boolean;
+}
+
+export interface CommandAssessment {
+  readonly classification: CommandClassification;
+  readonly allowed: boolean;
+  readonly requiresConfirmation: boolean;
+  readonly reason: string;
+}
 
 export interface GitFileStatus {
   readonly path: string;
@@ -61,6 +80,7 @@ export interface CheckpointSummary {
   readonly workspacePath: string;
   readonly createdAt: string;
   readonly label: string;
+  readonly fileCount: number;
 }
 
 export interface RunnerEvent {
@@ -131,11 +151,30 @@ declare global {
         readFile(relative: string): Promise<string>;
         writeFile(relative: string, content: string): Promise<void>;
         createDir(relative: string): Promise<void>;
-        delete(relative: string): Promise<void>;
+        delete(relative: string, confirmed: boolean): Promise<void>;
         rename(oldPath: string, newPath: string): Promise<void>;
         scanSecrets(filename: string, content: string): Promise<readonly SecretMatch[]>;
         redact(content: string): Promise<string>;
         classifyCommand(command: string): Promise<CommandClassification>;
+        prepareRemoteContext(files: readonly { path: string; content: string }[]): Promise<
+          readonly {
+            path: string;
+            content: string;
+            findings: readonly SecretMatch[];
+            omitted: boolean;
+          }[]
+        >;
+      };
+      readonly security: {
+        assessCommand(command: string, policy: CommandPolicy): Promise<CommandAssessment>;
+      };
+      readonly edits: {
+        list(): Promise<readonly EditProposal[]>;
+        propose(title: string, files: readonly ProposedFileInput[]): Promise<EditProposal>;
+        apply(id: string, selections: readonly FileReviewSelection[]): Promise<ApplyProposalResult>;
+        reject(id: string): Promise<EditProposal>;
+        history(): Promise<readonly CheckpointSummary[]>;
+        rollback(id: string): Promise<{ restored: readonly string[]; redoCheckpointId: string }>;
       };
       readonly checkpoint: {
         create(label: string, files: unknown): Promise<string>;
@@ -158,7 +197,13 @@ declare global {
         stashPop(): Promise<void>;
       };
       readonly runner: {
-        detect(): Promise<{ manager: string; devCommand: string; buildCommand: string; testCommand: string; port: number | null } | null>;
+        detect(): Promise<{
+          manager: string;
+          devCommand: string;
+          buildCommand: string;
+          testCommand: string;
+          port: number | null;
+        } | null>;
         start(processId: string, command: string): void;
         stop(processId: string): Promise<boolean>;
         isRunning(processId: string): Promise<boolean>;

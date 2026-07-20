@@ -15,6 +15,7 @@ import {
   type ProviderConnectionResult,
 } from '@visualnscode/providers';
 import { SecureStorage } from './secure-storage';
+import { prepareRemoteContext, redactContent } from './secret-scanner';
 
 const validateSettings = (settings: ProviderSettings): ProviderSettings => {
   const descriptor = getProviderDescriptor(settings.providerId);
@@ -127,12 +128,27 @@ export class ProviderService {
     if (!input.model.trim()) throw new Error('Selecione um modelo antes de enviar.');
 
     const provider = await this.create(providerId);
+    const descriptor = getProviderDescriptor(providerId);
+    const safeInput =
+      descriptor?.execution === 'remote'
+        ? {
+            ...input,
+            messages: input.messages.map((message) => ({
+              ...message,
+              content: redactContent(message.content),
+            })),
+            contextFiles: prepareRemoteContext(input.contextFiles ?? []).map((file) => ({
+              path: file.path,
+              content: file.content,
+            })),
+          }
+        : input;
     this.activeCounts.set(providerId, active + 1);
     this.activeProviders.set(input.requestId, provider);
     this.logger.info('Streaming iniciado.', { providerId, requestId: input.requestId });
     try {
       for await (const chunk of provider.streamMessage({
-        ...input,
+        ...safeInput,
         maxTokens: Math.min(input.maxTokens ?? settings.tokenLimit, settings.tokenLimit),
         timeoutMs: Math.min(input.timeoutMs ?? settings.timeoutMs, settings.timeoutMs),
       })) {

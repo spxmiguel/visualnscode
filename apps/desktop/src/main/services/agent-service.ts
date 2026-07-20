@@ -16,6 +16,7 @@ import {
   type WorkflowRunResult,
 } from '@visualnscode/agents';
 import type { AgentChunk, TokenUsage } from '@visualnscode/providers';
+import type { FileEditService } from './file-edit-service';
 import type { ProviderService } from './provider-service';
 
 export interface AgentRunRequest {
@@ -31,6 +32,12 @@ interface PendingApproval {
   readonly resolve: (approved: boolean) => void;
 }
 
+const withoutActionContent = (action: AgentAction): AgentAction => {
+  const { content, ...safeAction } = action;
+  void content;
+  return safeAction;
+};
+
 class ProviderAgentExecutor implements AgentExecutor {
   constructor(
     private readonly providers: ProviderService,
@@ -41,6 +48,7 @@ class ProviderAgentExecutor implements AgentExecutor {
     ) => Promise<boolean>,
     private readonly getMemory: (agent: AgentDefinition) => readonly string[],
     private readonly remember: (agent: AgentDefinition, output: string) => void,
+    private readonly proposeEdit: (agent: AgentDefinition, action: AgentAction) => Promise<void>,
   ) {}
 
   async execute(input: AgentExecutorInput): Promise<AgentExecutionResult> {
@@ -65,7 +73,7 @@ class ProviderAgentExecutor implements AgentExecutor {
           {
             id: `${requestId}-system`,
             role: 'system',
-            content: `${input.agent.systemPrompt}\n\nVocê opera sob estas restrições: autonomia=${input.agent.autonomy}; ferramentas=${input.agent.allowedTools.join(',')}; pastas=${input.agent.allowedFolders.join(',')}; terminal=${input.agent.terminalPermission}; edição=${input.agent.editPermission}.\nNão execute ações diretamente. Ao final, liste ações desejadas em JSON dentro de <visualnscode-actions>...</visualnscode-actions>. Cada item deve ter type, description, risk e, quando aplicável, path, command ou tool.`,
+            content: `${input.agent.systemPrompt}\n\nVocê opera sob estas restrições: autonomia=${input.agent.autonomy}; ferramentas=${input.agent.allowedTools.join(',')}; pastas=${input.agent.allowedFolders.join(',')}; terminal=${input.agent.terminalPermission}; edição=${input.agent.editPermission}.\nNão execute ações diretamente. Ao final, liste ações desejadas em JSON dentro de <visualnscode-actions>...</visualnscode-actions>. Cada item deve ter type, description, risk e, quando aplicável, path, command ou tool. Ações edit devem incluir content com o conteúdo completo proposto, ou null para solicitar exclusão. Toda edição ainda passará pela revisão visual do usuário.`,
           },
           { id: `${requestId}-user`, role: 'user', content: userContent },
         ],
@@ -91,7 +99,7 @@ class ProviderAgentExecutor implements AgentExecutor {
       const decision = decideAgentAction(input.agent, action);
       if (!decision.allowed) {
         actions.push({
-          ...action,
+          ...withoutActionContent(action),
           status: 'denied',
           requiresApproval: false,
           decisionReason: decision.reason,
@@ -101,8 +109,11 @@ class ProviderAgentExecutor implements AgentExecutor {
       }
       if (decision.requiresApproval) {
         const approved = await this.approval(input, action, decision);
+        if (approved && action.type === 'edit') {
+          await this.proposeEdit(input.agent, action);
+        }
         actions.push({
-          ...action,
+          ...withoutActionContent(action),
           status: approved ? 'approved' : 'denied',
           requiresApproval: true,
           decisionReason: decision.reason,
@@ -110,8 +121,11 @@ class ProviderAgentExecutor implements AgentExecutor {
         if (!approved) errors.push(`${action.description}: não aprovada.`);
         continue;
       }
+      if (action.type === 'edit') {
+        await this.proposeEdit(input.agent, action);
+      }
       actions.push({
-        ...action,
+        ...withoutActionContent(action),
         status: 'executed',
         requiresApproval: false,
         decisionReason: decision.reason,
@@ -153,7 +167,10 @@ export class AgentService {
   private readonly memories = new Map<string, string[]>();
   private memoriesLoaded = false;
 
-  constructor(private readonly providers: ProviderService) {}
+  constructor(
+    private readonly providers: ProviderService,
+    private readonly fileEdits?: FileEditService,
+  ) {}
 
   async start(
     request: AgentRunRequest,
@@ -165,6 +182,7 @@ export class AgentService {
       (input, action, decision) => this.requestApproval(input, action, decision, onEvent),
       (agent) => this.memories.get(this.memoryKey(request.runId, agent)) ?? [],
       (agent, output) => this.remember(request.runId, agent, output),
+      (agent, action) => this.proposeEdit(agent, action),
     );
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);
@@ -246,6 +264,16 @@ export class AgentService {
     const key = this.memoryKey(runId, agent);
     const current = this.memories.get(key) ?? [];
     this.memories.set(key, [...current, output].slice(-agent.memory.maxEntries));
+  }
+
+  private async proposeEdit(agent: AgentDefinition, action: AgentAction): Promise<void> {
+    if (!this.fileEdits) throw new Error('O workspace seguro de edição não está disponível.');
+    if (!action.path || action.content === undefined) {
+      throw new Error('A ação de edição precisa informar caminho e conteúdo completo.');
+    }
+    await this.fileEdits.propose(`${agent.name}: ${action.description}`, [
+      { path: action.path, proposedContent: action.content },
+    ]);
   }
 
   private memoryKey(runId: string, agent: AgentDefinition): string {
