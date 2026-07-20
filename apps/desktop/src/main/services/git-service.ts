@@ -1,5 +1,4 @@
 import { execFile } from 'node:child_process';
-import path from 'node:path';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(execFile);
@@ -79,18 +78,32 @@ export class GitService {
 
   async log(workspacePath: string, limit = 30): Promise<GitLogEntry[]> {
     const format = '%H\x1f%h\x1f%s\x1f%an\x1f%ar';
-    const out = await run(workspacePath, ['log', `--max-count=${limit}`, `--pretty=format:${format}`]).catch(() => '');
+    const out = await run(workspacePath, [
+      'log',
+      `--max-count=${limit}`,
+      `--pretty=format:${format}`,
+    ]).catch(() => '');
     return out
       .split('\n')
       .filter(Boolean)
       .map((line) => {
         const [hash, shortHash, subject, author, date] = line.split('\x1f');
-        return { hash: hash ?? '', shortHash: shortHash ?? '', subject: subject ?? '', author: author ?? '', date: date ?? '' };
+        return {
+          hash: hash ?? '',
+          shortHash: shortHash ?? '',
+          subject: subject ?? '',
+          author: author ?? '',
+          date: date ?? '',
+        };
       });
   }
 
   async branches(workspacePath: string): Promise<GitBranch[]> {
-    const out = await run(workspacePath, ['branch', '-a', '--format=%(refname:short) %(HEAD)']).catch(() => '');
+    const out = await run(workspacePath, [
+      'branch',
+      '-a',
+      '--format=%(refname:short) %(HEAD)',
+    ]).catch(() => '');
     return out
       .split('\n')
       .filter(Boolean)
@@ -98,7 +111,11 @@ export class GitService {
         const parts = line.trim().split(' ');
         const current = parts[parts.length - 1] === '*';
         const name = current ? parts.slice(0, -1).join(' ') : parts.join(' ');
-        return { name: name.replace(/^origin\//, ''), current, remote: name.startsWith('remotes/') };
+        return {
+          name: name.replace(/^origin\//, ''),
+          current,
+          remote: name.startsWith('remotes/'),
+        };
       });
   }
 

@@ -6,7 +6,11 @@ import { useWorkspaceStore } from '../workspace-store';
 import { ChatPanel } from './chat/ChatPanel';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
-const DEVICE_WIDTHS: Record<DeviceMode, string> = { desktop: '100%', tablet: '768px', mobile: '375px' };
+const DEVICE_WIDTHS: Record<DeviceMode, string> = {
+  desktop: '100%',
+  tablet: '768px',
+  mobile: '375px',
+};
 
 const PROCESS_ID = 'workspace-dev-server';
 
@@ -57,9 +61,8 @@ export function RightWorkspacePanel() {
   };
 
   const reload = () => {
-    if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
-    }
+    const current = iframeRef.current?.getAttribute('src');
+    if (current) iframeRef.current?.setAttribute('src', current);
   };
 
   const openExternal = () => {
@@ -130,8 +133,20 @@ export function RightWorkspacePanel() {
             {previewUrl ? (
               <>
                 <div className="mx-1 h-4 w-px bg-[rgb(var(--border))]" />
-                <button className="rounded p-1 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]" onClick={reload} title="Recarregar" type="button">↺</button>
-                <button className="rounded p-1 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]" onClick={openExternal} title="Abrir no navegador" type="button">
+                <button
+                  className="rounded p-1 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]"
+                  onClick={reload}
+                  title="Recarregar"
+                  type="button"
+                >
+                  ↺
+                </button>
+                <button
+                  className="rounded p-1 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]"
+                  onClick={openExternal}
+                  title="Abrir no navegador"
+                  type="button"
+                >
                   <ExternalLink className="size-3.5" />
                 </button>
               </>
@@ -153,13 +168,19 @@ export function RightWorkspacePanel() {
             ) : (
               <div className="flex h-full flex-col">
                 <EmptyState
-                  description={running ? 'Aguardando servidor iniciar…' : 'Clique em Run para iniciar o servidor de desenvolvimento.'}
+                  description={
+                    running
+                      ? 'Aguardando servidor iniciar…'
+                      : 'Clique em Run para iniciar o servidor de desenvolvimento.'
+                  }
                   icon={<Eye className="size-5" />}
                   title="Preview"
                 />
                 {logs.length > 0 ? (
                   <div className="border-t border-[rgb(var(--border))] p-3 font-mono text-xs text-[rgb(var(--text-muted))]">
-                    {logs.slice(-5).map((line, i) => <p key={i}>{line}</p>)}
+                    {logs.slice(-5).map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
                   </div>
                 ) : null}
               </div>
