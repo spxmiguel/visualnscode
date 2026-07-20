@@ -38,6 +38,8 @@ All notable changes are documented here. The format follows
   remaining audit finding is a low-severity development-server advisory.
 - The runtime runner accepts only detected actions and starts processes without a shell.
 - Provider context is redacted in the main process before remote transmission.
+- Desktop development and packaging use a dedicated tsup runtime configuration that bundles internal
+  workspace packages instead of asking Electron to load their TypeScript sources.
 
 ### Security
 

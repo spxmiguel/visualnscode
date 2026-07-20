@@ -18,7 +18,7 @@ const stop = () => {
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
 
-run(pnpm, ['exec', 'tsup', '--watch']);
+run(pnpm, ['exec', 'tsup', '--config', 'tsup.runtime.config.ts', '--watch']);
 run(pnpm, ['exec', 'vite', '--host', '127.0.0.1']);
 
 const waitForWorkspace = async () => {

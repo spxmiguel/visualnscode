@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist-electron/main/index.cjs",
   "scripts": {
-    "build": "vite build && tsup",
+    "build": "vite build && tsup --config tsup.runtime.config.ts",
     "dev": "node scripts/dev.mjs",
     "pack": "pnpm build && electron-builder --dir",
     "release": "pnpm build && electron-builder",
