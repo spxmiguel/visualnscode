@@ -70,7 +70,6 @@ versão alpha.
 ```bash
 git clone https://github.com/spxmiguel/visualnscode.git
 cd visualnscode
-corepack enable
 pnpm install --frozen-lockfile
 pnpm dev
 ```

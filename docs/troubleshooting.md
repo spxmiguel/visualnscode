@@ -3,7 +3,7 @@
 ## App doesn't start
 
 - Ensure Node.js ≥ 20.18 and pnpm ≥ 9 are installed.
-- Run `corepack enable` and `pnpm install --frozen-lockfile` from the repository root.
+- Run `pnpm install --frozen-lockfile` from the repository root.
 - Run `pnpm dev` and check the terminal for errors.
 
 ## `spxcode` command not found after install

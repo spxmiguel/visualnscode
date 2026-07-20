@@ -11,12 +11,12 @@ VisualnsCode installers.
 ```bash
 git clone https://github.com/spxmiguel/visualnscode.git
 cd visualnscode
-corepack enable
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Node.js 20.18 or newer, pnpm 9, and Git are required. `pnpm install` also activates the versioned
+Node.js 20.18 or newer, pnpm 9, and Git are required. Install pnpm using its official installation
+method if the command is not already available. `pnpm install` also activates the versioned
 Husky hooks for this clone.
 
 ## Build without an installer

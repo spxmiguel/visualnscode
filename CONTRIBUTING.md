@@ -7,7 +7,7 @@ and architectural boundaries of the project.
 
 1. Install Node.js 20.18 or newer, pnpm 9, and Git.
 2. Fork and clone the repository.
-3. Run `corepack enable` and `pnpm install --frozen-lockfile`.
+3. Run `pnpm install --frozen-lockfile`.
 4. Create a short-lived branch from `main`.
 5. Read [Architecture](./docs/architecture.md) and the [ADRs](./docs/decisions/README.md) before changing a system boundary.
 
