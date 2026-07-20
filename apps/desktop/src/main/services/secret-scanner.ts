@@ -201,7 +201,7 @@ const CONFIRM_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
     'Instalação de dependências requer confirmação.',
   ],
   [
-    /\bgit\s+(?:push|reset|clean|stash\s+drop|branch\s+-[dD])\b/i,
+    /\bgit\s+(?:push|pull|reset|clean|checkout|switch|merge|rebase|commit|tag|restore|stash\s+(?:drop|pop)|branch\s+-[dD])\b/i,
     'A operação Git pode alterar ou publicar estado.',
   ],
   [/\b(?:rm|del|rmdir|Remove-Item)\b/i, 'Exclusão requer confirmação.'],

@@ -1,5 +1,6 @@
 import { app } from 'electron';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import {
   WorkflowEngine,
@@ -24,6 +25,8 @@ import type { FilesystemService } from './filesystem-service';
 import type { GitService } from './git-service';
 import type { GitHubService } from './github-service';
 import type { ProviderService } from './provider-service';
+import { SystemAgentCommandRunner, type AgentCommandRunner } from './agent-command-runner';
+import { classifyCommand, redactContent } from './secret-scanner';
 
 export interface AgentRunRequest {
   readonly runId: string;
@@ -37,6 +40,19 @@ export interface AgentRunRequest {
 interface PendingApproval {
   readonly runId: string;
   readonly resolve: (approved: boolean) => void;
+}
+
+interface ActionExecution {
+  readonly executed: boolean;
+  readonly filesRead: readonly string[];
+  readonly commands: readonly string[];
+  readonly errors: readonly string[];
+  readonly logs: readonly string[];
+}
+
+export interface AgentServiceOptions {
+  readonly commandRunner?: AgentCommandRunner;
+  readonly dataDirectory?: string;
 }
 
 const withoutActionContent = (action: AgentAction): AgentAction => {
@@ -55,7 +71,10 @@ class ProviderAgentExecutor implements AgentExecutor {
     ) => Promise<boolean>,
     private readonly getMemory: (agent: AgentDefinition) => readonly string[],
     private readonly remember: (agent: AgentDefinition, output: string) => void,
-    private readonly proposeEdit: (agent: AgentDefinition, action: AgentAction) => Promise<void>,
+    private readonly executeAction: (
+      agent: AgentDefinition,
+      action: AgentAction,
+    ) => Promise<ActionExecution>,
   ) {}
 
   async execute(input: AgentExecutorInput): Promise<AgentExecutionResult> {
@@ -71,38 +90,73 @@ class ProviderAgentExecutor implements AgentExecutor {
       relevantFiles: Object.keys(input.context.relevantContext),
       memory,
     });
-    await this.providers.stream(
-      input.agent.providerId,
-      {
-        requestId,
-        model: input.agent.model,
-        messages: [
-          {
-            id: `${requestId}-system`,
-            role: 'system',
-            content: `${input.agent.systemPrompt}\n\nVocê opera sob estas restrições: autonomia=${input.agent.autonomy}; ferramentas=${input.agent.allowedTools.join(',')}; pastas=${input.agent.allowedFolders.join(',')}; terminal=${input.agent.terminalPermission}; edição=${input.agent.editPermission}.\nNão execute ações diretamente. Ao final, liste ações desejadas em JSON dentro de <visualnscode-actions>...</visualnscode-actions>. Cada item deve ter type, description, risk e, quando aplicável, path, command ou tool. Ações edit devem incluir content com o conteúdo completo proposto, ou null para solicitar exclusão. Toda edição ainda passará pela revisão visual do usuário.`,
-          },
-          { id: `${requestId}-user`, role: 'user', content: userContent },
-        ],
-        contextFiles: Object.entries(input.context.relevantContext).map(([path, content]) => ({
-          path,
-          content,
-        })),
-        maxTokens: 8192,
-        timeoutMs: input.agent.timeoutMs,
-      },
-      (chunk: AgentChunk) => {
-        if (chunk.type === 'text') output += chunk.text;
-        if (chunk.type === 'usage') usage = chunk.usage;
-        if (chunk.type === 'error') throw new Error(chunk.message);
-      },
-    );
+    const cancelProvider = () => void this.providers.cancel(requestId);
+    input.signal.addEventListener('abort', cancelProvider, { once: true });
+    try {
+      if (input.signal.aborted) throw new Error('Execução do agente cancelada.');
+      await this.providers.stream(
+        input.agent.providerId,
+        {
+          requestId,
+          model: input.agent.model,
+          messages: [
+            {
+              id: `${requestId}-system`,
+              role: 'system',
+              content: `${input.agent.systemPrompt}\n\nVocê opera sob estas restrições: autonomia=${input.agent.autonomy}; ferramentas=${input.agent.allowedTools.join(',')}; pastas=${input.agent.allowedFolders.join(',')}; terminal=${input.agent.terminalPermission}; edição=${input.agent.editPermission}.\nNão execute ações diretamente. Ao final, liste ações desejadas em JSON dentro de <visualnscode-actions>...</visualnscode-actions>. Cada item deve ter type, description, risk e, quando aplicável, path, command ou tool. Ações edit devem incluir content com o conteúdo completo proposto, ou null para solicitar exclusão. Toda edição ainda passará pela revisão visual do usuário.`,
+            },
+            { id: `${requestId}-user`, role: 'user', content: userContent },
+          ],
+          contextFiles: Object.entries(input.context.relevantContext).map(([path, content]) => ({
+            path,
+            content,
+          })),
+          maxTokens: 8192,
+          timeoutMs: input.agent.timeoutMs,
+        },
+        (chunk: AgentChunk) => {
+          if (chunk.type === 'text') output += chunk.text;
+          if (chunk.type === 'usage') usage = chunk.usage;
+          if (chunk.type === 'error') throw new Error(chunk.message);
+        },
+      );
+    } finally {
+      input.signal.removeEventListener('abort', cancelProvider);
+    }
 
     const parsed = parseAgentOutput(output);
     const actions: AgentAction[] = [];
     const errors: string[] = [];
+    const filesRead: string[] = [...Object.keys(input.context.relevantContext)];
+    const commands: string[] = [];
+    const logs: string[] = [];
     for (const original of parsed.actions) {
-      const action = { ...original, id: `${input.nodeId}:${original.id}` };
+      const commandClassification = original.command ? classifyCommand(original.command) : null;
+      const action: AgentAction = {
+        ...original,
+        id: `${input.nodeId}:${original.id}`,
+        ...(commandClassification
+          ? {
+              risk:
+                commandClassification === 'safe'
+                  ? ('safe' as const)
+                  : commandClassification === 'confirm'
+                    ? ('important' as const)
+                    : ('destructive' as const),
+            }
+          : {}),
+      };
+      if (commandClassification === 'blocked') {
+        const reason = 'Comando bloqueado pela política global de segurança.';
+        actions.push({
+          ...withoutActionContent(action),
+          status: 'denied',
+          requiresApproval: false,
+          decisionReason: reason,
+        });
+        errors.push(`${action.description}: ${reason}`);
+        continue;
+      }
       const decision = decideAgentAction(input.agent, action);
       if (!decision.allowed) {
         actions.push({
@@ -114,42 +168,51 @@ class ProviderAgentExecutor implements AgentExecutor {
         errors.push(`${action.description}: ${decision.reason}`);
         continue;
       }
+      let approved = true;
       if (decision.requiresApproval) {
-        const approved = await this.approval(input, action, decision);
-        if (approved && action.type === 'edit') {
-          await this.proposeEdit(input.agent, action);
-        }
+        approved = await this.approval(input, action, decision);
+      }
+      if (!approved) {
         actions.push({
           ...withoutActionContent(action),
-          status: approved ? 'approved' : 'denied',
-          requiresApproval: true,
+          status: 'denied',
+          requiresApproval: decision.requiresApproval,
           decisionReason: decision.reason,
         });
-        if (!approved) errors.push(`${action.description}: não aprovada.`);
+        errors.push(`${action.description}: não aprovada.`);
         continue;
       }
-      if (action.type === 'edit') {
-        await this.proposeEdit(input.agent, action);
+      try {
+        const execution = await this.executeAction(input.agent, action);
+        filesRead.push(...execution.filesRead);
+        commands.push(...execution.commands);
+        errors.push(...execution.errors);
+        logs.push(...execution.logs);
+        actions.push({
+          ...withoutActionContent(action),
+          status: execution.executed ? 'executed' : 'approved',
+          requiresApproval: decision.requiresApproval,
+          decisionReason: decision.reason,
+        });
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : 'A ação não pôde ser executada.';
+        actions.push({
+          ...withoutActionContent(action),
+          status: 'denied',
+          requiresApproval: decision.requiresApproval,
+          decisionReason: message,
+        });
+        errors.push(`${action.description}: ${message}`);
       }
-      actions.push({
-        ...withoutActionContent(action),
-        status: 'executed',
-        requiresApproval: false,
-        decisionReason: decision.reason,
-      });
     }
-    this.remember(input.agent, parsed.output);
+    const safeOutput = redactContent(parsed.output);
+    this.remember(input.agent, safeOutput);
     const measuredUsage = usage as TokenUsage | null;
     return {
-      output: parsed.output,
-      filesRead: [
-        ...Object.keys(input.context.relevantContext),
-        ...actions.flatMap((action) =>
-          action.type === 'read' && action.path ? [action.path] : [],
-        ),
-      ],
+      output: safeOutput,
+      filesRead: [...new Set(filesRead)],
       filesChanged: [],
-      commands: actions.flatMap((action) => (action.command ? [action.command] : [])),
+      commands,
       actions,
       errors,
       costUsd: measuredUsage?.estimatedCostUsd ?? 0,
@@ -157,6 +220,7 @@ class ProviderAgentExecutor implements AgentExecutor {
       logs: [
         `${input.agent.name} recebeu ${input.context.previousResults.length} resultado(s) anterior(es).`,
         `${actions.length} ação(ões) analisada(s) pela política.`,
+        ...logs,
       ],
     };
   }
@@ -167,12 +231,14 @@ class ProviderAgentExecutor implements AgentExecutor {
 }
 
 export class AgentService {
-  private readonly historyPath = join(app.getPath('userData'), 'agent-history.json');
-  private readonly memoryPath = join(app.getPath('userData'), 'agent-memory.json');
+  private readonly historyPath: string;
+  private readonly memoryPath: string;
+  private readonly commandRunner: AgentCommandRunner;
   private readonly engines = new Map<string, WorkflowEngine>();
   private readonly approvals = new Map<string, PendingApproval>();
   private readonly memories = new Map<string, string[]>();
   private memoriesLoaded = false;
+  private persistenceQueue: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly providers: ProviderService,
@@ -181,24 +247,30 @@ export class AgentService {
     private readonly checkpoints?: CheckpointService,
     private readonly git?: GitService,
     private readonly github?: GitHubService,
-  ) {}
+    options: AgentServiceOptions = {},
+  ) {
+    const dataDirectory = options.dataDirectory ?? app.getPath('userData');
+    this.historyPath = join(dataDirectory, 'agent-history.json');
+    this.memoryPath = join(dataDirectory, 'agent-memory.json');
+    this.commandRunner = options.commandRunner ?? new SystemAgentCommandRunner();
+  }
 
   async start(
     request: AgentRunRequest,
     onEvent: (event: WorkflowEvent) => void,
   ): Promise<WorkflowRunResult> {
     await this.loadMemories();
+    const workspace = this.filesystem?.getWorkspace() ?? null;
     const executor = new ProviderAgentExecutor(
       this.providers,
       (input, action, decision) => this.requestApproval(input, action, decision, onEvent),
-      (agent) => this.memories.get(this.memoryKey(request.runId, agent)) ?? [],
-      (agent, output) => this.remember(request.runId, agent, output),
-      (agent, action) => this.proposeEdit(agent, action),
+      (agent) => this.memories.get(this.memoryKey(request.runId, agent, workspace)) ?? [],
+      (agent, output) => this.remember(request.runId, agent, output, workspace),
+      (agent, action) => this.executeAction(agent, action, workspace),
     );
     const engine = new WorkflowEngine(executor);
     this.engines.set(request.runId, engine);
     try {
-      const workspace = this.filesystem?.getWorkspace();
       const automationLogs = workspace ? await this.prepareVersionControl(request, workspace) : [];
       const result = await engine.run(request.workflow, request.agents, request.task, {
         runId: request.runId,
@@ -263,15 +335,15 @@ export class AgentService {
       requiresApproval: true,
       decisionReason: decision.reason,
     };
-    onEvent({
-      type: 'action-requested',
-      runId: input.runId,
-      nodeId: input.nodeId,
-      agentId: input.agent.id,
-      action: enriched,
-    });
     return new Promise<boolean>((resolve) => {
       this.approvals.set(`${input.runId}:${action.id}`, { runId: input.runId, resolve });
+      onEvent({
+        type: 'action-requested',
+        runId: input.runId,
+        nodeId: input.nodeId,
+        agentId: input.agent.id,
+        action: withoutActionContent(enriched),
+      });
     });
   }
 
@@ -283,9 +355,14 @@ export class AgentService {
     }
   }
 
-  private remember(runId: string, agent: AgentDefinition, output: string): void {
+  private remember(
+    runId: string,
+    agent: AgentDefinition,
+    output: string,
+    workspace: string | null,
+  ): void {
     if (!agent.memory.enabled || !output) return;
-    const key = this.memoryKey(runId, agent);
+    const key = this.memoryKey(runId, agent, workspace);
     const current = this.memories.get(key) ?? [];
     this.memories.set(key, [...current, output].slice(-agent.memory.maxEntries));
   }
@@ -298,6 +375,61 @@ export class AgentService {
     await this.fileEdits.propose(`${agent.name}: ${action.description}`, [
       { path: action.path, proposedContent: action.content },
     ]);
+  }
+
+  private async executeAction(
+    agent: AgentDefinition,
+    action: AgentAction,
+    workspace: string | null,
+  ): Promise<ActionExecution> {
+    if (action.type === 'edit') {
+      await this.proposeEdit(agent, action);
+      return {
+        executed: true,
+        filesRead: [],
+        commands: [],
+        errors: [],
+        logs: [`Alteração proposta para revisão: ${action.path}.`],
+      };
+    }
+    if (action.type === 'read') {
+      if (!this.filesystem || !action.path)
+        throw new Error('O caminho de leitura não foi informado.');
+      const content = await this.filesystem.readFile(action.path);
+      return {
+        executed: true,
+        filesRead: [action.path],
+        commands: [],
+        errors: [],
+        logs: [`Arquivo lido: ${action.path} (${content.length} caracteres).`],
+      };
+    }
+    if (action.type === 'command') {
+      if (!workspace || !action.command)
+        throw new Error('O comando precisa de um workspace aberto.');
+      const result = await this.commandRunner.run(action.command, workspace, agent.timeoutMs);
+      const failed = result.exitCode !== 0;
+      return {
+        executed: true,
+        filesRead: [],
+        commands: [action.command],
+        errors: failed
+          ? [`${action.command} terminou com código ${result.exitCode}: ${result.stderr}`]
+          : [],
+        logs: [
+          `$ ${action.command}`,
+          ...(result.stdout ? [result.stdout] : []),
+          ...(result.stderr ? [result.stderr] : []),
+        ],
+      };
+    }
+    return {
+      executed: false,
+      filesRead: [],
+      commands: [],
+      errors: [],
+      logs: [`Ferramenta ${action.tool ?? 'desconhecida'} autorizada para integração dedicada.`],
+    };
   }
 
   private async prepareVersionControl(
@@ -377,8 +509,13 @@ export class AgentService {
     return logs;
   }
 
-  private memoryKey(runId: string, agent: AgentDefinition): string {
-    return agent.memory.scope === 'project' ? `project:${agent.id}` : `run:${runId}:${agent.id}`;
+  private memoryKey(runId: string, agent: AgentDefinition, workspace: string | null): string {
+    if (agent.memory.scope === 'run') return `run:${runId}:${agent.id}`;
+    const projectId = createHash('sha256')
+      .update(workspace ?? 'no-workspace')
+      .digest('hex')
+      .slice(0, 16);
+    return `project:${projectId}:${agent.id}`;
   }
 
   private async loadMemories(): Promise<void> {
@@ -390,7 +527,8 @@ export class AgentService {
         string[]
       >;
       for (const [key, entries] of Object.entries(stored)) {
-        if (!key.startsWith('project:') || !Array.isArray(entries)) continue;
+        if (!/^project:[a-f0-9]{16}:[a-z0-9-]{1,100}$/u.test(key) || !Array.isArray(entries))
+          continue;
         this.memories.set(key, entries.filter((entry) => typeof entry === 'string').slice(-100));
       }
     } catch {
@@ -402,19 +540,30 @@ export class AgentService {
     const projectMemories = Object.fromEntries(
       [...this.memories].filter(([key]) => key.startsWith('project:')),
     );
-    await mkdir(dirname(this.memoryPath), { recursive: true });
-    await writeFile(this.memoryPath, JSON.stringify(projectMemories, null, 2), {
-      encoding: 'utf8',
-      mode: 0o600,
-    });
+    await this.enqueuePersistence(() => this.writePrivateJson(this.memoryPath, projectMemories));
   }
 
   private async saveHistory(result: WorkflowRunResult): Promise<void> {
-    const history = await this.history();
-    await mkdir(dirname(this.historyPath), { recursive: true });
-    await writeFile(this.historyPath, JSON.stringify([result, ...history].slice(0, 50), null, 2), {
+    await this.enqueuePersistence(async () => {
+      const history = await this.history();
+      await this.writePrivateJson(this.historyPath, [result, ...history].slice(0, 50));
+    });
+  }
+
+  private async enqueuePersistence(operation: () => Promise<void>): Promise<void> {
+    const next = this.persistenceQueue.then(operation, operation);
+    this.persistenceQueue = next.catch(() => undefined);
+    await next;
+  }
+
+  private async writePrivateJson(filePath: string, value: unknown): Promise<void> {
+    await mkdir(dirname(filePath), { recursive: true, mode: 0o700 });
+    const temporary = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+    await writeFile(temporary, JSON.stringify(value, null, 2), {
       encoding: 'utf8',
+      flag: 'wx',
       mode: 0o600,
     });
+    await rename(temporary, filePath);
   }
 }
