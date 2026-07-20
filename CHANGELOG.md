@@ -38,6 +38,8 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- Documentation now matches the result-oriented Simple mode, current terminal limitation, measured
+  coverage, and installer-specific `PATH` behavior.
 - Simple mode is now a result-oriented preview and project-assistant experience without IDE chrome;
   Monaco, Explorer, terminal, Git internals, diffs, agents, and technical panels live in Advanced.
 - Approved agent commands are independently classified, parsed without a shell, workspace-bound,

@@ -48,10 +48,10 @@ security boundaries and plain-language actions.
 | Agent teams            | Ten roles, custom agents, visual DAGs, live actions/files/cost, parallel stages, approval, retries, timeout, and rollback       |
 | Safe editing           | Reviewable side-by-side or unified diffs, hunk selection, checkpoints, snapshots, rollback, path controls, and secret redaction |
 | Guided projects        | Plain-language suggestions and 13 versioned templates with optional Git, GitHub, installation, run, and preview steps           |
-| Git and GitHub         | Simple labels for beginners plus status, branches, commits, conflicts, issues, pull requests, Actions, and releases             |
+| Git and GitHub         | Advanced source control with status, branches, commits, conflicts, issues, pull requests, Actions, and releases                 |
 | Runtime and preview    | Detect npm, pnpm, Yarn, Bun, Python, and static projects; run fixed actions; inspect logs and select preview elements           |
 | Confirmed deploys      | Vercel, Firebase Hosting, Supabase, and GitHub Pages plans with build validation and production confirmation                    |
-| Two interface modes    | Guided preview/assistant in Simple; full IDE with editor, terminal, Git, diffs, agents, models, and permissions in Advanced     |
+| Two interface modes    | Guided preview/assistant in Simple; IDE with editor, Git, diffs, agents, models, and permissions in Advanced                    |
 | Environment onboarding | Detects 19 development tools and guides setup through named, permission-checked actions                                         |
 
 ## Screenshots

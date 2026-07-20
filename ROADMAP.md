@@ -14,7 +14,7 @@ security review, and packaged-app testing.
 - [x] Review-first AI editing, diffs, hunk selection, checkpoints, snapshots, rollback, and secret redaction.
 - [x] Safe workspace filesystem, command classification, permission gates, and constrained YOLO mode.
 - [x] Guided project creation with 13 versioned, executable templates and local no-publish tests.
-- [x] Git and GitHub operations in Simple and Advanced language.
+- [x] Git and GitHub operations in the Advanced workspace with reviewed, confirmed remote effects.
 - [x] Project runtime detection, process control, preview bridge, responsive sizes, and element picker.
 - [x] Confirmed deploy plans for Vercel, Firebase Hosting, Supabase, and GitHub Pages.
 - [x] Responsive landing page, accessibility tests, metadata, and Lighthouse CI.

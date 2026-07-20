@@ -49,8 +49,9 @@ The project is never pushed or deployed automatically. See [Project templates](.
 
 Select **Open folder** on the home screen and choose a trusted workspace. VisualnsCode validates the
 real path before reading or writing it. Simple mode opens the project assistant and preview. Switch to
-Advanced to use Explorer, Monaco, terminal tools, agents, and Git; manual saves use Command+S on macOS
-or Control+S on Windows and Linux. AI-generated changes remain proposals until reviewed in Diff.
+Advanced to use Explorer, Monaco, agents, Git, diffs, and technical panels; manual saves use Command+S
+on macOS or Control+S on Windows and Linux. AI-generated changes remain proposals until reviewed in
+Diff. The generic interactive terminal remains an alpha limitation.
 
 ## Next reading
 

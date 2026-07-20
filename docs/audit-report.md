@@ -141,7 +141,7 @@ remain functional through constrained PTYs.
 
 | Suite       | Files | Tests | Statements | Branches | Functions |  Lines |
 | ----------- | ----: | ----: | ---------: | -------: | --------: | -----: |
-| Unit        |    16 |    57 |     50.46% |   42.95% |    44.35% | 50.17% |
+| Unit        |    16 |    57 |     50.09% |   42.28% |    43.94% | 50.00% |
 | Integration |    12 |    89 |     63.62% |   52.85% |    68.11% | 66.81% |
 
 Coverage is reported separately because unit tests run in jsdom while main-service integration tests

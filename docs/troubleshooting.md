@@ -28,7 +28,9 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 **Windows:**
-Reinstall using the `.msi` — it registers PATH automatically.
+Use the NSIS `.exe` installer when command-line registration is required; its install script adds the
+application directory to the system `PATH`. The MSI creates application shortcuts but does not claim
+to register `spxcode` in `PATH`.
 
 ## AI provider returns errors
 
@@ -39,7 +41,7 @@ Reinstall using the `.msi` — it registers PATH automatically.
 
 ## Preview panel is blank
 
-- Click **Run** and open the runtime log from the terminal icon.
+- Click **Run** and open the runtime log from the preview controls.
 - For Node projects, verify `dev` or `start` exists in `package.json`; for Python, verify an entrypoint
   or supported framework manifest exists.
 - VisualnsCode opens only loopback URLs. Confirm the server reports `localhost`, `127.0.0.1`, or `::1`.
@@ -58,8 +60,11 @@ Reinstall using the `.msi` — it registers PATH automatically.
 ## Git panel shows no status
 
 - The panel only works inside a Git repository.
-- Initialise Git: open the terminal and run `git init`.
+- Initialise Git by running `git init` in an external terminal opened at the workspace root.
 - Or create the project using a template — Git is initialised automatically.
+
+The generic interactive terminal inside VisualnsCode is not complete in the current alpha; do not
+depend on it for repository setup.
 
 ## File changes not saved
 

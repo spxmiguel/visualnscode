@@ -71,7 +71,7 @@ generic Vite screen. Every recommended agent name is validated against the built
 - Firebase setup writes local configuration only; production deploy is outside this flow.
 - Tests inject a fake command runner, so they never install packages, authenticate, or publish.
 
-## Adding a built-in template
+## Adding a template
 
 Definitions live in
 `apps/desktop/src/main/services/scaffold-service.ts`. Add a `TemplateDefinition` with immutable version

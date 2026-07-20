@@ -36,7 +36,7 @@ interface de IDE; o modo Avançado oferece a IDE completa para desenvolvedores e
 | Agentes          | Dez papéis, agentes personalizados, equipes visuais, ações ao vivo, custos, retry e timeout       |
 | Edição segura    | Diff lado a lado/unificado, seleção por bloco, checkpoints, snapshots, rollback e redaction       |
 | Projetos         | Modo Simples sem IDE, sugestão local e 13 templates funcionais e versionados                      |
-| Git e GitHub     | Modo simples e operações avançadas, sempre sem push automático                                    |
+| Git e GitHub     | Painel avançado com histórico, branches, issues e PRs, sempre sem push automático                 |
 | Preview e deploy | Execução detectada, preview integrado, seletor de elemento e quatro destinos confirmados          |
 | Onboarding       | Detecção de 19 ferramentas, permissões separadas e credenciais protegidas pelo sistema            |
 

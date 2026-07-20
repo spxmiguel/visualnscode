@@ -110,6 +110,7 @@ execution requires HTTPS except for loopback development endpoints.
 Adapters isolate SDK and CLI changes. Capability discovery avoids vendor conditionals in the UI.
 Cancellation, timeouts, concurrency limits, bounded histories, and workflow budgets constrain long
 operations. Heavy resources are created in the main process and only when needed.
+
 The Simple workspace does not import Monaco: the complete Advanced IDE, editor integration, language
 workers, and diff UI are loaded through a separate dynamic chunk only after the mode changes.
 

@@ -5,6 +5,9 @@ result, preview controls, and a plain-language project assistant. Advanced mode 
 Explorer, Monaco, terminal, Git, logs, diffs, tasks, agents, models, settings, and permissions. Both
 modes use the same trusted workspace and running process.
 
+The Advanced bottom panel already presents runtime, task, log, and Git surfaces. Its generic
+interactive terminal is not complete in the current alpha and is tracked in the roadmap.
+
 ## Navigation
 
 ```mermaid
@@ -37,7 +40,7 @@ recent projects. Settings controls theme, interface mode, providers, permissions
 - Streaming chat with provider/model selection and explicit context files.
 - Preview with process controls, responsive sizes, diagnostics, screenshot, and element selection.
 - Diff review for AI proposals and checkpoint rollback.
-- Advanced bottom panel for terminal, tasks, logs, Git, and other tools.
+- Advanced bottom panel for runtime output, tasks, logs, Git, and the planned interactive terminal.
 - Status bar showing workspace and runtime state.
 
 Advanced panels use the shared `ResizeHandle` from `packages/ui`. Pointer and keyboard resizing expose separator

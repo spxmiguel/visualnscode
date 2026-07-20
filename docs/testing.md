@@ -61,7 +61,7 @@ Install Playwright's browser once on a new machine with
 `pnpm exec playwright install chromium`. CI uses `--with-deps` on Ubuntu.
 
 Coverage reports are written to `coverage/unit` and `coverage/integration`. The 2026-07-20 audit
-baseline is 44.43% unit lines and 56.74% integration lines. No global threshold is claimed yet because
-the next step is to close the 0% privileged-service gaps first, then introduce per-boundary thresholds
-without rewarding tests of low-risk generated or composition code. See
+baseline is 50.00% unit lines and 66.81% integration lines. No global threshold is claimed yet because
+the next step is to add direct coverage for `provider-service` and `secure-storage`, then introduce
+per-boundary thresholds without rewarding tests of low-risk generated or composition code. See
 [audit issue #22](https://github.com/spxmiguel/visualnscode/issues/22).
