@@ -17,6 +17,7 @@ import {
 } from '@visualnscode/agents';
 import type { AgentChunk, TokenUsage } from '@visualnscode/providers';
 import type { AgentVersionControlOptions } from '../../shared/version-control';
+import { changedFilesFromAgentRun } from '../../shared/agent-version-control';
 import type { CheckpointService } from './checkpoint-service';
 import type { FileEditService } from './file-edit-service';
 import type { FilesystemService } from './filesystem-service';
@@ -208,7 +209,7 @@ export class AgentService {
       });
       const completedLogs =
         result.status === 'completed' && workspace
-          ? await this.completeVersionControl(request, workspace)
+          ? await this.completeVersionControl(request, workspace, result)
           : [];
       const finalResult = {
         ...result,
@@ -334,22 +335,27 @@ export class AgentService {
   private async completeVersionControl(
     request: AgentRunRequest,
     workspace: string,
+    result: WorkflowRunResult,
   ): Promise<string[]> {
     const options = request.versionControl;
     if (!options || !this.git) return [];
     const logs: string[] = [];
     if (options.commit) {
       const status = await this.git.status(workspace);
-      if (status.files.length) {
+      const changedByAgents = new Set(changedFilesFromAgentRun(result));
+      const taskFiles = status.files.filter(({ path: filePath }) => changedByAgents.has(filePath));
+      if (taskFiles.length) {
         await this.git.stage(
           workspace,
-          status.files.map(({ path }) => path),
+          taskFiles.map(({ path }) => path),
         );
         await this.git.commit(
           workspace,
           `chore(agents): ${request.task.trim().replace(/\s+/g, ' ').slice(0, 180)}`,
         );
         logs.push('Commit local criado após a tarefa.');
+      } else if (status.files.length) {
+        logs.push('Alterações anteriores do workspace foram preservadas fora do commit do agente.');
       }
     }
     if (options.pullRequest) {
