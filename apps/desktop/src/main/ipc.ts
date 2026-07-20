@@ -19,7 +19,8 @@ import { FilesystemService } from './services/filesystem-service';
 import { GitService } from './services/git-service';
 import { ProviderService } from './services/provider-service';
 import { RunnerService } from './services/runner-service';
-import { ScaffoldService, PROJECT_TEMPLATES } from './services/scaffold-service';
+import { ScaffoldService, PROJECT_TEMPLATES, suggestProject } from './services/scaffold-service';
+import type { ProjectCreationOptions } from '../shared/project-creation';
 import {
   assessCommand,
   scanForSecrets,
@@ -178,6 +179,32 @@ const isValidAgentRunRequest = (value: unknown): value is AgentRunRequest => {
     entries.length <= 20 &&
     entries.every(([path, content]) => path.length <= 1000 && content.length <= 200_000) &&
     entries.reduce((total, [, content]) => total + content.length, 0) <= 1_000_000
+  );
+};
+
+const isValidProjectCreationOptions = (value: unknown): value is ProjectCreationOptions => {
+  if (!value || typeof value !== 'object') return false;
+  const options = value as Partial<ProjectCreationOptions>;
+  return (
+    typeof options.description === 'string' &&
+    options.description.length <= 2000 &&
+    typeof options.templateId === 'string' &&
+    PROJECT_TEMPLATES.some(({ id }) => id === options.templateId) &&
+    typeof options.parentPath === 'string' &&
+    options.parentPath.length > 0 &&
+    options.parentPath.length <= 2000 &&
+    typeof options.projectName === 'string' &&
+    options.projectName.length > 0 &&
+    options.projectName.length <= 64 &&
+    typeof options.installDependencies === 'boolean' &&
+    typeof options.initializeGit === 'boolean' &&
+    Boolean(options.github) &&
+    typeof options.github?.enabled === 'boolean' &&
+    typeof options.github.confirmed === 'boolean' &&
+    ['private', 'public'].includes(options.github.visibility ?? '') &&
+    ['none', 'firebase', 'supabase', 'vercel'].includes(options.integration ?? '') &&
+    typeof options.integrationConfirmed === 'boolean' &&
+    typeof options.startAfterCreate === 'boolean'
   );
 };
 
@@ -560,35 +587,30 @@ export const registerEnvironmentIpc = (): void => {
 
   // ── Scaffold ──────────────────────────────────────────────────────────────
   ipcMain.handle('scaffold:templates', () => PROJECT_TEMPLATES);
+  ipcMain.handle('scaffold:suggest', (_event, description: string) => {
+    if (
+      typeof description !== 'string' ||
+      description.trim().length < 3 ||
+      description.length > 2000
+    ) {
+      throw new Error('Descreva o projeto em pelo menos três caracteres.');
+    }
+    return suggestProject(description);
+  });
   ipcMain.handle('scaffold:choose-dir', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory'],
     });
     return result.canceled ? null : (result.filePaths[0] ?? null);
   });
-  ipcMain.on(
-    'scaffold:create',
-    (event, templateId: string, projectPath: string, projectName: string) => {
-      if (
-        typeof templateId !== 'string' ||
-        typeof projectPath !== 'string' ||
-        typeof projectName !== 'string' ||
-        projectName.length > 100 ||
-        projectPath.length > 2000
-      ) {
-        event.sender.send('scaffold:log', 'Parâmetros inválidos.');
-        return;
-      }
-      void scaffoldService
-        .scaffold(templateId, projectPath, projectName, (msg) => {
-          event.sender.send('scaffold:log', msg);
-        })
-        .then((result) => {
-          event.sender.send('scaffold:done', result);
-          if (result.success) {
-            fsService.setWorkspace(result.path);
-          }
-        });
-    },
-  );
+  ipcMain.handle('scaffold:create', async (event, options: ProjectCreationOptions) => {
+    if (!isValidProjectCreationOptions(options)) {
+      throw new Error('Os dados do novo projeto são inválidos.');
+    }
+    const result = await scaffoldService.create(options, (progress) => {
+      event.sender.send('scaffold:progress', progress);
+    });
+    if (result.success) fsService.setWorkspace(result.path);
+    return result;
+  });
 };

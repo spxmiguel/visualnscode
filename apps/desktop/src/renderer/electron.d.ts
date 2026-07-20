@@ -25,6 +25,13 @@ import type {
   FileReviewSelection,
   ProposedFileInput,
 } from '../shared/edit-model';
+import type {
+  ProjectCreationOptions,
+  ProjectCreationResult,
+  ProjectProgressEvent,
+  ProjectSuggestion,
+  ProjectTemplate,
+} from '../shared/project-creation';
 
 export interface FileEntry {
   readonly name: string;
@@ -87,20 +94,6 @@ export interface RunnerEvent {
   readonly type: 'log' | 'error' | 'started' | 'stopped' | 'url';
   readonly processId: string;
   readonly payload: string;
-}
-
-export interface ProjectTemplate {
-  readonly id: string;
-  readonly name: string;
-  readonly description: string;
-  readonly category: string;
-  readonly tags: readonly string[];
-}
-
-export interface ScaffoldResult {
-  readonly success: boolean;
-  readonly path: string;
-  readonly logs: string[];
 }
 
 declare global {
@@ -211,10 +204,10 @@ declare global {
       };
       readonly scaffold: {
         templates(): Promise<readonly ProjectTemplate[]>;
+        suggest(description: string): Promise<ProjectSuggestion>;
         chooseDir(): Promise<string | null>;
-        create(templateId: string, projectPath: string, projectName: string): void;
-        onLog(listener: (msg: string) => void): () => void;
-        onDone(listener: (result: ScaffoldResult) => void): () => void;
+        create(options: ProjectCreationOptions): Promise<ProjectCreationResult>;
+        onProgress(listener: (progress: ProjectProgressEvent) => void): () => void;
       };
     };
   }

@@ -72,6 +72,7 @@ export function HomeScreen() {
   const setError = useAppStore((state) => state.setError);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [projectIdea, setProjectIdea] = useState('');
 
   const openFolder = async () => {
     setLoadingAction('open');
@@ -128,6 +129,39 @@ export function HomeScreen() {
             </div>
           ) : null}
 
+          <section aria-labelledby="idea-title" className="mb-9">
+            <Surface className="p-4 sm:p-5" elevated>
+              <label className="block" htmlFor="home-project-idea">
+                <span className="text-sm font-semibold text-[rgb(var(--text))]" id="idea-title">
+                  Descreva sua ideia
+                </span>
+                <span className="mt-1 block text-xs text-[rgb(var(--text-muted))]">
+                  Nós sugerimos a stack, a estrutura e o melhor ponto de partida.
+                </span>
+              </label>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <input
+                  className="min-w-0 flex-1 rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--background))] px-3 py-2.5 text-sm text-[rgb(var(--text))] outline-none placeholder:text-[rgb(var(--text-subtle))] focus:border-[rgb(var(--accent))]"
+                  id="home-project-idea"
+                  onChange={(event) => setProjectIdea(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && projectIdea.trim().length >= 3) {
+                      setShowCreateModal(true);
+                    }
+                  }}
+                  placeholder="Quero criar um site para controlar minhas notas escolares."
+                  value={projectIdea}
+                />
+                <Button
+                  disabled={projectIdea.trim().length < 3}
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  <Sparkles className="size-4" /> Começar com esta ideia
+                </Button>
+              </div>
+            </Surface>
+          </section>
+
           <section aria-labelledby="start-title">
             <h2
               className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-subtle))]"
@@ -168,7 +202,10 @@ export function HomeScreen() {
           </section>
 
           {showCreateModal ? (
-            <CreateProjectModal onClose={() => setShowCreateModal(false)} />
+            <CreateProjectModal
+              initialDescription={projectIdea}
+              onClose={() => setShowCreateModal(false)}
+            />
           ) : null}
 
           <section aria-labelledby="recent-title" className="mt-10">

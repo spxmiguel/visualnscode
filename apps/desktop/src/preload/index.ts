@@ -116,18 +116,13 @@ contextBridge.exposeInMainWorld('visualnscode', {
   },
   scaffold: {
     templates: () => ipcRenderer.invoke('scaffold:templates'),
+    suggest: (description: string) => ipcRenderer.invoke('scaffold:suggest', description),
     chooseDir: () => ipcRenderer.invoke('scaffold:choose-dir'),
-    create: (templateId: string, projectPath: string, projectName: string) =>
-      ipcRenderer.send('scaffold:create', templateId, projectPath, projectName),
-    onLog: (listener: (msg: string) => void) => {
-      const handler = (_e: Electron.IpcRendererEvent, msg: string) => listener(msg);
-      ipcRenderer.on('scaffold:log', handler);
-      return () => ipcRenderer.removeListener('scaffold:log', handler);
-    },
-    onDone: (listener: (result: unknown) => void) => {
-      const handler = (_e: Electron.IpcRendererEvent, result: unknown) => listener(result);
-      ipcRenderer.on('scaffold:done', handler);
-      return () => ipcRenderer.removeListener('scaffold:done', handler);
+    create: (options: unknown) => ipcRenderer.invoke('scaffold:create', options),
+    onProgress: (listener: (progress: unknown) => void) => {
+      const handler = (_e: Electron.IpcRendererEvent, progress: unknown) => listener(progress);
+      ipcRenderer.on('scaffold:progress', handler);
+      return () => ipcRenderer.removeListener('scaffold:progress', handler);
     },
   },
 });
