@@ -12,6 +12,7 @@
 **Build with every AI. Manage everything from one place.**
 
 [![CI](https://github.com/spxmiguel/visualnscode/actions/workflows/ci.yml/badge.svg)](https://github.com/spxmiguel/visualnscode/actions/workflows/ci.yml)
+[![Lighthouse](https://github.com/spxmiguel/visualnscode/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/spxmiguel/visualnscode/actions/workflows/lighthouse.yml)
 [![Release](https://github.com/spxmiguel/visualnscode/actions/workflows/release.yml/badge.svg)](https://github.com/spxmiguel/visualnscode/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](./LICENSE)
 [![Version](https://img.shields.io/github/v/release/spxmiguel/visualnscode?color=7C5CFC&label=version)](https://github.com/spxmiguel/visualnscode/releases)
@@ -119,6 +120,7 @@ pnpm dev:landing
 
 # checks
 pnpm lint && pnpm typecheck && pnpm test
+pnpm test:e2e && pnpm test:lighthouse
 
 # build everything
 pnpm build
@@ -156,6 +158,8 @@ tagged release.
 | Cross-platform release pipeline                 | 📋 Planned |
 
 See [ROADMAP.md](./ROADMAP.md) for full details.
+
+Landing architecture and Vercel deployment: [docs/landing.md](./docs/landing.md).
 
 ## Contributing
 

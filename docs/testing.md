@@ -7,6 +7,8 @@
 | Vitest          | Unit and integration tests |
 | Testing Library | React component tests      |
 | Playwright      | End-to-end tests           |
+| Axe             | Automated accessibility    |
+| Lighthouse CI   | Web quality budgets        |
 
 ## Run tests
 
@@ -14,13 +16,19 @@
 pnpm test           # all unit tests, pass with no tests
 pnpm test:watch     # watch mode
 pnpm test:e2e       # Playwright E2E (requires built app)
+pnpm test:lighthouse # build and audit the landing page
 ```
 
 ## Test locations
 
 - Unit tests live alongside source files: `*.test.ts`, `*.test.tsx`.
 - E2E tests live in `e2e/`.
+- Landing accessibility checks live in `e2e/landing-accessibility.spec.ts`.
 - Test helpers and mocks in `vitest.setup.ts`.
+
+The Lighthouse configuration is in `.lighthouserc.json`. It audits the production build rather than
+the development server, and the dedicated GitHub Actions workflow runs the same command on pushes to
+`main` and pull requests.
 
 ## Writing unit tests
 

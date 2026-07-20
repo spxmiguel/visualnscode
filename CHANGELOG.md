@@ -8,6 +8,13 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- landing pública reconstruída em 14 seções com narrativa completa, visual do produto, integrações,
+  modos, agentes, onboarding, segurança, GitHub, deploy, roadmap e FAQ;
+- temas claro e escuro persistidos, navegação móvel, motion reduzido e componentes reutilizáveis;
+- metadata Open Graph/Twitter, dados estruturados, favicon, social card, sitemap e robots;
+- testes Playwright com Axe, auditoria Lighthouse CI e workflow de qualidade dedicado;
+- guia da landing e processo de deploy separado na Vercel;
+
 - execução detectada para npm, pnpm, Yarn, Bun, Python e projetos HTML estáticos, com ações tipadas
   de instalação, desenvolvimento, build e teste;
 - controles reais para iniciar, parar e reiniciar processos, detecção de porta, stream de logs e

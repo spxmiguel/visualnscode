@@ -83,6 +83,15 @@ pesquisa com usuários e revisão de segurança.
 - [x] testes de criação com executor falso, sem instalação, autenticação ou publicação real;
 - [ ] catálogo remoto assinado e opt-in.
 
+## Landing page — completo
+
+- [x] narrativa completa do produto em 14 seções;
+- [x] identidade visual própria, responsiva e sem logos de terceiros;
+- [x] temas claro e escuro com preferência persistida;
+- [x] metadata Open Graph e Twitter, favicon, sitemap e robots;
+- [x] testes Playwright de interface e Axe para acessibilidade;
+- [x] Lighthouse CI e documentação de deploy na Vercel;
+
 ## Depois — Capacidades locais avançadas
 
 - [ ] terminal isolado com `node-pty`;

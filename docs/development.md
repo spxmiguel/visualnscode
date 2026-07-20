@@ -10,17 +10,18 @@ pnpm install
 
 ## Dev commands
 
-| Command            | What it does                                  |
-| ------------------ | --------------------------------------------- |
-| `pnpm dev`         | Electron app with hot-reload                  |
-| `pnpm dev:landing` | Landing page (Vite dev server)                |
-| `pnpm test`        | Unit tests (Vitest)                           |
-| `pnpm test:watch`  | Tests in watch mode                           |
-| `pnpm test:e2e`    | End-to-end tests (Playwright)                 |
-| `pnpm lint`        | ESLint (zero warnings)                        |
-| `pnpm typecheck`   | TypeScript `tsc --noEmit` across all packages |
-| `pnpm format`      | Prettier                                      |
-| `pnpm build`       | Production build                              |
+| Command                | What it does                                  |
+| ---------------------- | --------------------------------------------- |
+| `pnpm dev`             | Electron app with hot-reload                  |
+| `pnpm dev:landing`     | Landing page (Vite dev server)                |
+| `pnpm test`            | Unit tests (Vitest)                           |
+| `pnpm test:watch`      | Tests in watch mode                           |
+| `pnpm test:e2e`        | End-to-end tests (Playwright)                 |
+| `pnpm test:lighthouse` | Production landing quality audit              |
+| `pnpm lint`            | ESLint (zero warnings)                        |
+| `pnpm typecheck`       | TypeScript `tsc --noEmit` across all packages |
+| `pnpm format`          | Prettier                                      |
+| `pnpm build`           | Production build                              |
 
 ## Repository structure
 
@@ -81,3 +82,6 @@ chore: bump electron to 43.2.0
 ## Architecture decisions
 
 All significant decisions are documented as ADRs in `docs/decisions/`. Read them before making architectural changes.
+
+Landing page structure, quality gates, and deployment are documented in
+[`landing.md`](./landing.md).

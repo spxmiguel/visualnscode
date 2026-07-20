@@ -75,3 +75,9 @@ history.
 If the build fails, deployment stops. A failed CLI invocation creates a failed history record and the
 UI keeps the sanitized log available for review. VisualnsCode never retries a production publish by
 itself.
+
+## VisualnsCode landing page
+
+The public website is deployed separately from user projects and from the Electron release pipeline.
+Its Vite build, quality gates, canonical-domain checklist, and Vercel project settings are documented
+in [`landing.md`](./landing.md).
