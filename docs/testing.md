@@ -7,6 +7,7 @@
 | Unit          | `pnpm test:unit`        | Pure packages, shared edit model, and renderer behavior                       |
 | Integration   | `pnpm test:integration` | Main-process services with fake command, provider, Git, and deploy boundaries |
 | Combined      | `pnpm test`             | Unit then integration                                                         |
+| Coverage      | `pnpm test:coverage`    | Separate V8 reports for unit and main-service integration suites              |
 | End to end    | `pnpm test:e2e`         | Landing navigation, interactions, responsive behavior, and Axe checks         |
 | Quality audit | `pnpm test:lighthouse`  | Built landing performance, accessibility, practices, and SEO budgets          |
 
@@ -44,6 +45,7 @@ pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:coverage
 pnpm build
 pnpm test:e2e
 pnpm test:lighthouse
@@ -53,6 +55,8 @@ pnpm security:audit
 Install Playwright's browser once on a new machine with
 `pnpm exec playwright install chromium`. CI uses `--with-deps` on Ubuntu.
 
-Coverage reporting is configured in the base Vitest configuration, but the V8 coverage package is not
-currently installed and no coverage threshold is claimed. Adding a measured threshold is a roadmap
-item, not a hidden CI requirement.
+Coverage reports are written to `coverage/unit` and `coverage/integration`. The 2026-07-20 audit
+baseline is 44.43% unit lines and 56.74% integration lines. No global threshold is claimed yet because
+the next step is to close the 0% privileged-service gaps first, then introduce per-boundary thresholds
+without rewarding tests of low-risk generated or composition code. See
+[audit issue #22](https://github.com/spxmiguel/visualnscode/issues/22).

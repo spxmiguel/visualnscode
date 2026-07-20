@@ -18,8 +18,9 @@ flowchart LR
 ```
 
 The renderer has `nodeIntegration` disabled, `contextIsolation` enabled, and Electron sandboxing
-enabled. Filesystem, checkpoint, command, provider, and credential operations cross an explicit
-preload API. The main process validates IPC payload size and shape again before using them.
+enabled. A restrictive Content Security Policy blocks unapproved script, object, form, frame, and
+connection sources. Filesystem, checkpoint, command, provider, and credential operations cross an
+explicit preload API. The main process validates IPC payload size and shape again before using them.
 
 ## AI edit flow
 
@@ -93,6 +94,10 @@ Local providers and CLIs do not require remote redaction, but their access is st
 their configured permissions. Provider logs use a separate recursive sanitizer and never include
 stored API keys.
 
+Remote provider endpoints must use HTTPS. Plain HTTP is accepted only for loopback or a provider
+explicitly classified as local. User information in an endpoint URL is rejected so credentials cannot
+leak through URL persistence or error messages.
+
 ## Preview and deployment boundaries
 
 The integrated preview accepts only HTTP(S) loopback origins: `localhost`, `127.0.0.1`, and `::1`.
@@ -117,11 +122,18 @@ automatically.
 | `safe`      | read-only local commands                                                                                  | allowed                                      |
 | `confirm`   | dependency installation, regular Git push, deletion, network download                                     | explicit confirmation                        |
 | `dangerous` | administrative commands, force push, package publication, external file upload, write to an absolute path | reinforced confirmation; YOLO cannot skip it |
-| `blocked`   | `rm -rf`, `del /s`, `format`, `diskpart`, `mkfs`, destructive `dd`, `shutdown`                            | rejected; cannot be overridden               |
+| `blocked`   | recursive-force `rm`, `del /s`, `rmdir /s /q`, `format`, `diskpart`, `mkfs`, destructive `dd`, `shutdown` | rejected; cannot be overridden               |
 
 The integrated project runner accepts only named install, development, build, or test actions
 detected from the current project. It starts the executable without a shell, which prevents a
-renderer payload from appending shell operators.
+renderer payload from appending shell operators. Child processes receive an allowlisted environment
+containing runtime paths, locale, temporary directories, terminal metadata, and optional SSH-agent
+socket information. API keys, CI tokens, and deploy credentials are never inherited. Authenticated
+CLIs must use their own credential store.
+
+Workspace-writing Firebase, Vercel, and Supabase actions resolve the requested working directory to a
+real path. It must be the active workspace or one of its descendants unless the user granted the
+dedicated outside-workspace permission.
 
 Git and GitHub use a second fixed command boundary. The renderer selects named operations, while the
 main process builds argument arrays for `git` or `gh` and validates paths, refs, text lengths, and

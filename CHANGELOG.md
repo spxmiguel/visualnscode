@@ -8,6 +8,9 @@ All notable changes are documented here. The format follows
 
 ### Added
 
+- Final alpha audit with severity-ranked findings, measured coverage and duplication, dependency and
+  compatibility results, release recommendation, and linked follow-up issues.
+- Separate V8 coverage reports for unit and main-service integration suites.
 - Complete English documentation set, verified local links, current application screenshots, six
   Mermaid system flows, extension guides, and an initial Brazilian Portuguese README.
 - Separate GitHub Actions workflows for lint, typecheck, unit tests, integration tests, desktop build,
@@ -28,6 +31,13 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- Workspace, scaffold, Git, and deploy processes now inherit only an allowlisted, credential-free
+  environment.
+- Automatic agent commits now stage only files attributed to the completed agent run and preserve
+  unrelated workspace changes.
+- Remote provider endpoints require HTTPS outside loopback; explicitly local providers may still use
+  private-network HTTP.
+- Packaging metadata now uses the public `spx miguel` identity and GitHub noreply address.
 - Release automation is manual and requires an exact typed confirmation before publishing anything.
 - Unit and integration tests now have separate Vitest configurations and CI checks.
 - Desktop packaging targets macOS arm64/x64, Windows x64, and Linux x64, with additional Linux arm64
@@ -43,6 +53,11 @@ All notable changes are documented here. The format follows
 
 ### Security
 
+- Desktop CSP, real-path enforcement for integration working directories, strict confirmation types,
+  and runtime permission ID validation were added.
+- Destructive command matching now covers separated and long recursive-force flags, Windows recursive
+  removal, `git clean`, and batch deletion; repository history scanning covers common private-key
+  headers.
 - Repository audit and pre-push checks reject known credential filenames and secret patterns.
 - Filesystem writes are atomic and reject traversal, unsafe symlinks, sensitive files, mass deletion,
   and paths outside the trusted workspace.

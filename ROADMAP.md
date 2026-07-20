@@ -18,6 +18,8 @@ security review, and packaged-app testing.
 - [x] Confirmed deploy plans for Vercel, Firebase Hosting, Supabase, and GitHub Pages.
 - [x] Responsive landing page, accessibility tests, metadata, and Lighthouse CI.
 - [x] Cross-platform packaging configuration and manually confirmed release workflow.
+- [x] Final alpha audit, child-process environment filtering, secure remote endpoints, workspace-bound
+      integrations, safe agent commits, desktop CSP, and measured coverage reports.
 
 ## Stabilization for alpha releases
 
@@ -25,7 +27,8 @@ security review, and packaged-app testing.
 - [ ] Complete the interactive terminal surface backed by the existing constrained process boundary.
 - [ ] Add workspace-wide text search and complete keyboard-only navigation.
 - [ ] Add failure recovery tests for interrupted writes, process crashes, and partial deploys.
-- [ ] Measure coverage by security boundary and close high-risk gaps.
+- [x] Establish separate unit and integration coverage measurement.
+- [ ] Close privileged-service coverage gaps and add per-boundary thresholds.
 - [ ] Publish the first explicitly approved alpha release.
 
 ## Beta readiness

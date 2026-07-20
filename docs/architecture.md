@@ -80,6 +80,10 @@ Deployment is a separate remote-effect service. It builds a fixed plan, presents
 requires confirmation in the main process, runs the build first when required, redacts output, and
 writes bounded history.
 
+Every spawned project, Git, integration, and deploy process receives a shared allowlisted environment
+rather than the Electron process environment. Provider endpoints are normalized centrally; remote
+execution requires HTTPS except for loopback development endpoints.
+
 ## State and persistence
 
 - Zustand persists theme, interface mode, onboarding completion, and other non-secret preferences.
@@ -101,6 +105,8 @@ operations. Heavy resources are created in the main process and only when needed
 - Playwright and Axe cover landing journeys and accessibility.
 - Lighthouse CI enforces landing quality budgets.
 - Platform packaging runs only from a manually triggered release workflow.
+- `pnpm test:coverage` produces separate unit and integration reports; current gaps are documented in
+  the [final audit](./audit-report.md).
 
 Durable trade-offs are recorded in the [ADR index](./decisions/README.md). Security invariants are
 expanded in the [security model](./security-model.md).

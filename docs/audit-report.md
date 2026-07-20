@@ -1,95 +1,167 @@
-# Audit report — VisualnsCode 0.1.0 alpha
+# Final audit report — VisualnsCode 0.1.0 alpha
 
-- Review date: 2026-07-20
-- Scope: architecture, security boundaries, accessibility, tests, documentation, dependencies,
-  packaging, and GitHub automation
-- Method: static source review plus the commands listed under Verification
+- Audit date: 2026-07-20
+- Repository: [spxmiguel/visualnscode](https://github.com/spxmiguel/visualnscode)
+- Scope: architecture, security, performance, accessibility, user experience, test coverage,
+  documentation, visual consistency, duplication, dependencies, error handling, credentials,
+  command execution, and cross-platform behavior
+- Method: manual source review, targeted threat analysis, repository and history secret scan,
+  measured coverage, clone detection, dependency/license inspection, and the complete verification
+  matrix below
 
 ## Executive summary
 
-No open Critical or High source finding was identified in this review. Earlier path, deletion,
-redaction, and secret-scanner findings are covered by dedicated service tests. The remaining release
-risks are material but expected for an alpha: unsigned binaries, incomplete packaged-app testing,
-no complete interactive terminal surface, no SQLite migration, and no stable plugin sandbox.
+No Critical finding was identified. Six High findings were found and corrected during the audit:
+workspace processes no longer inherit credential-bearing environment variables; integration CLIs can
+no longer trust a renderer-supplied directory outside the workspace; agent commits exclude unrelated
+user changes; remote providers require encrypted transport; destructive command variants and private
+key formats are detected more completely; and public packaging metadata no longer contains a personal
+email or the wrong maintainer identity. A restrictive desktop Content Security Policy was also added.
 
-The repository must continue to be treated as source-first until an explicitly approved release is
-published.
+The codebase is credible as an alpha source distribution, not as a stable binary release. The largest
+remaining risks are unsigned artifacts, missing packaged-desktop E2E and accessibility gates, direct
+JSON persistence for credentials and settings, incomplete preview-message validation, and 0% direct
+integration coverage in three privileged services. Every open Medium and Low finding has a linked
+GitHub issue.
 
-## Findings
+## Finding summary
 
-### Critical
+| Severity    | Found | Fixed now | Open |
+| ----------- | ----: | --------: | ---: |
+| Critical    |     0 |         0 |    0 |
+| High        |     6 |         6 |    0 |
+| Medium      |     6 |         1 |    5 |
+| Low         |     3 |         0 |    3 |
+| Improvement |     4 |         1 |    3 |
+
+## Critical
 
 None identified.
 
-### High
+## High — corrected
 
-None open. The following previously high-risk boundaries have implemented mitigations:
+| ID   | Area                    | Finding                                                                                                      | Resolution                                                                                                |
+| ---- | ----------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| H-01 | Process execution       | Runner, scaffold, Git, and deploy processes inherited all of `process.env`, exposing host tokens to scripts. | Central allowlist keeps OS runtime values and removes API, CI, GitHub, and deploy credentials.            |
+| H-02 | Workspace isolation     | Firebase, Vercel, and Supabase accepted a renderer-labelled trusted directory outside the active workspace.  | Real paths are checked against the active workspace; external paths require the dedicated permission.     |
+| H-03 | Agent version control   | Optional agent commits staged every dirty file, including unrelated work that existed before the task.       | Only paths explicitly attributed to completed agent runs are eligible for staging.                        |
+| H-04 | Provider transport      | Remote provider settings accepted plaintext HTTP endpoints outside loopback.                                 | Remote endpoints require HTTPS; HTTP remains available for loopback and explicitly local providers.       |
+| H-05 | Destructive commands    | Long or separated recursive-force flags could avoid the blocked class; the history scan missed key variants. | `rm`, Windows `rmdir`, `git clean`, and batch deletion rules were hardened; RSA/EC/OpenSSH/DSA are found. |
+| H-06 | Public identity/privacy | Linux package metadata exposed a personal Gmail address and a maintainer name different from `spx miguel`.   | Packaging now uses `spx miguel` and the GitHub-generated noreply address.                                 |
 
-| Boundary          | Mitigation                                                                      |
-| ----------------- | ------------------------------------------------------------------------------- |
-| Workspace paths   | Lexical and real-path containment, unsafe-symlink rejection, atomic writes      |
-| Deletion          | Explicit confirmation, workspace-root block, directory-size and proposal limits |
-| Remote AI context | Main-process sensitive-file omission and value redaction                        |
-| Secret scanning   | Bounded patterns covered by focused tests                                       |
+The desktop renderer also gained an explicit Content Security Policy restricting scripts, workers,
+frames, connections, forms, and object content. Runtime confirmation checks now require real booleans,
+and unknown permission identifiers are rejected.
 
-### Medium
+## Medium — open or partially resolved
 
-| Area                 | Finding                                                                                                  | Current control                                                         | Required follow-up                                                               |
-| -------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Distribution         | macOS and Windows artifacts are unsigned; macOS hardened runtime is disabled                             | No public release and manual publish confirmation                       | Signing, hardened runtime, notarization, checksums, and provenance before stable |
-| Desktop web security | A strict production Content Security Policy is not explicitly documented in the renderer entry point     | Renderer sandbox, context isolation, no Node integration, named preload | Add and test a restrictive CSP before stable                                     |
-| Platform coverage    | Main-process services are not exercised as packaged apps on every target OS                              | Linux CI builds and mocked cross-platform service tests                 | Add packaged Electron E2E on macOS, Windows, and Linux                           |
-| Terminal             | The bottom-panel terminal is an explicit non-functional surface while provider CLIs use constrained PTYs | No generic renderer shell; command services remain named                | Complete an isolated interactive terminal and its approval UX                    |
+| ID   | Area                  | Finding                                                                                                    | Status and issue                                                                                           |
+| ---- | --------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| M-01 | Distribution          | macOS and Windows artifacts are unsigned; macOS hardened runtime remains disabled.                         | Open: [#8 — signing and notarization](https://github.com/spxmiguel/visualnscode/issues/8).                 |
+| M-02 | Security coverage     | `agent-service`, `provider-service`, and `secure-storage` have 0% direct integration coverage.             | Open: [#22 — privileged-service coverage](https://github.com/spxmiguel/visualnscode/issues/22).            |
+| M-03 | Credential durability | Credential, settings, memory, and history JSON writes are not uniformly atomic or recoverable.             | Open: [#21 — atomic persistence and recovery](https://github.com/spxmiguel/visualnscode/issues/21).        |
+| M-04 | Preview trust         | The iframe source is verified, but bridge payload fields and total sizes are not completely bounded.       | Open: [#24 — preview bridge validation](https://github.com/spxmiguel/visualnscode/issues/24).              |
+| M-05 | Platform/a11y         | CI builds desktop targets but does not run packaged Electron or Axe/keyboard checks across supported OSes. | Open: [#25 — packaged E2E and desktop accessibility](https://github.com/spxmiguel/visualnscode/issues/25). |
+| M-06 | Desktop web security  | The renderer had no explicit Content Security Policy.                                                      | Fixed in this audit; production and development builds pass with the policy.                               |
 
-### Low
+The incomplete generic terminal remains a functional alpha limitation tracked by
+[#1](https://github.com/spxmiguel/visualnscode/issues/1), not an exposed arbitrary-shell feature.
 
-| Area          | Finding                                                                        | Follow-up                                          |
-| ------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- |
-| Checkpoints   | Owner-only JSON snapshots can contain normal source code and are not encrypted | Offer encrypted high-confidentiality workspaces    |
-| Monaco        | Editor resources are a large part of the renderer bundle                       | Measure startup and lazy-load further where useful |
-| Persistence   | Several bounded histories use JSON rather than migrations                      | Move authoritative metadata to versioned SQLite    |
-| Issue tracker | Some open feature issues describe capabilities already implemented             | Close or rewrite them after maintainer review      |
-| Dependencies  | One low-severity esbuild development-server advisory remains                   | Upgrade when Vite supports the patched esbuild     |
+## Low — open
 
-### Improvements
+| ID   | Area              | Finding                                                                                                   | Issue                                                                                                   |
+| ---- | ----------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| L-01 | Dependencies      | `pnpm audit` reports one Low esbuild development-server advisory through Vite.                            | [#23 — compatible Vite upgrade](https://github.com/spxmiguel/visualnscode/issues/23).                   |
+| L-02 | Local persistence | Checkpoints and histories are owner-only but normal source content is not encrypted and lacks migrations. | [#27 — confidential storage and SQLite](https://github.com/spxmiguel/visualnscode/issues/27).           |
+| L-03 | Maintainability   | Five source modules exceed 650 lines; small clones exist in providers, onboarding, environment, and CSS.  | [#26 — split modules and consolidate duplication](https://github.com/spxmiguel/visualnscode/issues/26). |
 
-- Add coverage instrumentation and thresholds by security boundary.
-- Add an SBOM, artifact attestations, and documented checksum verification.
-- Add a dependency-license policy alongside Dependabot and dependency review.
-- Complete a manual WCAG 2.2 AA audit for both desktop and landing.
+## Improvements
 
-## Security posture
+- Coverage is now measurable with `pnpm test:coverage`; per-boundary thresholds remain to be set in
+  [#22](https://github.com/spxmiguel/visualnscode/issues/22).
+- Add an SBOM, checksums, artifact attestations, and provenance before a stable release.
+- Add an explicit dependency-license policy. Production licenses currently resolve to MIT, ISC,
+  BSD-2-Clause, Apache-2.0, MPL-2.0, or their declared combinations.
+- Threat-model and approve a plugin host ADR before loading third-party code.
 
-| Control                                                 | Status                                       |
-| ------------------------------------------------------- | -------------------------------------------- |
-| `contextIsolation` and renderer sandbox                 | Enabled                                      |
-| `nodeIntegration`                                       | Disabled                                     |
-| Named preload surface and validated IPC                 | Implemented                                  |
-| OS-backed provider credential encryption                | Implemented; insecure Linux backend rejected |
-| Secret scanning and remote-context redaction            | Implemented                                  |
-| Traversal and unsafe-symlink rejection                  | Implemented                                  |
-| Command risk classes and constrained YOLO mode          | Implemented                                  |
-| Confirmation for remote mutations and production deploy | Implemented                                  |
-| Repository secret audit before push                     | Implemented through Husky                    |
-| Binary signing and notarization                         | Not implemented                              |
+## Architecture and API assessment
 
-## Test organization
+The dependency direction remains sound: applications compose pure packages, the renderer has no
+Node.js access, preload exposes named operations, and main-process services own privileged effects.
+No package cycle or arbitrary IPC channel was found. TypeScript strict checks pass without ignored
+errors or application-level `any` escapes.
 
-- Unit suite: packages, renderer behavior, and shared edit model.
-- Integration suite: filesystem, edits, secrets, Git/GitHub, scaffold, runner, preview, and deployment
-  services using temporary directories and fake executors.
-- E2E suite: landing behavior and automated Axe checks in Chromium.
-- Lighthouse: built landing page against checked-in budgets.
+The principal maintainability pressure is composition size rather than package design. `ipc.ts`
+(834 lines), `VersionControlPanel.tsx` (804), `scaffold-service.ts` (750), landing `Sections.tsx`
+(671), and `RightWorkspacePanel.tsx` (659) should be divided by domain. Clone detection across 192
+files reported seven clones and 156 duplicated lines, or 0.65%; this is low and below the 1% follow-up
+ceiling.
 
-The project does not claim a percentage coverage figure because the coverage provider and enforced
-threshold are not configured.
+## Security assessment
 
-The dependency audit has no Critical, High, or Moderate finding after applying patched transitive
-DOMPurify and UUID overrides. One Low development-server advisory remains.
+### Implemented controls
 
-## Verification
+- Electron sandbox, context isolation, disabled Node integration, CSP, and denied window creation.
+- Named preload capabilities and runtime IPC payload limits.
+- Lexical and real-path containment, symlink rejection, atomic workspace writes, sensitive-file
+  blocking, bounded deletion, checkpoints, and rollback.
+- Remote-context secret scanning and redaction plus sanitized provider and deploy logs.
+- OS-backed `safeStorage`; insecure Linux `basic_text` is rejected.
+- Fixed executable/argument arrays without a shell, filtered child environments, command risk
+  classes, and constrained YOLO behavior.
+- HTTPS for remote providers and loopback-only integrated preview origins.
+- Confirmation for remote GitHub mutations and all deploys; production deploy confirmation is
+  rechecked by the main service.
+- Repository scan of tracked files and all Git revisions for known keys and private-key headers.
 
-The documented release gate is:
+### Residual security risks
+
+Renderer compromise remains a meaningful trust event until packaged desktop tests and a mature CSP
+regression gate exist. JSON persistence needs atomic recovery. Preview content is sandboxed and
+source-checked, but payload validation must be completed. Signed binaries and update provenance do
+not exist; users must build from source and keep independent backups.
+
+## Performance, accessibility, and UX
+
+- Desktop production renderer: approximately 396 kB JavaScript, 113 kB gzip.
+- Landing production bundle: approximately 229 kB JavaScript, 71 kB gzip.
+- Lighthouse CI passes the checked-in performance, accessibility, best-practices, and SEO budgets.
+- Landing Playwright runs Axe in desktop and mobile journeys. No automated violation is open.
+- Desktop has responsive panel constraints, keyboard shortcuts, labelled icon controls, friendly
+  empty/error states, persistent themes, and Simple/Advanced language.
+- A complete desktop keyboard and WCAG 2.2 AA audit is still required in issue #25.
+
+Visual tokens and shared controls are consistent across desktop and the UI catalog. The landing uses
+the same restrained neutral/accent system and presents a working product rather than claiming the UI
+is a mockup. The largest UX limitation is the non-functional generic terminal surface; provider CLIs
+remain functional through constrained PTYs.
+
+## Test coverage
+
+| Suite       | Files | Tests | Statements | Branches | Functions |  Lines |
+| ----------- | ----: | ----: | ---------: | -------: | --------: | -----: |
+| Unit        |    15 |    53 |     44.96% |   36.88% |    40.25% | 44.43% |
+| Integration |    10 |    76 |     53.94% |   47.38% |    56.48% | 56.74% |
+
+Coverage is reported separately because unit tests run in jsdom while main-service integration tests
+run in Node. High-value filesystem, edit, secret, runner, scaffold, preview, Git, GitHub, deploy, and
+environment boundaries have direct tests. Agent composition, provider composition, and the Electron
+credential wrapper are the most important gaps.
+
+## Dependencies and compatibility
+
+- 962 resolved dependencies; audit result: 0 Critical, 0 High, 0 Moderate, 1 Low.
+- No direct dependency is flagged as deprecated by `pnpm outdated`.
+- Five deprecated transitive utilities remain in packaging/tooling trees; none introduces a separate
+  audit advisory.
+- macOS arm64/x64, Windows x64, and Linux x64 targets are configured. Linux arm64 AppImage is also
+  configured, but packaged execution has not been proven on the full matrix.
+- Source and service logic avoid shell parsing and use Node path APIs, `windowsHide`, platform
+  executable detection, and portable pnpm commands. Packaging verification remains M-05.
+
+## Verification matrix
+
+The final audit gate is:
 
 ```bash
 pnpm docs:check
@@ -98,19 +170,20 @@ pnpm check:structure
 pnpm lint
 pnpm typecheck
 pnpm test
-pnpm build
+pnpm test:coverage
 pnpm test:e2e
 pnpm test:lighthouse
+pnpm build
 pnpm security:audit
+pnpm dependencies:audit
 ```
 
-Run results belong in the pull request or release record; this report does not treat a historical pass
-as proof for a later commit.
+All project checks and builds pass. `pnpm audit` exits non-zero only for the documented Low esbuild
+advisory. The repository secret audit scanned the complete tracked tree and every Git revision without
+finding a known secret.
 
-## Next security milestones
+## Release recommendation
 
-1. Add a strict production CSP and packaged-app security test.
-2. Enable hardened runtime, signing, notarization, checksums, and provenance.
-3. Exercise packaged artifacts on every supported architecture.
-4. Complete terminal isolation and SQLite migrations.
-5. Threat-model and approve the plugin host in a new ADR before loading third-party code.
+Source distribution may continue as alpha. Do not publish a stable installer until M-01, M-02,
+M-03, and M-05 are closed. Any alpha binary should be clearly marked unsigned, include checksums,
+and tell users to keep an independent copy of their workspace.

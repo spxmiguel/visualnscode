@@ -135,6 +135,7 @@ pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:coverage
 pnpm test:e2e
 pnpm test:lighthouse
 pnpm build
@@ -142,7 +143,9 @@ pnpm security:audit
 ```
 
 The E2E suite starts the applications it needs. Lighthouse builds and serves the landing page through
-its checked-in configuration. See [Testing](./docs/testing.md) for focused commands and test layout.
+its checked-in configuration. Coverage is reported separately for unit and main-service integration
+tests. See [Testing](./docs/testing.md) for focused commands and the
+[final audit](./docs/audit-report.md) for measured results and open risks.
 
 ## Architecture
 
@@ -219,7 +222,8 @@ the credential-safety checklist before pushing a branch.
 
 VisualnsCode stores provider secrets with Electron `safeStorage`, prevents the renderer from reading
 them, redacts sensitive content before remote requests, validates workspace paths, and classifies local
-commands. Extreme destructive commands remain blocked even when YOLO mode is enabled.
+commands. Workspace processes receive a credential-free environment, remote providers require HTTPS,
+and extreme destructive commands remain blocked even when YOLO mode is enabled.
 
 Report vulnerabilities privately as described in [SECURITY.md](./SECURITY.md). The detailed threat
 model and limitations are in [docs/security-model.md](./docs/security-model.md).

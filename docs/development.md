@@ -23,10 +23,12 @@ pnpm install --frozen-lockfile
 | `pnpm test:unit`                    | Pure package and renderer tests                                |
 | `pnpm test:integration`             | Main-process service tests with fakes                          |
 | `pnpm test`                         | Unit followed by integration tests                             |
+| `pnpm test:coverage`                | Separate unit and integration V8 coverage reports              |
 | `pnpm test:e2e`                     | Playwright landing journeys and accessibility                  |
 | `pnpm test:lighthouse`              | Production landing build and Lighthouse CI                     |
 | `pnpm build`                        | Build all workspaces with a build script                       |
 | `pnpm security:audit`               | Scan tracked files and Git history for secret patterns         |
+| `pnpm dependencies:audit`           | Check the resolved dependency graph for known advisories       |
 | `pnpm changeset`                    | Describe a release-relevant package change                     |
 | `pnpm version-packages`             | Consume Changesets and update package versions/changelogs      |
 
