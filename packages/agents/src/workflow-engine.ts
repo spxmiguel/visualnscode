@@ -174,6 +174,9 @@ export class WorkflowEngine {
         agentId: agent.id,
         attempt,
       });
+      const attemptController = new AbortController();
+      const abortAttempt = () => attemptController.abort();
+      controller.signal.addEventListener('abort', abortAttempt, { once: true });
       try {
         const result = await this.withTimeout(
           this.executor.execute({
@@ -181,11 +184,11 @@ export class WorkflowEngine {
             nodeId: node.id,
             agent,
             context,
-            signal: controller.signal,
+            signal: attemptController.signal,
             attempt,
           }),
           Math.min(agent.timeoutMs, workflow.timeoutMs),
-          controller.signal,
+          attemptController,
         );
         if (result.costUsd > agent.costLimitUsd)
           throw new Error(`${agent.name} ultrapassou o limite de custo.`);
@@ -212,6 +215,8 @@ export class WorkflowEngine {
           attempt,
         });
         if (controller.signal.aborted || attempt > workflow.retries) break;
+      } finally {
+        controller.signal.removeEventListener('abort', abortAttempt);
       }
     }
     throw lastError;
@@ -254,14 +259,15 @@ export class WorkflowEngine {
   private async withTimeout<T>(
     promise: Promise<T>,
     timeoutMs: number,
-    signal: AbortSignal,
+    controller: AbortController,
   ): Promise<T> {
+    const { signal } = controller;
     if (signal.aborted) throw new Error('Workflow cancelado.');
     return new Promise<T>((resolve, reject) => {
-      const timeout = setTimeout(
-        () => reject(new Error('Tempo limite do agente atingido.')),
-        timeoutMs,
-      );
+      const timeout = setTimeout(() => {
+        reject(new Error('Tempo limite do agente atingido.'));
+        controller.abort();
+      }, timeoutMs);
       const abort = () => reject(new Error('Workflow cancelado.'));
       signal.addEventListener('abort', abort, { once: true });
       void promise.then(resolve, reject).finally(() => {

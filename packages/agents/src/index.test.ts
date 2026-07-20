@@ -91,6 +91,23 @@ describe('WorkflowEngine', () => {
     expect((await running).status).toBe('cancelled');
   });
 
+  it('cancela a tentativa ativa antes de fazer retry após timeout', async () => {
+    const template = teamTemplates.find(({ id }) => id === 'documentation')!;
+    const firstNode = template.nodes[0]!;
+    const firstAgent = builtInAgents.find(({ id }) => id === firstNode.agentId)!;
+    const executor = new FakeAgentExecutor({ delayMs: 100 });
+    const engine = new WorkflowEngine(executor);
+    const result = await engine.run(
+      { ...template, nodes: [firstNode], edges: [], retries: 0, timeoutMs: 1000 },
+      [{ ...firstAgent, timeoutMs: 5 }],
+      'Testar timeout',
+    );
+
+    expect(result.status).toBe('failed');
+    expect(result.error).toMatch(/tempo limite/i);
+    expect(executor.contexts[0]?.signal.aborted).toBe(true);
+  });
+
   it('rejeita ciclos no grafo', () => {
     const template = teamTemplates.find(({ id }) => id === 'bug-fix')!;
     const first = template.nodes[0]!;
