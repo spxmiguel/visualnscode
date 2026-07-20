@@ -93,6 +93,23 @@ Local providers and CLIs do not require remote redaction, but their access is st
 their configured permissions. Provider logs use a separate recursive sanitizer and never include
 stored API keys.
 
+## Preview and deployment boundaries
+
+The integrated preview accepts only HTTP(S) loopback origins: `localhost`, `127.0.0.1`, and `::1`.
+An ephemeral reverse proxy injects the inspection bridge into HTML and forwards assets to that fixed
+origin. The iframe remains sandboxed. The bridge can observe DOM metadata, console calls, and Fetch
+results, but it communicates only through `postMessage` and cannot call preload APIs. Element context
+contains selector, visible text, limited attributes, and geometry; it does not read local files.
+
+Screenshot capture is performed by Electron only after the renderer provides a bounded rectangle.
+The image is written only after a native save dialog returns a user-selected path.
+
+Deploy plans use fixed CLI executable and argument arrays. Preview and production both require
+confirmation; production confirmation is checked again in the main process. A detected build must
+succeed first. CLI output passes through secret redaction before display, and deploy history contains
+only status metadata and returned URLs. VisualnsCode does not retry, promote, or publish production
+automatically.
+
 ## Command classification
 
 | Class       | Examples                                                                                                  | Default behavior                             |
@@ -102,9 +119,9 @@ stored API keys.
 | `dangerous` | administrative commands, force push, package publication, external file upload, write to an absolute path | reinforced confirmation; YOLO cannot skip it |
 | `blocked`   | `rm -rf`, `del /s`, `format`, `diskpart`, `mkfs`, destructive `dd`, `shutdown`                            | rejected; cannot be overridden               |
 
-The integrated project runner accepts only the development, build, or test commands detected from
-the current project. It starts the executable without a shell, which prevents a renderer payload
-from appending shell operators.
+The integrated project runner accepts only named install, development, build, or test actions
+detected from the current project. It starts the executable without a shell, which prevents a
+renderer payload from appending shell operators.
 
 Git and GitHub use a second fixed command boundary. The renderer selects named operations, while the
 main process builds argument arrays for `git` or `gh` and validates paths, refs, text lengths, and

@@ -36,6 +36,33 @@ O chat segue `renderer → preload → IPC validado → ProviderService → AIPr
 voltam por um canal somente de eventos. Configurações sem segredo usam arquivo local com permissão
 restrita; chaves usam `safeStorage`. O renderer nunca recebe a chave.
 
+## Runtime, preview, and deployment
+
+```mermaid
+flowchart LR
+    UI["Preview panel"] -->|"named action"| IPC["validated IPC"]
+    IPC --> Detect["runtime detection"]
+    Detect --> Process["exec + argument array"]
+    Process -->|"logs and local URL"| UI
+    UI -->|"local URL"| Proxy["ephemeral loopback proxy"]
+    Proxy --> App["project dev server"]
+    Proxy -->|"isolated postMessage bridge"| UI
+    UI -->|"reviewed plan + confirmation"| Deploy["DeploymentService"]
+    Deploy --> Build["detected build"]
+    Build --> CLI["provider CLI"]
+    CLI --> History["redacted local history"]
+```
+
+Runtime actions are a closed union (`install`, `dev`, `build`, `test`). The renderer cannot provide an
+executable. `RunnerService` maps a freshly detected project to `spawn` arguments with `shell: false`.
+The static preview uses the Electron Node runtime and does not require a globally installed server.
+
+`PreviewService` proxies only loopback origins. Its injected bridge reports console, basic Fetch
+activity, and selected DOM metadata through browser `postMessage`; it receives no privileged preload
+API. Deployment uses a separate service because it is a remote side effect: it plans fixed provider
+commands, verifies confirmation in the main process, runs the build first, redacts output, and writes a
+bounded history.
+
 ## Responsabilidades dos pacotes
 
 | Pacote         | Responsabilidade                             | Não deve conhecer               |

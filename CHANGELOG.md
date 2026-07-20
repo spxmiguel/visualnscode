@@ -8,6 +8,16 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- execução detectada para npm, pnpm, Yarn, Bun, Python e projetos HTML estáticos, com ações tipadas
+  de instalação, desenvolvimento, build e teste;
+- controles reais para iniciar, parar e reiniciar processos, detecção de porta, stream de logs e
+  mensagens de erro;
+- preview isolado em loopback com resoluções padrão/personalizada, refresh, navegador externo e
+  screenshot salvo por diálogo nativo;
+- captura de console e rede, seletor visual de elementos e envio de contexto DOM ao rascunho do chat;
+- deploy confirmado para Vercel, Firebase Hosting, Supabase Edge Functions e GitHub Pages, com build
+  prévio, logs sanitizados, URL e histórico local;
+- testes de runtime, proxy de preview, contexto visual e deploy usando servidores e executores falsos;
 - integração Git completa com status sincronizado, stage, unstage, diff, Conventional Commits,
   histórico visual, branches, merge, stash, tags, reset seguro, revert e conflitos;
 - integração GitHub via `gh` para autenticação, repositório, clone, fork, push/pull, issues, pull

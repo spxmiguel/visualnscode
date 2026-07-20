@@ -60,11 +60,15 @@ pesquisa com usuários e revisão de segurança.
 
 ## Preview e execução — completo
 
-- [x] detectar script `dev` e package manager;
-- [x] iniciar / parar servidor com stream de logs;
-- [x] preview integrado com iframe (desktop / tablet / mobile);
-- [ ] element picker → enviar para o chat;
-- [ ] console e network logs no preview.
+- [x] detectar instalação, desenvolvimento, build, teste e porta para npm, pnpm, Yarn, Bun, Python
+      e sites estáticos;
+- [x] iniciar, parar e reiniciar processos com stream separado de logs e erros;
+- [x] preview integrado com resoluções desktop, tablet, mobile e personalizada;
+- [x] screenshot, refresh e abertura segura no navegador;
+- [x] element picker com contexto DOM enviado ao rascunho do chat;
+- [x] console e logs básicos de rede por ponte isolada;
+- [x] deploy confirmado para Vercel, Firebase Hosting, Supabase e GitHub Pages;
+- [x] build de validação, logs sanitizados, URL e histórico local de deploy;
 
 ## Templates e criação — completo
 

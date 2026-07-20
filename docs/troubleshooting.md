@@ -36,10 +36,21 @@ Reinstall using the `.msi` — it registers PATH automatically.
 
 ## Preview panel is blank
 
-- Click **Run** to start the dev server.
-- Check the log output below the preview for errors.
-- Verify the project has a `dev` script in `package.json`.
-- If using a custom port, ensure it's not blocked by a firewall.
+- Click **Run** and open the runtime log from the terminal icon.
+- For Node projects, verify `dev` or `start` exists in `package.json`; for Python, verify an entrypoint
+  or supported framework manifest exists.
+- VisualnsCode opens only loopback URLs. Confirm the server reports `localhost`, `127.0.0.1`, or `::1`.
+- If console events appear but the page is blank, reload after the server reports its final URL.
+- Hot-module reload WebSocket messages are not shown in the basic network log; the project remains
+  responsible for its own HMR configuration.
+
+## Deployment did not start
+
+- Every preview and production attempt needs its own checked confirmation.
+- Run the integration test in onboarding and authenticate the selected CLI.
+- Supabase needs both project reference and function name.
+- GitHub Pages needs an existing workflow file, such as `deploy-pages.yml`.
+- Open the deploy log: a build error stops publication before any provider command is run.
 
 ## Git panel shows no status
 

@@ -151,8 +151,8 @@ tagged release.
 | File system, secure runner, complete Git/GitHub | ✅ Done    |
 | Diff viewer, checkpoints, rollback              | 🔜 Next    |
 | Guided creation and 13 versioned templates      | ✅ Done    |
-| Optional deploy integrations                    | 🔜 Next    |
-| Preview panel, element picker                   | 📋 Planned |
+| Confirmed deploy integrations                   | ✅ Done    |
+| Runtime detection, preview, element picker      | ✅ Done    |
 | Cross-platform release pipeline                 | 📋 Planned |
 
 See [ROADMAP.md](./ROADMAP.md) for full details.
