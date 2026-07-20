@@ -34,10 +34,16 @@ After install, type `spxcode` in any terminal to open the app.
 
 ## Create your first project
 
-1. Click **New project** on the home screen.
-2. Select a template (React + Vite, Next.js, Node.js API, etc.).
-3. Enter a project name and choose a parent folder.
-4. VisualnsCode creates the files, installs dependencies, initialises Git, and opens the workspace.
+1. Describe what you want to build on the home screen.
+2. Review the suggested name, stack, structure, database, authentication, deployment target, and agent.
+3. Keep the recommendation or select one of the 13 versioned templates manually.
+4. Choose a parent folder and decide whether to install dependencies, initialise Git, and run preview.
+5. Explicitly confirm any optional GitHub, Firebase, Supabase, or Vercel setup.
+6. Follow the plain-language progress, expanding technical details only when you need them.
+7. Open the generated workspace.
+
+The destination must be empty. GitHub repositories are not created without confirmation, and the
+project is never pushed automatically. See [Project creation and templates](./project-templates.md).
 
 ## Open an existing project
 

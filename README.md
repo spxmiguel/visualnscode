@@ -56,6 +56,7 @@ After install, type **`spxcode`** in any terminal to open the app.
 | 🔒 **Safe by default**   | AI never edits files silently. Every change goes through diff → approve → checkpoint → apply.                                 |
 | 🚀 **Integrated deploy** | Vercel, Firebase, Supabase, GitHub Pages — from build to production URL with explicit confirmation.                           |
 | 🛠 **Auto-onboarding**    | Detects Git, Node, pnpm, CLIs, and AI providers already installed. Guides through setup in plain language.                    |
+| 🧱 **Guided projects**   | Describe an idea, review the suggested stack, then create from 13 versioned templates with explicit external-action consent.  |
 
 ## Screenshots
 
@@ -148,7 +149,8 @@ tagged release.
 | Agent system & workflows                        | ✅ Done        |
 | **Terminal (node-pty), file system, Git panel** | 🔄 In progress |
 | Diff viewer, checkpoints, rollback              | 🔜 Next        |
-| Project templates, deploy integrations          | 🔜 Next        |
+| Guided creation and 13 versioned templates      | ✅ Done        |
+| Optional deploy integrations                    | 🔜 Next        |
 | Preview panel, element picker                   | 📋 Planned     |
 | Cross-platform release pipeline                 | 📋 Planned     |
 

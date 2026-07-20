@@ -8,6 +8,13 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- criação guiada por descrição em linguagem natural, com recomendação local de nome, stack,
+  estrutura, banco, autenticação, deploy e agente;
+- catálogo de 13 templates versionados, agora separando Node.js API e Express e registrando a origem
+  em `.visualnscode/template.json`;
+- pipeline de criação com mensagens simples, detalhes técnicos expansíveis, opções de dependências,
+  Git, primeiro commit, GitHub, Firebase, Supabase, Vercel, execução e preview;
+- confirmações explícitas para ações externas e testes com executor falso que não instala nem publica;
 - fluxo de propostas de edição por IA sem escrita automática: seleção por arquivo e bloco, diff
   lado a lado ou unificado, edição antes de aplicar, rejeição e aceite parcial;
 - histórico real de checkpoints com snapshots de arquivos novos/existentes, rollback e snapshot de
@@ -22,8 +29,8 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 - `CheckpointService`: snapshots por workspace com rollback automático e limite de 50 checkpoints;
 - `GitService`: status, stage, unstage, commit, log, branches, checkout, criar branch, stash via `child_process.execFile`;
 - `RunnerService`: iniciar/parar processo de desenvolvimento, detectar script `dev` e porta, stream de logs e URL para o painel de preview;
-- `ScaffoldService`: 12 templates de projeto (React+Vite, Next.js, Node API, Fastify, Electron, Firebase, Supabase, Landing, Portfolio, Dashboard, Static, Empty) com scaffold, instalação e primeiro commit automáticos;
-- `CreateProjectModal`: picker de template com categorias, configuração de nome e pasta, logs em tempo real durante a criação;
+- `ScaffoldService`: pipeline tipado e seguro para templates, instalações opcionais, Git e integrações confirmadas;
+- `CreateProjectModal`: fluxo de ideia, recomendação, template, configuração e progresso legível;
 - painel Git funcional no BottomPanel: arquivos staged/unstaged, stage/unstage por arquivo, commit com mensagem, histórico de 10 commits;
 - painel Preview com controles Run/Stop, modos desktop/tablet/mobile, iframe integrado, botão de abrir no navegador;
 - `DiffViewer` component com Monaco diff editor lado a lado, botões aceitar/rejeitar;

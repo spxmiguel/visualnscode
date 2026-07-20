@@ -64,10 +64,16 @@ pesquisa com usuários e revisão de segurança.
 
 ## Templates e criação — completo
 
-- [x] 12 templates com scaffold, deps, git init e primeiro commit;
-- [x] modal de seleção de template com categorias e tags;
-- [x] suporte a `createCommand` e `files[]` estáticos;
-- [ ] templates versionados e sincronizados do remoto.
+- [x] descrição em linguagem natural com sugestão local e explicável de stack, estrutura, banco,
+      autenticação, deploy e agente;
+- [x] 13 templates com React, Next.js, Electron, Node API, Express, Fastify, Firebase, Supabase,
+      Landing, Portfolio, Dashboard, Static e Empty;
+- [x] templates versionados e identificados no projeto gerado;
+- [x] pipeline guiado para arquivos, dependências, Git, primeiro commit, integração opcional,
+      execução e preview;
+- [x] confirmação separada para GitHub e serviços externos, sem push automático;
+- [x] testes de criação com executor falso, sem instalação, autenticação ou publicação real;
+- [ ] catálogo remoto assinado e opt-in.
 
 ## Depois — Capacidades locais avançadas
 
