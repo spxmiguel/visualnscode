@@ -49,8 +49,10 @@ pnpm test:e2e
 pnpm test:lighthouse
 ```
 
-The production output is written to `apps/landing/dist`. Lighthouse CI enforces minimum scores of
-0.90 for performance and best practices, 0.95 for accessibility, and 0.95 for SEO.
+The production output is written to `apps/landing/dist`. Lighthouse CI uses the median of three runs
+and enforces minimum scores of 0.80 for performance, 0.90 for best practices, 0.95 for
+accessibility, and 0.95 for SEO. The median keeps the mobile performance gate useful on shared CI
+runners without making one noisy CPU sample fail the workflow.
 
 ## Deploy to Vercel
 
