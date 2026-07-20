@@ -10,27 +10,27 @@ pnpm install --frozen-lockfile
 
 ## Commands
 
-| Command                             | Purpose                                                        |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `pnpm dev`                          | Electron desktop development mode                              |
-| `pnpm dev:landing`                  | Landing Vite server                                            |
-| `pnpm dev:ui`                       | Shared component catalog                                       |
-| `pnpm docs:check`                   | Required docs, local links, README sections, and Mermaid flows |
-| `pnpm check:structure`              | Required monorepo packages and apps                            |
-| `pnpm format` / `pnpm format:check` | Write or verify Prettier formatting                            |
-| `pnpm lint`                         | ESLint with zero warnings                                      |
-| `pnpm typecheck`                    | Root and workspace TypeScript checks                           |
-| `pnpm test:unit`                    | Pure package and renderer tests                                |
-| `pnpm test:integration`             | Main-process service tests with fakes                          |
-| `pnpm test`                         | Unit followed by integration tests                             |
-| `pnpm test:coverage`                | Separate unit and integration V8 coverage reports              |
-| `pnpm test:e2e`                     | Playwright landing journeys and accessibility                  |
-| `pnpm test:lighthouse`              | Production landing build and Lighthouse CI                     |
-| `pnpm build`                        | Build all workspaces with a build script                       |
-| `pnpm security:audit`               | Scan tracked files and Git history for secret patterns         |
-| `pnpm dependencies:audit`           | Check the resolved dependency graph for known advisories       |
-| `pnpm changeset`                    | Describe a release-relevant package change                     |
-| `pnpm version-packages`             | Consume Changesets and update package versions/changelogs      |
+| Command                             | Purpose                                                         |
+| ----------------------------------- | --------------------------------------------------------------- |
+| `pnpm dev`                          | Electron desktop development mode                               |
+| `pnpm dev:landing`                  | Landing Vite server                                             |
+| `pnpm dev:ui`                       | Shared component catalog                                        |
+| `pnpm docs:check`                   | Required docs, local links/anchors, extension guides, and flows |
+| `pnpm check:structure`              | Required monorepo packages and apps                             |
+| `pnpm format` / `pnpm format:check` | Write or verify Prettier formatting                             |
+| `pnpm lint`                         | ESLint with zero warnings                                       |
+| `pnpm typecheck`                    | Root and workspace TypeScript checks                            |
+| `pnpm test:unit`                    | Pure package and renderer tests                                 |
+| `pnpm test:integration`             | Main-process service tests with fakes                           |
+| `pnpm test`                         | Unit followed by integration tests                              |
+| `pnpm test:coverage`                | Separate unit and integration V8 coverage reports               |
+| `pnpm test:e2e`                     | Playwright landing journeys and accessibility                   |
+| `pnpm test:lighthouse`              | Production landing build and Lighthouse CI                      |
+| `pnpm build`                        | Build all workspaces with a build script                        |
+| `pnpm security:audit`               | Scan tracked files and Git history for secret patterns          |
+| `pnpm dependencies:audit`           | Check the resolved dependency graph for known advisories        |
+| `pnpm changeset`                    | Describe a release-relevant package change                      |
+| `pnpm version-packages`             | Consume Changesets and update package versions/changelogs       |
 
 ## Repository layout
 

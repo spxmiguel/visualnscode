@@ -40,6 +40,8 @@ All notable changes are documented here. The format follows
 
 - Documentation now matches the result-oriented Simple mode, current terminal limitation, measured
   coverage, and installer-specific `PATH` behavior.
+- Documentation validation now checks local anchors, required README sections, all six Mermaid flows,
+  and the provider, integration, template, agent, and future plugin extension guides.
 - Simple mode is now a result-oriented preview and project-assistant experience without IDE chrome;
   Monaco, Explorer, terminal, Git internals, diffs, agents, and technical panels live in Advanced.
 - Approved agent commands are independently classified, parsed without a shell, workspace-bound,

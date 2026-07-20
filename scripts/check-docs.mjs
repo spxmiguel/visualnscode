@@ -56,6 +56,33 @@ for (const file of required) {
 const markdownFiles = required.filter(
   (file) => file.endsWith('.md') && existsSync(resolve(root, file)),
 );
+const headingAnchors = new Map();
+
+function slugifyHeading(heading) {
+  return heading
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/[`*_~]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+for (const file of markdownFiles) {
+  const body = readFileSync(resolve(root, file), 'utf8');
+  const anchors = new Set();
+  const duplicates = new Map();
+  for (const match of body.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) {
+    const base = slugifyHeading(match[1]);
+    const duplicate = duplicates.get(base) ?? 0;
+    anchors.add(duplicate === 0 ? base : `${base}-${duplicate}`);
+    duplicates.set(base, duplicate + 1);
+  }
+  headingAnchors.set(file, anchors);
+}
+
 const rootScripts = Object.keys(
   JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).scripts,
 );
@@ -65,10 +92,20 @@ for (const file of markdownFiles) {
   const linkPattern = /\[[^\]]*\]\(([^)]+)\)/g;
   for (const match of body.matchAll(linkPattern)) {
     const target = match[1].trim().replace(/^<|>$/g, '');
-    if (/^(?:https?:|mailto:|#)/.test(target)) continue;
-    const path = decodeURIComponent(target.split('#')[0]);
-    if (path && !existsSync(resolve(root, dirname(file), path))) {
+    if (/^(?:https?:|mailto:)/.test(target)) continue;
+    const [rawPath, rawFragment] = target.split('#');
+    const path = decodeURIComponent(rawPath);
+    const linkedPath = path ? resolve(root, dirname(file), path) : resolve(root, file);
+    if (!existsSync(linkedPath)) {
       errors.push(`${file}: broken local link ${target}`);
+      continue;
+    }
+    if (rawFragment && linkedPath.endsWith('.md')) {
+      const linkedFile = path ? linkedPath.slice(root.length + 1).replaceAll('\\', '/') : file;
+      const fragment = decodeURIComponent(rawFragment).toLowerCase();
+      if (!headingAnchors.get(linkedFile)?.has(fragment)) {
+        errors.push(`${file}: broken local anchor ${target}`);
+      }
     }
   }
   for (const fence of body.matchAll(/```(?:bash|sh|shell|powershell)\n([\s\S]*?)```/g)) {
@@ -81,29 +118,52 @@ for (const file of markdownFiles) {
   }
 }
 
-const diagramFiles = [
-  'docs/architecture.md',
-  'docs/agents.md',
-  'docs/security-model.md',
-  'docs/onboarding.md',
-  'docs/deployment.md',
-];
-for (const file of diagramFiles) {
+const diagramFiles = new Map([
+  ['docs/architecture.md', 1],
+  ['docs/agents.md', 1],
+  ['docs/security-model.md', 2],
+  ['docs/onboarding.md', 1],
+  ['docs/deployment.md', 1],
+]);
+for (const [file, minimum] of diagramFiles) {
   const body = readFileSync(resolve(root, file), 'utf8');
-  if (!body.includes('```mermaid')) errors.push(`${file}: required Mermaid diagram is missing`);
+  const count = [...body.matchAll(/^```mermaid$/gm)].length;
+  if (count < minimum) {
+    errors.push(`${file}: expected at least ${minimum} Mermaid diagram(s), found ${count}`);
+  }
 }
 
 const readme = readFileSync(resolve(root, 'README.md'), 'utf8');
 for (const heading of [
+  '## Who it is for',
+  '## Features',
   '## Screenshots',
   '## Current status',
   '## Requirements',
+  '## Install from source',
+  '## Run',
+  '## Build',
+  '## Test and verify',
   '## Architecture',
+  '## Documentation',
+  '## Roadmap',
   '## Contributing',
   '## Security',
   '## License',
 ]) {
   if (!readme.includes(heading)) errors.push(`README.md: missing ${heading}`);
+}
+
+const extensionGuides = new Map([
+  ['docs/providers.md', '## Adding a provider'],
+  ['docs/integrations.md', '## Adding an integration'],
+  ['docs/project-templates.md', '## Adding a template'],
+  ['docs/agents.md', '## Adding an agent programmatically'],
+  ['docs/plugins.md', '# Future plugin contract'],
+]);
+for (const [file, heading] of extensionGuides) {
+  const body = readFileSync(resolve(root, file), 'utf8');
+  if (!body.includes(heading)) errors.push(`${file}: missing extension guide ${heading}`);
 }
 
 if (errors.length > 0) {
