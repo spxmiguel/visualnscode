@@ -1,7 +1,7 @@
 appId: dev.visualnscode.app
 productName: VisualnsCode
 executableName: spxcode
-copyright: Copyright © 2025-2026 Miguel Moretti
+copyright: Copyright © 2025-2026 spx miguel
 
 directories:
   output: ../../release
@@ -31,7 +31,7 @@ pkg:
 linux:
   category: Development
   description: AI-native IDE — Claude, Gemini, GPT and local models in one workspace
-  maintainer: Miguel Moretti <miguel.r.moretti.00@gmail.com>
+  maintainer: spx miguel <274152312+spxmiguel@users.noreply.github.com>
   target:
     - target: AppImage
       arch: [x64, arm64]
