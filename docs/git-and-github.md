@@ -73,6 +73,5 @@ argument arrays and return fixture output. They verify parsing, validation, conf
 the absence of `--push` without invoking GitHub, changing authentication, or publishing anything.
 
 ```bash
-pnpm test -- apps/desktop/src/main/services/git-service.test.ts \
-  apps/desktop/src/main/services/github-service.test.ts
+pnpm test:integration -- git-service.test.ts github-service.test.ts
 ```

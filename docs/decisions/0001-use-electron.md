@@ -1,24 +1,23 @@
-# ADR-0001: Usar Electron na aplicação desktop
+# ADR-0001: Use Electron for the desktop application
 
-- Estado: Aceito
-- Data: 2026-07-11
+- Status: Accepted
+- Date: 2026-07-11
 
-## Contexto
+## Context
 
-A aplicação precisa combinar uma UI web produtiva com filesystem, terminal, processos locais e
-distribuição para macOS, Windows e Linux. A equipe quer compartilhar TypeScript entre UI e backend
-local e aproveitar o ecossistema do Monaco Editor.
+The application combines a productive web UI with workspace files, terminals, local processes, and
+distribution for macOS, Windows, and Linux. The project should share TypeScript contracts between the
+UI and local backend and use the Monaco ecosystem.
 
-## Decisão
+## Decision
 
-Usar Electron com processos `main`, `preload` e `renderer` separados. O renderer terá
-`nodeIntegration: false`, `contextIsolation: true` e sandbox ativa. Capacidades locais serão
-expostas por uma API de preload mínima e IPC validado.
+Use Electron with separate main, preload, and renderer contexts. Set `nodeIntegration: false`,
+`contextIsolation: true`, and renderer sandboxing. Expose local capabilities through a minimal preload
+API and validated, named IPC.
 
-## Consequências
+## Consequences
 
-- acelera desenvolvimento multiplataforma e integração com tecnologias web;
-- permite compartilhar contratos TypeScript;
-- aumenta tamanho do binário e consumo de memória;
-- exige hardening contínuo, atualizações frequentes e disciplina rigorosa nas fronteiras IPC;
-- trabalho bloqueante deve sair do processo main.
+- Web technologies and TypeScript can be shared across platforms.
+- The binary and memory footprint are larger than a native or lightweight webview shell.
+- Electron/Chromium updates, hardening, and strict IPC review are continuous responsibilities.
+- Blocking and privileged work must not run in the renderer and should not block the main event loop.

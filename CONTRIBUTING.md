@@ -1,26 +1,33 @@
-# Contribuindo com o VisualnsCode
+# Contributing to VisualnsCode
 
-Obrigado por contribuir. Mudanças devem preservar a experiência simples, a segurança por padrão e
-os limites arquiteturais do projeto.
+Thank you for contributing. Changes should preserve the approachable experience, secure defaults,
+and architectural boundaries of the project.
 
-## Preparação
+## Set up the repository
 
-1. Instale Node.js 22 e pnpm 9.
-2. Execute `pnpm install`.
-3. Crie uma branch curta a partir de `main`.
-4. Antes de alterar arquitetura, leia `docs/architecture.md` e os ADRs.
+1. Install Node.js 20.18 or newer, pnpm 9, and Git.
+2. Fork and clone the repository.
+3. Run `corepack enable` and `pnpm install --frozen-lockfile`.
+4. Create a short-lived branch from `main`.
+5. Read [Architecture](./docs/architecture.md) and the [ADRs](./docs/decisions/README.md) before changing a system boundary.
 
-## Fluxo de desenvolvimento
+`pnpm install` activates Husky. The pre-commit hook formats and lints staged files, typechecks the
+workspace, and runs unit tests. The pre-push hook audits tracked content for secrets and runs the
+integration suite.
 
-- mantenha cada alteração pequena e focada;
-- escreva ou atualize testes junto com o comportamento;
-- não inclua credenciais, dados pessoais, artefatos de build ou dependências geradas;
-- mudanças duradouras de arquitetura precisam de um ADR;
-- uma PR deve explicar contexto, abordagem, riscos e como foi validada.
+## Development expectations
 
-Antes de abrir uma PR:
+- Keep each change small and focused.
+- Add or update tests with behavior changes.
+- Do not commit credentials, personal data, generated dependencies, local databases, or build output.
+- Record durable architectural decisions in an ADR.
+- Explain context, approach, risks, screenshots for UI changes, and validation in the pull request.
+- Keep the repository runnable after every commit.
+
+Before opening a pull request, run:
 
 ```bash
+pnpm docs:check
 pnpm format:check
 pnpm check:structure
 pnpm lint
@@ -30,7 +37,10 @@ pnpm build
 pnpm test:e2e
 ```
 
-## Commits
+Run `pnpm test:lighthouse` when changing the landing page and `pnpm security:audit` before every
+push. See [Testing](./docs/testing.md) for focused commands.
+
+## Commits and Changesets
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
@@ -41,23 +51,30 @@ docs(adr): record terminal isolation strategy
 test(providers): cover capability negotiation
 ```
 
-Tipos comuns: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci` e `chore`. Evite
-mensagens genéricas como `update`, `fix` ou `changes`. O repositório deve continuar funcional após
-cada commit.
+Common types are `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, and `chore`.
+Messages such as `update`, `fix`, or `changes` are not acceptable on their own.
 
-## Segurança antes do push
+For a user-visible change, run `pnpm changeset` and commit the generated file. Documentation-only,
+test-only, CI-only, and non-user-visible refactors do not require a Changeset.
 
-O script `pnpm security:audit` verifica os arquivos rastreados em busca de nomes sensíveis e padrões conhecidos de credenciais. O hook versionado em `.githooks/pre-push` executa essa auditoria automaticamente após `pnpm install` configurar o repositório.
+## Pull requests
 
-Antes de qualquer publicação:
+Pull requests must:
 
-1. revise `git status` e `git diff --cached`;
-2. execute `pnpm security:audit`;
-3. confirme que arquivos locais, bancos, tokens e credenciais estão cobertos pelo `.gitignore`;
-4. se um segredo já entrou no histórico, revogue-o e remova-o de todo o histórico antes do push.
+- use the repository template;
+- link the relevant issue when one exists;
+- remain limited to one coherent change;
+- pass all required GitHub Actions checks;
+- call out new IPC channels, commands, credentials, remote requests, or filesystem access;
+- avoid drive-by formatting or unrelated dependency updates.
 
-## Segurança
+## Security before push
 
-Não abra issue pública para vulnerabilidades. Siga [SECURITY.md](./SECURITY.md). Qualquer nova
-ponte de IPC, comando, acesso a arquivo, segredo ou integração externa precisa de validação de
-entrada e revisão explícita de privilégio.
+1. Review `git status`, `git diff`, and `git diff --cached`.
+2. Run `pnpm security:audit`.
+3. Confirm local state, databases, tokens, and credentials are excluded by `.gitignore`.
+4. If a secret entered Git history, revoke it first and contact the maintainers privately before rewriting shared history.
+
+Do not open public issues for vulnerabilities. Follow [SECURITY.md](./SECURITY.md). Any new IPC
+bridge, command, file access, secret, or external integration requires input validation and an
+explicit least-privilege review.

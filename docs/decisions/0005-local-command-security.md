@@ -1,26 +1,29 @@
-# ADR-0005: Controlar comandos locais por capacidade e risco
+# ADR-0005: Control local commands by capability and risk
 
-- Estado: Aceito
-- Data: 2026-07-11
+- Status: Accepted
+- Date: 2026-07-11
 
-## Contexto
+## Context
 
-Terminal, agentes e CLIs podem ler dados sensíveis, alterar projetos ou executar ações destrutivas.
-Um canal IPC genérico ou confirmação baseada apenas em strings não fornece limites confiáveis.
+Terminals, agents, and CLIs can read sensitive data, alter projects, or execute destructive actions. A
+generic IPC executor or confirmation based only on display text does not create a reliable boundary.
 
-## Decisão
+## Decision
 
-Não expor `exec`, shell ou `node-pty` ao renderer. Pedidos serão operações tipadas com diretório,
-argumentos, origem e efeito esperado. Uma policy classifica efeitos como leitura, escrita,
-destrutivo ou privilegiado. Escritas e níveis superiores exigem preview e confirmação; privilégios
-e acesso fora do workspace exigem consentimento específico. Execução ocorrerá em processo
-utilitário, com ambiente filtrado, cancelamento, limites e log local redigido.
+Do not expose `exec`, a shell, or `node-pty` to the renderer. Renderer requests are typed operations.
+Main-process policy resolves a fixed executable and argument array, checks workspace, origin,
+permission, and risk, then applies confirmation, timeout, cancellation, environment filtering, bounded
+output, and sanitized logging. Extreme destructive patterns are always blocked.
 
-## Consequências
+## Consequences
 
-- reduz execução acidental e injeção por conteúdo não confiável;
-- permite políticas diferentes para modo guiado e avançado sem remover proteções essenciais;
-- adiciona atrito intencional a efeitos relevantes;
-- comandos compostos e shells variam por plataforma e exigem parsing/testes específicos;
-- allowlists não substituem confirmação, sandbox do sistema ou revisão de diff;
-- nenhuma execução local será implementada antes do threat model da Fase 2.
+- Untrusted content cannot append shell operators to a named operation.
+- Simple and Advanced modes can differ in presentation without removing core protections.
+- Meaningful effects intentionally add review friction.
+- Platform command differences require focused adapters and tests.
+- Allowlists complement rather than replace OS sandboxing, confirmation, and diff review.
+
+## Implementation note
+
+Detection, Git/GitHub, scaffolding, project runners, provider CLIs, and deployment use constrained
+service boundaries. The complete policy is in [Security model](../security-model.md).

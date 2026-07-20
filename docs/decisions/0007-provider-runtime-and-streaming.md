@@ -1,28 +1,25 @@
-# ADR-0007: Executar providers no processo principal com eventos normalizados
+# ADR-0007: Run providers in the main process with normalized streaming
 
-- Estado: Aceito
-- Data: 2026-07-12
+- Status: Accepted
+- Date: 2026-07-12
 
-## Contexto
+## Context
 
-APIs HTTP, servidores locais e CLIs têm autenticação, protocolos de stream, cancelamento e riscos
-diferentes. Expor SDKs, chaves ou PTYs ao renderer violaria isolamento e espalharia detalhes de
-fornecedor pela interface.
+HTTP APIs, local servers, and CLIs have different authentication, stream protocols, cancellation, and
+risk. Exposing SDKs, keys, or PTYs to the renderer would break isolation and leak vendor details.
 
-## Decisão
+## Decision
 
-Implementar `AIProvider` em `packages/providers` e compor adapters no processo principal. HTTP usa
-SSE normalizado; CLIs usam adapters individuais sobre `node-pty`, com ambiente allowlisted. O
-preload oferece somente operações nomeadas, e o renderer recebe `AgentChunk` serializável.
+Implement `AIProvider` in `packages/providers` and construct adapters in the main process. Normalize
+HTTP streaming and individual `node-pty` CLI adapters into serializable `AgentChunk` events. Preload
+offers only named operations. Keep non-secret settings in owner-only application data and credentials
+in the ADR-0006 vault. Enforce concurrency, timeout, tokens, cancellation, and known cost limits in
+`ProviderService`.
 
-Configurações não sensíveis ficam no diretório de dados do aplicativo com modo `0600`. Segredos
-permanecem no cofre definido no ADR-0006. Concorrência, timeout, tokens e custos conhecidos são
-limitados no `ProviderService`.
+## Consequences
 
-## Consequências
-
-- a UI não conhece formatos de eventos ou autenticação de fornecedores;
-- cancelamento e testes falsos compartilham o mesmo contrato;
-- módulos nativos exigem empacotamento específico por plataforma;
-- capacidades anunciadas são conservadoras e preços não são congelados no código;
-- protocolos específicos podem exigir adapters nativos futuros, como a Responses API da OpenAI.
+- The UI does not know vendor event formats or authentication headers.
+- Cancellation and fake-provider tests share one contract.
+- Native PTY modules require platform-specific packaging tests.
+- Capability declarations remain conservative and prices are not frozen in source.
+- A provider-specific feature can justify a native adapter without changing the renderer contract.

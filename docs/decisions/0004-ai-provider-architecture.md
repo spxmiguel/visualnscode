@@ -1,23 +1,27 @@
-# ADR-0004: Arquitetar providers de IA por ports e adapters
+# ADR-0004: Use ports and adapters for AI providers
 
-- Estado: Aceito
-- Data: 2026-07-11
+- Status: Accepted
+- Date: 2026-07-11
 
-## Contexto
+## Context
 
-Providers variam em autenticação, streaming, modelos, tool calling, limites e erros. Acoplar a UI
-ou o domínio a um SDK tornaria a troca de fornecedor cara e espalharia condicionais pelo produto.
+Providers differ in authentication, streaming, model discovery, tools, limits, pricing, and errors.
+Coupling UI or domain logic to one SDK would spread vendor conditions throughout the product.
 
-## Decisão
+## Decision
 
-Definir uma porta canônica em `packages/providers`, baseada em capacidades e eventos normalizados.
-Cada fornecedor será um adapter separado. O core consome a porta, nunca o SDK; a composição ocorre
-no processo privilegiado. O registro inicial contém somente descritores e nenhuma chamada real.
+Define a capability-based canonical port in `packages/providers`. Implement each protocol or CLI as a
+separate adapter and compose it in the privileged Electron process. Domain and renderer code consume
+normalized models, chunks, responses, and errors rather than vendor SDK types.
 
-## Consequências
+## Consequences
 
-- providers podem ser trocados, simulados e testados isoladamente;
-- recursos exclusivos são anunciados por capabilities, sem fingir equivalência total;
-- normalização adiciona trabalho e pode limitar temporariamente recursos específicos;
-- secrets, rate limits, retries e telemetria ficam fora do renderer;
-- um mock provider será obrigatório antes da primeira integração externa.
+- Providers are replaceable, mockable, and independently testable.
+- Capabilities represent real differences instead of pretending all vendors are equivalent.
+- Normalization requires adapter work and may temporarily omit provider-specific features.
+- Secrets, rate limits, cancellation, and logs stay outside the renderer.
+
+## Implementation note
+
+The catalog now includes remote APIs, local servers, five CLI adapters, and a mandatory fake provider
+for deterministic tests. See [Providers](../providers.md).

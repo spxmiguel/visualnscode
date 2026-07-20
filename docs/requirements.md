@@ -1,48 +1,47 @@
-# Análise de requisitos
+# Product requirements
 
-## Visão do produto
+## Product vision
 
-O VisualnsCode deve centralizar edição, IA, agentes, CLIs e deploy sem expor toda a complexidade
-de uma IDE tradicional no primeiro contato. A interface será progressiva: segura e guiada por
-padrão, com controles avançados disponíveis quando necessários.
+VisualnsCode centralizes editing, AI, agents, CLIs, source control, preview, and deployment without
+showing the full complexity of a traditional IDE on first contact. The same domain capabilities power
+a guided Simple mode and a detailed Advanced mode.
 
-## Requisitos funcionais de longo prazo
+## Functional requirements
 
-1. Abrir, editar, salvar e buscar arquivos de um workspace local.
-2. Fornecer terminal integrado e executar comandos com política explícita de risco.
-3. Permitir configurar múltiplos providers de IA por adaptadores substituíveis.
-4. Orquestrar agentes com escopo, capacidades, limites e trilha de auditoria.
-5. Integrar source control, CLIs e plataformas de deploy sem acoplá-las à interface.
-6. Persistir configurações, metadados e histórico localmente.
-7. Apresentar modos de uso guiado e avançado sobre o mesmo núcleo de domínio.
+1. Open, inspect, edit, save, diff, checkpoint, and restore files in a trusted local workspace.
+2. Detect and run supported project actions through a risk-aware command boundary.
+3. Configure multiple interchangeable remote, local, and CLI AI providers.
+4. Orchestrate agents with explicit scope, tools, budgets, autonomy, visibility, and cancellation.
+5. Integrate Git, GitHub, developer CLIs, preview, and deploy without coupling them to renderer code.
+6. Keep non-secret preferences and bounded histories locally; encrypt credentials with the OS facility.
+7. Explain important actions in plain language while keeping technical details available.
+8. Require review for AI file changes and fresh confirmation for remote or dangerous effects.
 
-## Requisitos não funcionais
+## Non-functional requirements
 
-- **Segurança:** renderer sem acesso direto ao Node.js; IPC mínimo, validado e auditável;
-  credenciais fora do estado do renderer; confirmação para efeitos locais relevantes.
-- **Evolução:** contratos estáveis, adapters por provider e pacotes com dependências direcionais.
-- **Confiabilidade:** lint, typecheck, testes e build obrigatórios no CI.
-- **Desempenho:** carregar recursos pesados sob demanda e evitar bloquear o processo main.
-- **Portabilidade:** macOS, Windows e Linux, com abstrações para diferenças de shell e filesystem.
-- **Acessibilidade:** navegação por teclado, semântica e contraste tratados como critérios de
-  aceite, não como acabamento.
-- **Privacidade:** contexto enviado externamente deve ser explícito e minimizado.
+- **Security:** no direct Node.js renderer access; named and validated IPC; least privilege; secret
+  redaction; safe real-path handling; destructive-command invariants.
+- **Reliability:** lint, typecheck, unit/integration/E2E tests, builds, dependency review, CodeQL, and
+  documentation validation in CI.
+- **Maintainability:** stable contracts, provider/integration adapters, directed package dependencies,
+  Conventional Commits, Changesets, and ADRs.
+- **Performance:** lazy heavy resources, bounded output/history, cancellable work, and no blocking
+  long-running operation in renderer code.
+- **Portability:** macOS arm64/x64, Windows x64, and Linux x64 packaging with platform-aware commands.
+- **Accessibility:** keyboard operation, semantics, focus visibility, reduced motion, and contrast are
+  acceptance criteria.
+- **Privacy:** explicit minimal context, local-first history, sanitized logs, and no workspace telemetry
+  by default.
 
-## Escopo desta entrega
+## Current alpha scope
 
-- monorepo pnpm com apps desktop e landing separadas;
-- shell Electron mínimo com isolamento seguro;
-- React, Vite, Tailwind, Monaco e Zustand configurados;
-- contratos iniciais para core, agents, providers e integrations;
-- lint, formatação, typecheck, testes unitários, smoke test e CI;
-- documentação de arquitetura, plano, governança e decisões.
+The repository implements the major product flows above and a separate public landing page. The alpha
+is intended for source-based development and evaluation, not as a signed production distribution.
 
-## Fora do escopo desta entrega
+## Explicit limitations
 
-- chamadas reais a modelos ou armazenamento de chaves de API;
-- execução de agentes ou comandos locais;
-- terminal com `node-pty`, banco SQLite ou WebSocket;
-- empacotadores, assinatura de binários e auto-update;
-- autenticação, telemetria ou deploy real.
-
-Esses itens dependem de threat modeling e contratos validados nas fases seguintes.
+- No public binary release, signing, notarization, or automatic update channel.
+- No stable third-party plugin loader or SDK.
+- SQLite migration and the complete interactive terminal UI remain planned.
+- Packaged Electron E2E and operating-system coverage are incomplete.
+- Provider behavior and pricing can change upstream; tests use fakes rather than live credentials.

@@ -1,87 +1,68 @@
-# Development
+# Development guide
 
 ## Setup
 
 ```bash
 git clone https://github.com/spxmiguel/visualnscode.git
 cd visualnscode
-pnpm install
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
-## Dev commands
+## Commands
 
-| Command                | What it does                                  |
-| ---------------------- | --------------------------------------------- |
-| `pnpm dev`             | Electron app with hot-reload                  |
-| `pnpm dev:landing`     | Landing page (Vite dev server)                |
-| `pnpm test`            | Unit tests (Vitest)                           |
-| `pnpm test:watch`      | Tests in watch mode                           |
-| `pnpm test:e2e`        | End-to-end tests (Playwright)                 |
-| `pnpm test:lighthouse` | Production landing quality audit              |
-| `pnpm lint`            | ESLint (zero warnings)                        |
-| `pnpm typecheck`       | TypeScript `tsc --noEmit` across all packages |
-| `pnpm format`          | Prettier                                      |
-| `pnpm build`           | Production build                              |
+| Command                             | Purpose                                                        |
+| ----------------------------------- | -------------------------------------------------------------- |
+| `pnpm dev`                          | Electron desktop development mode                              |
+| `pnpm dev:landing`                  | Landing Vite server                                            |
+| `pnpm dev:ui`                       | Shared component catalog                                       |
+| `pnpm docs:check`                   | Required docs, local links, README sections, and Mermaid flows |
+| `pnpm check:structure`              | Required monorepo packages and apps                            |
+| `pnpm format` / `pnpm format:check` | Write or verify Prettier formatting                            |
+| `pnpm lint`                         | ESLint with zero warnings                                      |
+| `pnpm typecheck`                    | Root and workspace TypeScript checks                           |
+| `pnpm test:unit`                    | Pure package and renderer tests                                |
+| `pnpm test:integration`             | Main-process service tests with fakes                          |
+| `pnpm test`                         | Unit followed by integration tests                             |
+| `pnpm test:e2e`                     | Playwright landing journeys and accessibility                  |
+| `pnpm test:lighthouse`              | Production landing build and Lighthouse CI                     |
+| `pnpm build`                        | Build all workspaces with a build script                       |
+| `pnpm security:audit`               | Scan tracked files and Git history for secret patterns         |
+| `pnpm changeset`                    | Describe a release-relevant package change                     |
+| `pnpm version-packages`             | Consume Changesets and update package versions/changelogs      |
 
-## Repository structure
+## Repository layout
 
-```
-visualnscode/
-├── apps/
-│   ├── desktop/          # Electron main + preload + renderer (React)
-│   └── landing/          # Marketing site (Vite + React)
-├── packages/
-│   ├── agents/           # Agent contracts, workflow engine, default agents
-│   ├── config/           # Shared constants (tool IDs, permissions)
-│   ├── core/             # Pure domain logic (command classifier, templates)
-│   ├── integrations/     # CLI integrations (GitHub, Firebase, Vercel, Supabase)
-│   ├── providers/        # AI provider adapters
-│   ├── types/            # Shared TypeScript types
-│   └── ui/               # Shared React components
-├── docs/                 # All documentation
-├── scripts/              # Install scripts, CI helpers
-└── .github/              # Workflows, issue templates, PR template
-```
+The desktop renderer, preload, and main process live in `apps/desktop`. The landing app is completely
+separate in `apps/landing`. `apps/ui-docs` documents shared components. Stable contracts and reusable
+logic live in `packages`; product composition stays in `apps`.
 
-## Adding a package
+## Electron IPC conventions
 
-```bash
-pnpm --filter @visualnscode/your-package add some-dep
-```
+Channels use `namespace:action`, for example `fs:read-file` or `chat:send`. Add a capability in this order:
 
-Add the package to `pnpm-workspace.yaml` if creating a new one.
+1. Define or reuse a serializable request/result type.
+2. Add validation and a handler in the main-process IPC composition.
+3. Expose one named preload method.
+4. Add the renderer type declaration.
+5. Test a valid request, invalid payload, denied permission, and sanitized error.
 
-## IPC conventions
+Never expose raw `ipcRenderer`, Node.js APIs, a general filesystem function, or arbitrary command
+execution through preload.
 
-All Electron IPC channels follow the pattern `namespace:action`:
+## Extension paths
 
-- `fs:read-file` — handle (invoke/handle)
-- `runner:start` — fire-and-forget (send/on)
-- `chat:chunk` — pushed to renderer (send from main)
+- [Add an AI provider](./providers.md#adding-a-provider)
+- [Add a tool integration](./integrations.md#adding-an-integration)
+- [Add a project template](./project-templates.md#adding-a-template)
+- [Add an agent](./agents.md#adding-an-agent-programmatically)
+- [Design against the future plugin contract](./plugins.md)
 
-Never expose raw filesystem paths or Node.js APIs directly in the preload — only typed IPC calls.
+Use a new ADR when a change adds a privilege, alters package dependency direction, changes storage,
+or creates a new process or trust boundary.
 
-## Adding an IPC channel
+## Git workflow
 
-1. Add the handler to `apps/desktop/src/main/ipc.ts`.
-2. Expose it in `apps/desktop/src/preload/index.ts`.
-3. Add the type signature to `apps/desktop/src/renderer/electron.d.ts`.
-
-## Commit style
-
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat(desktop): add diff viewer component
-fix(git): handle detached HEAD state
-docs: add deployment guide
-test(fs): cover path traversal cases
-chore: bump electron to 43.2.0
-```
-
-## Architecture decisions
-
-All significant decisions are documented as ADRs in `docs/decisions/`. Read them before making architectural changes.
-
-Landing page structure, quality gates, and deployment are documented in
-[`landing.md`](./landing.md).
+Husky runs lint-staged, typecheck, and unit tests before commit. Pre-push runs the repository security
+audit and integration tests. Use Conventional Commits and add a Changeset for user-visible behavior.
+The full policy is in [CONTRIBUTING.md](../CONTRIBUTING.md).

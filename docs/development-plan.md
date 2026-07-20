@@ -1,83 +1,53 @@
-# Plano de desenvolvimento
+# Development plan
 
-Cada fase termina com lint, typecheck, testes e build verdes. Funcionalidades devem entrar em
-fatias verticais pequenas; nenhuma fase autoriza a implementação antecipada de todas as seguintes.
+Each phase ends with documentation, lint, typecheck, tests, and build passing. Features should land as
+small vertical slices that leave the repository runnable.
 
-## Fase 0 — Fundação
+## Phase 0 — Foundation (complete)
 
-**Objetivo:** estabelecer limites, ferramentas e documentação.
+pnpm monorepo, separate desktop and landing apps, shared packages, TypeScript, ESLint, Prettier,
+Tailwind, Vitest, Playwright, CI, governance files, and initial ADRs.
 
-- monorepo, apps, pacotes, TypeScript, ESLint, Prettier e Tailwind;
-- shell Electron seguro, renderer e landing mínimos;
-- Vitest, Playwright, CI, governança e ADRs.
+## Phase 1 — Desktop workspace (complete in alpha)
 
-**Saída:** clone limpo instala, valida e compila com comandos documentados. **Concluída.**
+Home, recent projects, settings, themes, Simple/Advanced modes, Monaco, file tabs, native folder open,
+safe file read/write, resizable panels, UI states, shortcuts, and shared component catalog.
 
-## Fase 1 — Workspace local
+Remaining stabilization: workspace text search and complete keyboard-only navigation.
 
-**Objetivo:** tornar o editor útil sem IA.
+## Phase 2 — Local capabilities and security (partially complete)
 
-A composição visual, os modos de experiência, temas, painéis e estados foram antecipados como uma
-fatia de interface demonstrativa. Os itens abaixo continuam pendentes porque dependem de IPC real.
+Command classification, permission model, path and symlink controls, secret detection/redaction,
+review-first edits, checkpoints, Git, process runner, preview, and bounded histories are implemented.
 
-- abertura de pasta por diálogo nativo;
-- árvore de arquivos, abas, edição e salvamento;
-- busca básica e preferências de editor;
-- IPC tipado, schemas de validação e testes de contrato.
+Remaining: finish the interactive terminal surface, isolate long-lived PTY work more strongly, and
+migrate metadata to versioned SQLite.
 
-**Saída:** usuário edita um projeto local e nenhuma API Node é exposta diretamente ao renderer.
+## Phase 3 — Universal providers (complete in alpha)
 
-## Fase 2 — Terminal e persistência
+Canonical streaming contract, remote/local/CLI adapters, encrypted credentials, redacted remote
+context, provider settings, cancellation, chat history/export, and fake-provider tests.
 
-**Objetivo:** adicionar capacidades locais controladas.
+Remaining: maintained pricing metadata, cumulative session budgets, and packaged native-module tests.
 
-- `node-pty` isolado em processo utilitário;
-- SQLite com migrations para preferências e histórico;
-- classificação de risco, preview, confirmação e cancelamento de comandos;
-- logs de auditoria locais com política de retenção.
+## Phase 4 — Agents and reviewable work (complete in alpha)
 
-**Saída:** terminal funciona nas três plataformas-alvo e cenários destrutivos exigem confirmação.
+Built-in/custom definitions, autonomy policy, visual teams, DAG execution, parallel stages, retry,
+timeout, cancellation, budgets, step limits, history, rollback hooks, and opt-in version-control output.
 
-## Fase 3 — Primeiro provider de IA
+Remaining: harden real provider-to-tool execution and expand recovery tests.
 
-**Objetivo:** validar a arquitetura de providers com uma única integração.
+## Phase 5 — Projects, source control, preview, and deploy (complete in alpha)
 
-- porta canônica de mensagens, streaming, erros e capacidades;
-- armazenamento seguro de segredo pelo keychain do sistema;
-- consentimento e preview do contexto enviado;
-- mock provider para testes determinísticos.
+Thirteen versioned templates, guided creation, Git/GitHub operations, runtime detection, process
+controls, loopback preview, element context, and confirmed Vercel/Firebase/Supabase/GitHub Pages plans.
 
-**Saída:** chat opt-in funciona por adapter, sem SDK de fornecedor no `core` ou no renderer.
+Remaining: signed remote template catalog and broader deploy failure recovery.
 
-## Fase 4 — Agentes e ferramentas
+## Phase 6 — Distribution and maturity (in progress)
 
-**Objetivo:** permitir tarefas assistidas com controle humano.
+Separate quality workflows, Changesets, alpha/beta/stable policy, and cross-platform packaging are
+configured. Before stable: packaged-app E2E, signing, notarization, update rollback, SBOM/provenance,
+WCAG audit, supported migrations, and plugin isolation.
 
-- lifecycle de agente, orçamento, cancelamento e checkpoints;
-- tool calls tipadas e autorizadas pela política de comandos;
-- diff antes de escrita e recuperação de falhas;
-- integração inicial de source control.
-
-**Saída:** toda mutação é revisável, rastreável e reversível quando tecnicamente possível.
-
-## Fase 5 — Integrações e deploy
-
-**Objetivo:** conectar serviços sem fragmentar a experiência.
-
-- catálogo de integrações e capacidades;
-- deploy com preview de plano e confirmação;
-- WebSocket apenas para fluxos remotos que precisem de eventos em tempo real;
-- observabilidade e diagnóstico local opt-in.
-
-**Saída:** integrações falham de forma isolada e não bloqueiam o editor.
-
-## Fase 6 — Distribuição e maturidade
-
-**Objetivo:** preparar releases públicos confiáveis.
-
-- empacotamento, assinatura, notarização e auto-update;
-- acessibilidade WCAG, performance e testes cross-platform;
-- threat model revisado, SBOM e resposta a vulnerabilidades;
-- canal stable/beta e migrações compatíveis.
-
-**Saída:** artefatos reproduzíveis, assinados e promovidos por uma release pipeline auditável.
+Detailed priorities are maintained in [ROADMAP.md](../ROADMAP.md).

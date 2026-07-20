@@ -1,93 +1,58 @@
 # Testing
 
-## Test stack
+## Test layers
 
-| Tool            | Purpose                    |
-| --------------- | -------------------------- |
-| Vitest          | Unit and integration tests |
-| Testing Library | React component tests      |
-| Playwright      | End-to-end tests           |
-| Axe             | Automated accessibility    |
-| Lighthouse CI   | Web quality budgets        |
+| Layer         | Command                 | Scope                                                                         |
+| ------------- | ----------------------- | ----------------------------------------------------------------------------- |
+| Unit          | `pnpm test:unit`        | Pure packages, shared edit model, and renderer behavior                       |
+| Integration   | `pnpm test:integration` | Main-process services with fake command, provider, Git, and deploy boundaries |
+| Combined      | `pnpm test`             | Unit then integration                                                         |
+| End to end    | `pnpm test:e2e`         | Landing navigation, interactions, responsive behavior, and Axe checks         |
+| Quality audit | `pnpm test:lighthouse`  | Built landing performance, accessibility, practices, and SEO budgets          |
 
-## Run tests
+Vitest files remain beside source as `*.test.ts` or `*.test.tsx`. Playwright specifications live in
+`e2e/`. `vitest.unit.config.ts` and `vitest.integration.config.ts` make the CI split explicit.
+
+## Determinism and safety
+
+- Provider tests use `FakeProvider`, mocked Fetch, or fake PTY behavior; they never need an API key.
+- Integration tests inject fake command executors and do not authenticate, install, push, or deploy.
+- Filesystem tests use temporary directories and cover traversal, real paths, symlinks, sensitive
+  files, atomic writes, checkpoints, and rollback.
+- Renderer tests stub the typed `window.visualnscode` bridge rather than starting privileged services.
+- E2E tests start only the local landing Vite server defined in `playwright.config.ts`.
+
+## Writing tests
+
+Test observable contracts and failure paths. A new privileged capability needs at least:
+
+1. a successful request with the smallest valid payload;
+2. malformed input rejection;
+3. missing permission or confirmation rejection;
+4. sanitized command/provider failure;
+5. cancellation or timeout behavior when applicable.
+
+Use the existing fake implementations instead of monkey-patching process globals. Keep fixtures free of
+realistic secrets that could trigger the repository audit unless the test explicitly builds a secret
+from separated strings.
+
+## Local verification
 
 ```bash
-pnpm test           # all unit tests, pass with no tests
-pnpm test:watch     # watch mode
-pnpm test:e2e       # Playwright E2E (requires built app)
-pnpm test:lighthouse # build and audit the landing page
+pnpm docs:check
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+pnpm test:lighthouse
+pnpm security:audit
 ```
 
-## Test locations
+Install Playwright's browser once on a new machine with
+`pnpm exec playwright install chromium`. CI uses `--with-deps` on Ubuntu.
 
-- Unit tests live alongside source files: `*.test.ts`, `*.test.tsx`.
-- E2E tests live in `e2e/`.
-- Landing accessibility checks live in `e2e/landing-accessibility.spec.ts`.
-- Test helpers and mocks in `vitest.setup.ts`.
-
-The Lighthouse configuration is in `.lighthouserc.json`. It audits the production build rather than
-the development server, and the dedicated GitHub Actions workflow runs the same command on pushes to
-`main` and pull requests.
-
-## Writing unit tests
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { classifyCommand } from '../services/secret-scanner';
-
-describe('classifyCommand', () => {
-  it('blocks rm -rf', () => {
-    expect(classifyCommand('rm -rf /')).toBe('blocked');
-  });
-
-  it('confirms npm install', () => {
-    expect(classifyCommand('npm install')).toBe('confirm');
-  });
-});
-```
-
-## Writing component tests
-
-```typescript
-import { render, screen } from '@testing-library/react';
-import { DiffViewer } from '../components/DiffViewer';
-
-it('shows accept and reject buttons', () => {
-  render(<DiffViewer original="a" modified="b" originalPath="foo.ts" onAccept={() => {}} onReject={() => {}} />);
-  expect(screen.getByText('Aceitar')).toBeInTheDocument();
-  expect(screen.getByText('Rejeitar')).toBeInTheDocument();
-});
-```
-
-## Using the fake provider
-
-Tests that exercise the chat or agent system use `FakeProvider` — a provider that returns scripted responses without hitting any API:
-
-```typescript
-import { FakeProvider } from '@visualnscode/providers/testing';
-
-const provider = new FakeProvider([
-  { content: 'Hello', usage: { inputTokens: 5, outputTokens: 3, costUsd: 0 } },
-]);
-```
-
-## Mocking IPC in renderer tests
-
-The renderer accesses `window.visualnscode`. In tests, stub the object:
-
-```typescript
-vi.stubGlobal('visualnscode', {
-  fs: {
-    listDir: vi.fn().mockResolvedValue([]),
-    readFile: vi.fn().mockResolvedValue(''),
-  },
-  git: {
-    status: vi.fn().mockResolvedValue({ branch: 'main', files: [] }),
-  },
-});
-```
-
-## Coverage
-
-Run `pnpm test -- --coverage` (requires `@vitest/coverage-v8`). Coverage is reported in `coverage/`. The CI workflow uploads coverage to Codecov when configured.
+Coverage reporting is configured in the base Vitest configuration, but the V8 coverage package is not
+currently installed and no coverage threshold is claimed. Adding a measured threshold is a roadmap
+item, not a hidden CI requirement.

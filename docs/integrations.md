@@ -1,75 +1,68 @@
 # Integrations
 
-VisualnsCode integrates with the services most used in modern web development. All integrations require explicit permission and use secure credential storage.
+VisualnsCode integrates with local developer tools through typed adapters. Detection is read-only;
+install, authentication, workspace writes, migrations, remote creation, and deployment require both
+the relevant permission and confirmation for the specific action.
 
-## GitHub
+## Included integrations
 
-- Detected via: `gh auth status`
-- Auth: `gh auth login` (browser-based OAuth)
-- Read features: authentication status, username, issues, pull requests, Actions, and releases
-- Write features: create repo, clone, fork, issue, pull request, and release, each explicitly confirmed
-- Source control: status, diffs, commits, branches, merge, stash, tags, safe reset, revert, conflicts,
-  push, and pull
+| Service  | Detection and authentication                      | Implemented operations                                                                  |
+| -------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| GitHub   | `gh --version`, `gh auth status`, `gh auth login` | Account, repositories, clone, fork, issues, pull requests, Actions, releases, push/pull |
+| Firebase | `firebase --version`, `firebase login`            | Projects, project selection, initialization, Hosting deployment                         |
+| Vercel   | `vercel --version`, `vercel login`                | Projects, local link, project creation, preview and production deploy                   |
+| Supabase | `supabase --version`, `supabase login`            | Projects, link, local start, migrations, TypeScript type generation, function deploy    |
 
-See [Git and GitHub](./git-and-github.md) for UI modes, safety guarantees, and agent automation.
+Git itself is exposed by a separate main-process service for status, staging, commits, branches,
+merge, diff, stash, tags, safe reset, revert, and conflict handling. See
+[Git and GitHub](./git-and-github.md).
 
-## Firebase
-
-- Detected via: `firebase --version`
-- Auth: `firebase login`
-- Features: project selection, Hosting deploy, Firestore rules, Authentication setup
-
-## Vercel
-
-- Detected via: `vercel --version`
-- Auth: `vercel login`
-- Features: project link, preview deploy, production deploy, domain management
-
-## Supabase
-
-- Detected via: `supabase --version`
-- Auth: `supabase login`
-- Features: project link, local start, migrations, TypeScript types generation
-
-## Adding a new integration
-
-Integrations live in `packages/integrations/src/tools/`.
-
-1. Create a file named `my-tool.ts` implementing `ToolIntegration`:
+## Contract
 
 ```typescript
-import type { ToolIntegration } from '../types';
-
-export const myTool: ToolIntegration = {
-  id: 'my-tool',
-  name: 'My Tool',
-  detect: async () => {
-    /* shell detection */
-  },
-  install: async () => {
-    /* install instructions */
-  },
-  authenticate: async () => {
-    /* auth flow */
-  },
-  test: async () => {
-    /* connection test */
-  },
-};
+interface ToolIntegration {
+  readonly id: string;
+  readonly name: string;
+  detect(): Promise<ToolDetectionResult>;
+  install(): Promise<ToolActionResult>;
+  authenticate(): Promise<ToolActionResult>;
+  test(): Promise<ToolActionResult>;
+}
 ```
 
-2. Register it in `packages/integrations/src/index.ts`.
-3. The onboarding assistant will pick it up automatically.
+`GenericToolIntegration` implements detection, catalog-defined install, and a fixed test action.
+GitHub, Firebase, Vercel, and Supabase extend that behavior with service-specific named methods.
 
-## Permission model
+## Permission map
 
-Each integration action maps to a permission level:
+| Permission ID          | Purpose                                         | Default |
+| ---------------------- | ----------------------------------------------- | ------- |
+| `read`                 | Project and tool information                    | Granted |
+| `write`                | Workspace files and service configuration       | Denied  |
+| `execute-safe`         | Read-only detection and tests                   | Granted |
+| `install-dependencies` | Catalog-defined installers                      | Denied  |
+| `outside-workspace`    | Global Git configuration or other external path | Denied  |
+| `credentials`          | Authentication and account checks               | Denied  |
+| `administrative`       | Reserved privileged operations                  | Denied  |
 
-| Action             | Required permission |
-| ------------------ | ------------------- |
-| Read project info  | `read`              |
-| Write files        | `write`             |
-| Run safe commands  | `commands-safe`     |
-| Install packages   | `install`           |
-| Access credentials | `credentials`       |
-| Admin operations   | `admin`             |
+Permission is necessary but not sufficient. `EnvironmentService` also checks tool ID, action,
+confirmation, operation name, and trusted workspace path.
+
+## Adding an integration
+
+1. Add a `ToolDefinition` to `packages/integrations/src/tool-catalog.ts` with a stable ID,
+   executable, version arguments, official documentation URL, and optional fixed install command.
+2. Use `GenericToolIntegration` when detection/install/test are enough. For service operations, create
+   a focused adapter beside `github-integration.ts`, `firebase-integration.ts`, and the other existing
+   adapters. Run only `CommandSpec` objects with fixed executables and structured arguments.
+3. Export a public adapter from `packages/integrations/src/index.ts`.
+4. Add explicit action routing and permission checks in
+   `apps/desktop/src/main/services/environment-service.ts`. Catalog registration alone does not expose
+   write or authentication methods automatically.
+5. Add the renderer control only through a named preload method and validated IPC request.
+6. Test detection, missing executable, failed command, denied permission, missing confirmation,
+   sanitized output, and each operation with a fake `CommandRunner`.
+7. Update [CLI detection](./cli-detection.md), onboarding copy, and this document.
+
+Never accept a shell fragment, arbitrary environment, or free-form executable from the renderer. A
+new administrative or remote-write capability also requires a security review and usually an ADR.

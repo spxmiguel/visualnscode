@@ -1,83 +1,73 @@
 # Project execution, preview, and deployment
 
-VisualnsCode detects a project from files in the open workspace. The renderer requests named actions;
-it never sends an arbitrary shell command. The Electron main process detects the project again and
-maps the action to a fixed executable and argument array.
+VisualnsCode detects a project from the open workspace. The renderer requests a named action; it never
+sends an arbitrary shell command. The main process detects the project again and maps the action to a
+fixed executable and argument array.
 
 ## Runtime detection
 
-| Project signal                                   | Runtime / manager | Actions detected                             | Default port |
-| ------------------------------------------------ | ----------------- | -------------------------------------------- | ------------ |
-| `pnpm-lock.yaml`                                 | pnpm              | install, dev/start, build, test from scripts | framework    |
-| `yarn.lock`                                      | Yarn              | install, dev/start, build, test from scripts | framework    |
-| `bun.lock` or `bun.lockb`                        | Bun               | install, dev/start, build, test from scripts | framework    |
-| `package-lock.json`, `package.json`, or npm      | npm               | install, dev/start, build, test from scripts | framework    |
-| `pyproject.toml`, Python entrypoint, or manifest | Python            | pip install, server/entrypoint, pytest       | 5000 / 8000  |
-| `index.html` without a runtime manifest          | built-in server   | development preview                          | 4173         |
+| Project signal                           | Runtime or manager     | Detected actions                                            | Typical port       |
+| ---------------------------------------- | ---------------------- | ----------------------------------------------------------- | ------------------ |
+| `pnpm-lock.yaml`                         | pnpm                   | install plus package scripts for dev/start, build, and test | Framework-specific |
+| `yarn.lock`                              | Yarn                   | install plus package scripts                                | Framework-specific |
+| `bun.lock` or `bun.lockb`                | Bun                    | install plus package scripts                                | Framework-specific |
+| `package-lock.json` or `package.json`    | npm                    | install plus package scripts                                | Framework-specific |
+| `pyproject.toml` or a Python entry point | Python                 | install, server/entry point, pytest                         | 5000 or 8000       |
+| `index.html` without a runtime manifest  | Built-in static server | development preview                                         | 4173               |
 
-Vite defaults to 5173, Next.js and Create React App to 3000, and Astro to 4321. A port in the
-detected script (`--port`, `-p`, or `PORT=`) takes precedence. The process can be started, stopped,
-or restarted, while stdout and stderr stream into the runtime log.
+Vite defaults to 5173, Next.js and Create React App to 3000, and Astro to 4321. An explicit `--port`,
+`-p`, or `PORT=` in the detected script wins. Processes can start, stop, and restart while stdout and
+stderr stream separately into the runtime log.
 
-## Integrated web preview
+## Integrated preview
 
-The Preview panel provides desktop, tablet, mobile, and custom resolutions. Refresh, external browser,
-screenshot, console, and basic `fetch` network events are available from its toolbar.
+The Preview panel provides desktop, tablet, mobile, and custom dimensions plus refresh, external
+browser, screenshot, console, and basic Fetch network events. The page runs through an ephemeral
+loopback proxy that accepts only `localhost`, `127.0.0.1`, and `::1` origins.
 
-The displayed page is routed through an ephemeral loopback proxy. It accepts only `localhost`,
-`127.0.0.1`, and `::1`, and injects a small browser bridge. The bridge communicates through
-`postMessage`; it has no Electron, filesystem, credential, or command API.
+The proxy injects a small browser bridge. It communicates through `postMessage` and has no Electron,
+filesystem, credential, or command API. Element selection sends the reviewed page URL, CSS selector,
+tag, visible text, classes, selected attributes, and bounds to the chat draft. Any requested code
+change still uses the proposal and diff review flow.
 
-To give an agent visual context:
+## Supported deploy targets
 
-1. Start the project and click **Select element**.
-2. Hover the page and click the target.
-3. Review the CSS selector shown above the preview.
-4. Click **Send to chat**.
+| Service          | Preview                                               | Production                                    |
+| ---------------- | ----------------------------------------------------- | --------------------------------------------- |
+| Vercel           | Confirmed preview deploy                              | Separately confirmed `--prod` deploy          |
+| Firebase Hosting | Isolated preview channel                              | Hosting-only deploy                           |
+| Supabase         | Edge Function deploy for a selected project reference | Same operation marked production              |
+| GitHub Pages     | Existing configured workflow                          | Existing workflow with production environment |
 
-The chat draft receives the page URL, selector, tag, text, classes, selected attributes, and bounds.
-Files already open in the editor remain the explicit source context. Any resulting edit still follows
-the normal proposal → diff → review flow.
+The corresponding CLI must already be installed and authenticated. Supabase needs a project reference
+and function name. GitHub Pages needs an existing workflow; VisualnsCode does not silently generate or
+modify repository automation during deployment.
 
-## Supported deployment targets
+## Deploy flow
 
-| Service                 | Preview command                         | Production command                             |
-| ----------------------- | --------------------------------------- | ---------------------------------------------- |
-| Vercel                  | `vercel deploy --yes`                   | `vercel deploy --yes --prod`                   |
-| Firebase Hosting        | isolated Hosting preview channel        | Hosting-only deploy                            |
-| Supabase Edge Functions | function deploy for a project reference | same command, marked as production             |
-| GitHub Pages            | configured Actions workflow             | configured Actions workflow with `environment` |
+```mermaid
+flowchart TD
+    Choose["Choose service and environment"] --> Detect["Detect project and fixed command"]
+    Detect --> Review["Review configuration and technical details"]
+    Review --> Build["Run the detected build"]
+    Build -->|"failed"| Stop["Stop and show sanitized errors"]
+    Build -->|"passed"| Confirm["Request confirmation for this attempt"]
+    Confirm -->|"denied"| Stop
+    Confirm -->|"approved"| Publish["Run provider CLI without a shell"]
+    Publish --> Result["Show URL and sanitized output"]
+    Result --> History["Write bounded local deploy history"]
+    Result -->|"promote to production"| ConfirmProduction["Request a new production confirmation"]
+    ConfirmProduction --> Publish
+```
 
-The corresponding CLI must already be installed and authenticated. Supabase requires a project
-reference and function name. GitHub Pages requires an existing Pages workflow filename; VisualnsCode
-does not generate or silently alter a repository workflow during deployment.
+Renderer state cannot bypass the main-process confirmation. A preview confirmation is never reused for
+production, and VisualnsCode never retries a production deploy automatically.
 
-## Confirmed deployment flow
+## History and failures
 
-1. Open **Preview → Publish** and choose a service and environment.
-2. Review the exact plan and technical command.
-3. VisualnsCode runs the detected build when the target needs one.
-4. Select the confirmation checkbox for that specific attempt.
-5. Create a preview, inspect its URL, then select production if appropriate.
-6. Confirm production separately. A previous preview confirmation is never reused.
+Up to 100 records are stored in `.visualnscode/deploy-history.json` with restrictive permissions.
+Records contain provider, environment, status, timestamps, summary, and returned URL. CLI output is
+redacted before it reaches UI or history. A failed build prevents deploy; a failed deploy creates a
+failed record with sanitized diagnostics.
 
-Both preview and production are external side effects and require confirmation. Production is also
-validated in the main process; renderer state alone cannot bypass the guard.
-
-## History and failure behavior
-
-Results are stored in `.visualnscode/deploy-history.json` with permission `0600`. The directory is
-ignored by the VisualnsCode project templates and this repository. At most 100 records are retained.
-Each record contains the provider, environment, status, timestamps, summary, and URL when returned.
-CLI output is redacted before it reaches the interface; tokens and credentials are not written to
-history.
-
-If the build fails, deployment stops. A failed CLI invocation creates a failed history record and the
-UI keeps the sanitized log available for review. VisualnsCode never retries a production publish by
-itself.
-
-## VisualnsCode landing page
-
-The public website is deployed separately from user projects and from the Electron release pipeline.
-Its Vite build, quality gates, canonical-domain checklist, and Vercel project settings are documented
-in [`landing.md`](./landing.md).
+The VisualnsCode landing page has a separate Vercel process documented in [Landing](./landing.md).

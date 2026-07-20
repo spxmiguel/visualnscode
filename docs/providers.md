@@ -1,80 +1,84 @@
-# Providers de IA
+# AI providers
 
-## Visão geral
+`packages/providers` gives remote APIs, local servers, and command-line agents one canonical contract.
+The package does not know React or the concrete credential vault; `ProviderService` composes both in
+the Electron main process.
 
-`packages/providers` define uma porta comum para APIs remotas, servidores locais e CLIs. O pacote
-não conhece React nem o cofre concreto. A composição ocorre em `ProviderService`, dentro do processo
-principal do Electron.
+## Supported adapters
 
-```text
-ChatPanel → preload → IPC validado → ProviderService → AIProvider
-                                                   ↳ HTTP/SSE
-                                                   ↳ node-pty
+| Kind         | Providers                                                                | Execution  |
+| ------------ | ------------------------------------------------------------------------ | ---------- |
+| Remote API   | OpenAI, Anthropic, Google Gemini, OpenRouter, OpenAI-compatible endpoint | Remote     |
+| Local server | Ollama, LM Studio                                                        | Local HTTP |
+| CLI          | Claude Code, Codex, Gemini CLI, Aider, OpenCode                          | Local PTY  |
+
+OpenAI, OpenRouter, Ollama, LM Studio, and configurable compatible endpoints share the
+OpenAI-compatible protocol adapter. Anthropic and Gemini use dedicated adapters. Each CLI has a
+separate class built on the constrained `CliProvider` base.
+
+## Canonical contract
+
+```typescript
+interface AIProvider {
+  readonly id: string;
+  readonly name: string;
+  readonly type: 'api' | 'local' | 'cli';
+  readonly capabilities: ProviderCapabilities;
+  readonly execution: 'local' | 'remote';
+  isAvailable(): Promise<boolean>;
+  listModels(): Promise<readonly AIModel[]>;
+  sendMessage(input: AgentInput): Promise<AgentResponse>;
+  streamMessage(input: AgentInput): AsyncIterable<AgentChunk>;
+  cancel(requestId: string): Promise<void>;
+}
 ```
 
-O runtime inicial segue as referências oficiais de streaming da
-[OpenAI](https://platform.openai.com/docs/quickstart),
-[Anthropic](https://docs.anthropic.com/en/api/messages-streaming) e
-[Gemini](https://ai.google.dev/api/generate-content). Os argumentos do Codex devem acompanhar a
-[referência oficial da CLI](https://developers.openai.com/codex/cli/reference/).
+Capabilities report streaming, tools, vision, file editing, and long context. A model also reports its
+execution location, context window when known, and input/output cost. Unknown prices remain `null`;
+the interface does not invent a cost.
 
-## Contrato canônico
+Streams normalize provider output into `text`, `usage`, `done`, and sanitized `error` chunks. Every
+request has a caller-generated ID used for cancellation and concurrent request tracking.
 
-Um adapter implementa `AIProvider`: identidade, tipo, execução, capacidades, disponibilidade,
-modelos, envio integral, streaming e cancelamento. `AIModel` informa visão, ferramentas, edição de
-arquivos, contexto longo, localidade e custo. Quando o provider não retorna preço confiável, o custo
-fica `null` com uma nota explícita; a UI nunca inventa valores.
+## Configuration and credentials
 
-Eventos possíveis:
+The model settings screen controls enabled state, default model, local alias, base URL, cost limit,
+token limit, timeout, and concurrency. Non-secret settings are persisted in
+`provider-settings.json`. API keys are encrypted with Electron `safeStorage`; only a configured/not
+configured flag returns to the renderer.
 
-- `text`: incremento de conteúdo;
-- `usage`: tokens e custo, real ou estimado;
-- `done`: conclusão normal;
-- `error`: erro sanitizado e apropriado para a interface.
+Local base URLs must resolve to an allowed local endpoint. Remote context passes through the secret
+scanner. CLI adapters receive a filtered environment and structured arguments; Codex uses a read-only
+sandbox and Aider starts in dry-run mode.
 
-## Providers incluídos
+## Chat behavior
 
-| Família | Adapters                                                              |
-| ------- | --------------------------------------------------------------------- |
-| API     | OpenAI, Anthropic, Gemini, OpenRouter, endpoint compatível com OpenAI |
-| Local   | Ollama, LM Studio                                                     |
-| CLI     | Claude Code, Codex, Gemini CLI, Aider, OpenCode                       |
+The workspace chat supports streaming, cancellation, retry, provider/model labels, explicit context
+files, estimated usage, local history, Markdown export, and clear. Open tabs are the only automatic
+file context. Interrupted streams are marked cancelled after hydration rather than resumed silently.
 
-O adapter compatível com OpenAI usa `/models` e `/chat/completions`. OpenAI pode ganhar um adapter
-nativo de Responses API sem alterar o contrato da UI. Gemini usa `streamGenerateContent`; Anthropic
-usa Messages streaming. CLIs são classes separadas e nunca executam por uma string de shell.
+## Adding a provider
 
-## Segurança
+1. Add a conservative `ProviderDescriptor` to
+   `packages/providers/src/catalog.ts`. Do not claim a capability the adapter cannot prove.
+2. Implement the protocol in `packages/providers/src/`. Extend `BaseProvider` for HTTP or
+   `CliProvider` for a CLI. Keep vendor behavior out of the renderer.
+3. Normalize errors and chunks. Implement real cancellation and observe the input timeout.
+4. Register construction in `packages/providers/src/factory.ts`.
+5. Export any public type or adapter from `packages/providers/src/index.ts`.
+6. Add deterministic tests beside the adapter using mocked Fetch, a fake PTY, or `FakeProvider`.
+   Tests must not read environment credentials or contact a real service.
+7. Add the provider to onboarding only if it has a corresponding local tool definition or secret field.
+8. Update this document. Add an ADR if the provider requires a new privilege or protocol boundary.
 
-- chamadas externas e PTYs existem somente no processo principal;
-- segredos são recuperados do `safeStorage` no instante de criar o adapter;
-- o renderer recebe apenas `configured: boolean`, nunca o valor da chave;
-- logs passam por sanitização recursiva de nomes e padrões sensíveis;
-- payloads IPC limitam mensagens, arquivos, bytes, modelos e identificadores;
-- CLIs recebem apenas `HOME`, `PATH`, locale, terminal, temporários e usuário;
-- Codex executa com sandbox `read-only`; Aider inicia em `--dry-run`;
-- timeout, tokens e concorrência são aplicados pelo serviço;
-- custo só é bloqueado quando o adapter fornece um valor calculável.
+For HTTP adapters, validate the base URL and never log headers or authenticated bodies. For CLI
+adapters, keep the executable and arguments fixed by the adapter, preserve the filtered environment,
+and select read-only or dry-run flags when available.
 
-## Adicionando um provider
+Relevant implementation files:
 
-1. Adicione o descritor em `catalog.ts`, com capacidades conservadoras e endpoint padrão.
-2. Implemente uma classe por protocolo usando `BaseProvider`.
-3. Normalize todo retorno para `AgentChunk`; implemente cancelamento real.
-4. Registre a classe em `factory.ts`. Não coloque condicionais do fornecedor no renderer.
-5. Nunca registre headers, corpo cru autenticado, chave, token ou ambiente completo.
-6. Adicione testes com fetch mockado ou `FakeProvider`; não use rede ou credenciais reais.
-7. Atualize este documento e crie ADR se a fronteira de segurança ou o contrato mudar.
-
-Para uma CLI, estenda `CliProvider`, mantenha argumentos estruturados, preserve o ambiente filtrado
-e use um modo somente leitura ou dry-run quando existir. Para HTTP, valide a URL e traduza erros para
-linguagem simples sem ecoar dados sensíveis.
-
-## Chat e persistência
-
-O chat inclui somente as abas abertas como contexto explícito. O histórico serializável fica no
-armazenamento local do renderer e pode ser limpo ou exportado como Markdown. Solicitações ativas não
-são retomadas após reiniciar: ao hidratar, streams incompletos tornam-se cancelados.
-
-Configurações de provider ficam em `provider-settings.json` no diretório do aplicativo. Tokens e
-chaves nunca entram nesse arquivo, no histórico do chat ou nos logs.
+- `packages/providers/src/types.ts`
+- `packages/providers/src/catalog.ts`
+- `packages/providers/src/factory.ts`
+- `packages/providers/src/fake-provider.ts`
+- `apps/desktop/src/main/services/provider-service.ts`

@@ -1,67 +1,65 @@
 # CLI detection
 
-VisualnsCode detects installed tools by running version commands and parsing their output. Detection is read-only and never installs anything without confirmation.
+Environment detection checks known executables and their version output. It is read-only and never
+installs, authenticates, or changes configuration.
 
-## How detection works
+## Definition and result
 
-Each tool definition in `packages/integrations/src/tools/` includes:
+Definitions live in `packages/integrations/src/tool-catalog.ts`:
 
 ```typescript
-{
+const git: ToolDefinition = {
   id: 'git',
   name: 'Git',
-  versionCommand: ['git', '--version'],
-  versionPattern: /git version (\S+)/,
-  installUrl: 'https://git-scm.com',
-}
+  command: 'git',
+  category: 'core',
+  documentationUrl: 'https://git-scm.com/downloads',
+  versionArgs: ['--version'],
+  install: {
+    executable: 'brew',
+    args: ['install', 'git'],
+    description: 'Install Git with Homebrew',
+    permission: 'install-dependencies',
+    risk: 'write',
+    timeoutMs: 180_000,
+  },
+};
 ```
 
-The environment service runs `versionCommand` using `execFile` (no shell injection), parses the output with `versionPattern`, and returns:
-
-```typescript
-{
-  id: 'git',
-  installed: true,
-  version: '2.47.0',
-  path: '/usr/bin/git',
-  error: null,
-}
-```
+The result has `id`, `status`, `installed`, `version`, `path`, and a plain-language `message`.
+`findExecutable` resolves only the catalog command and declared alternatives. The version check runs
+through the command runner without a shell.
 
 ## Detected tools
 
-| ID         | Tool         | Version flag         |
-| ---------- | ------------ | -------------------- |
-| `git`      | Git          | `git --version`      |
-| `gh`       | GitHub CLI   | `gh --version`       |
-| `node`     | Node.js      | `node --version`     |
-| `npm`      | npm          | `npm --version`      |
-| `pnpm`     | pnpm         | `pnpm --version`     |
-| `yarn`     | Yarn         | `yarn --version`     |
-| `bun`      | Bun          | `bun --version`      |
-| `firebase` | Firebase CLI | `firebase --version` |
-| `vercel`   | Vercel CLI   | `vercel --version`   |
-| `supabase` | Supabase CLI | `supabase --version` |
-| `docker`   | Docker       | `docker --version`   |
-| `python`   | Python       | `python3 --version`  |
-| `claude`   | Claude Code  | `claude --version`   |
-| `codex`    | Codex CLI    | `codex --version`    |
-| `gemini`   | Gemini CLI   | `gemini --version`   |
-| `aider`    | Aider        | `aider --version`    |
-| `opencode` | OpenCode     | `opencode --version` |
-| `ollama`   | Ollama       | `ollama --version`   |
-| `lmstudio` | LM Studio    | `lms --version`      |
+| ID          | Tool         | Command                                      |
+| ----------- | ------------ | -------------------------------------------- |
+| `git`       | Git          | `git --version`                              |
+| `github`    | GitHub CLI   | `gh --version`                               |
+| `node`      | Node.js      | `node --version`                             |
+| `npm`       | npm          | `npm --version`                              |
+| `pnpm`      | pnpm         | `pnpm --version`                             |
+| `yarn`      | Yarn         | `yarn --version`                             |
+| `bun`       | Bun          | `bun --version`                              |
+| `firebase`  | Firebase CLI | `firebase --version`                         |
+| `vercel`    | Vercel CLI   | `vercel --version`                           |
+| `supabase`  | Supabase CLI | `supabase --version`                         |
+| `docker`    | Docker       | `docker --version`                           |
+| `python`    | Python       | `python3 --version`, then `python --version` |
+| `claude`    | Claude Code  | `claude --version`                           |
+| `codex`     | Codex CLI    | `codex --version`                            |
+| `gemini`    | Gemini CLI   | `gemini --version`                           |
+| `aider`     | Aider        | `aider --version`                            |
+| `opencode`  | OpenCode     | `opencode --version`                         |
+| `ollama`    | Ollama       | `ollama --version`                           |
+| `lm-studio` | LM Studio    | `lms --version`                              |
 
-## Adding a new tool
+## Adding a detected tool
 
-1. Create `packages/integrations/src/tools/my-tool.ts`.
-2. Export a `ToolDefinition` object.
-3. Register it in `packages/integrations/src/tool-registry.ts`.
+Add one immutable definition to `toolCatalog`, including the official documentation URL. Add a fixed
+installer only when the repository supports that operating-system path safely; otherwise the UI can
+open the documentation. Then cover installed, missing, alternate-command, version-output, and command
+failure cases in `packages/integrations/src/integrations.test.ts`.
 
-The onboarding assistant and environment detection will pick it up automatically.
-
-## Security
-
-- Detection uses `execFile` (not `exec`) to prevent shell injection from tool IDs.
-- Tool IDs are validated against a known allow-list before any command is run.
-- Installation commands always require user confirmation before execution.
+Catalog entries appear in `detectAll`, but service-specific authentication and configuration do not.
+Those operations require the explicit integration routing described in [Integrations](./integrations.md).

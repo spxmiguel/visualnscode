@@ -1,28 +1,27 @@
-# Código de Conduta
+# Code of Conduct
 
-## Nosso compromisso
+## Our commitment
 
-Comprometemo-nos a tornar a participação no VisualnsCode uma experiência livre de assédio para
-todas as pessoas, independentemente de experiência, identidade, origem, aparência, capacidade,
-religião ou orientação.
+We are committed to making participation in VisualnsCode a harassment-free experience for everyone,
+regardless of experience, identity, background, appearance, ability, religion, or orientation.
 
-## Comportamento esperado
+## Expected behavior
 
-- demonstrar empatia, respeito e curiosidade;
-- oferecer feedback sobre ideias e código, não sobre a pessoa;
-- acolher iniciantes e explicar contexto sem condescendência;
-- aceitar responsabilidade, pedir desculpas e reparar impactos;
-- priorizar o interesse e a segurança da comunidade.
+- Be empathetic, respectful, and curious.
+- Critique ideas and code, not people.
+- Welcome beginners and explain context without condescension.
+- Accept responsibility, apologize, and repair harm.
+- Put community safety and the project's long-term health first.
 
-Comportamentos inaceitáveis incluem assédio, intimidação, insultos, sexualização, publicação de
-informações privadas, ameaças ou interrupção deliberada do trabalho comunitário.
+Unacceptable behavior includes harassment, intimidation, insults, sexualized conduct, publishing
+private information, threats, stalking, or deliberate disruption of community work.
 
-## Aplicação
+## Enforcement
 
-Relate incidentes em privado aos mantenedores. Eles devem proteger a confidencialidade, investigar
-com imparcialidade e aplicar medidas proporcionais, que podem incluir orientação, advertência,
-remoção de conteúdo, suspensão ou banimento. Retaliação contra quem relata de boa-fé não será
-tolerada.
+Report incidents privately through the repository's security contact described in
+[SECURITY.md](./SECURITY.md). Maintainers will protect confidentiality, investigate impartially, and
+take proportionate action, which may include guidance, a warning, removal of content, suspension, or
+a permanent ban. Retaliation against a good-faith reporter is not tolerated.
 
-Este código se aplica aos espaços do projeto e à representação pública da comunidade. Ele é
-inspirado no Contributor Covenant 2.1.
+This code applies in project spaces and when someone publicly represents the project. It is inspired
+by the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).

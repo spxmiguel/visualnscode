@@ -1,111 +1,106 @@
-# Arquitetura inicial
+# Architecture
 
-## Princípios
+## Principles
 
-- domínio independente de UI e fornecedores externos;
-- privilégios mínimos entre renderer, preload e main;
-- contratos explícitos nas fronteiras de IPC e integrações;
-- recursos pesados e efeitos colaterais carregados sob demanda;
-- observabilidade local sem coletar conteúdo do usuário por padrão.
+- Keep domain rules independent from React, Electron, and individual vendors.
+- Give the renderer the minimum possible privilege.
+- Make IPC, provider, agent, and integration boundaries explicit and typed.
+- Represent commands as executable/argument arrays, never renderer-provided shell strings.
+- Keep remote side effects reviewable and require fresh confirmation for sensitive actions.
+- Store content locally by default and do not collect workspace content as telemetry.
 
-## Visão de componentes
-
-```mermaid
-flowchart LR
-  UI["Renderer React"] --> PRE["Preload: API mínima"]
-  PRE --> IPC["IPC tipado e validado"]
-  IPC --> MAIN["Electron main"]
-  MAIN --> CORE["Core de domínio"]
-  MAIN --> RUNTIME["ProviderService"]
-  MAIN --> WORKER["Processos utilitários futuros"]
-  CORE --> PORTS["Portas: providers e integrations"]
-  RUNTIME --> PORTS
-  PORTS --> HTTP["APIs e servidores locais"]
-  PORTS --> PTY["Adapters CLI via node-pty"]
-  WORKER --> OS["Filesystem, PTY e SQLite"]
-```
-
-O renderer nunca importa Electron, filesystem, shell, PTY ou SDKs de fornecedores. O preload
-expõe somente capacidades nomeadas. O main valida pedidos e delega trabalho bloqueante ou de maior
-risco a processos utilitários.
-
-O onboarding segue a mesma fronteira: renderer envia intents tipadas, preload expõe métodos
-nomeados e main resolve adapters. Não existe canal IPC de execução genérica.
-
-O chat segue `renderer → preload → IPC validado → ProviderService → AIProvider`. Chunks canônicos
-voltam por um canal somente de eventos. Configurações sem segredo usam arquivo local com permissão
-restrita; chaves usam `safeStorage`. O renderer nunca recebe a chave.
-
-## Runtime, preview, and deployment
+## System overview
 
 ```mermaid
 flowchart LR
-    UI["Preview panel"] -->|"named action"| IPC["validated IPC"]
-    IPC --> Detect["runtime detection"]
-    Detect --> Process["exec + argument array"]
-    Process -->|"logs and local URL"| UI
-    UI -->|"local URL"| Proxy["ephemeral loopback proxy"]
-    Proxy --> App["project dev server"]
-    Proxy -->|"isolated postMessage bridge"| UI
-    UI -->|"reviewed plan + confirmation"| Deploy["DeploymentService"]
-    Deploy --> Build["detected build"]
-    Build --> CLI["provider CLI"]
-    CLI --> History["redacted local history"]
+    User["User"] --> Renderer["React renderer"]
+    Renderer --> Store["Zustand UI state"]
+    Renderer --> Preload["Minimal preload bridge"]
+    Preload --> IPC["Named IPC channels"]
+    IPC --> Main["Electron main process"]
+    Main --> Domain["Core policies"]
+    Main --> ProviderService["Provider service"]
+    Main --> AgentEngine["Agent workflow engine"]
+    Main --> Services["Workspace services"]
+    ProviderService --> API["Remote AI APIs"]
+    ProviderService --> Local["Local servers and CLI PTYs"]
+    Services --> OS["Filesystem, Git, processes, and keychain"]
+    Services --> Deploy["Confirmed external integrations"]
+    Landing["Separate landing app"] --> SharedUI["Shared UI package"]
+    Renderer --> SharedUI
 ```
 
-Runtime actions are a closed union (`install`, `dev`, `build`, `test`). The renderer cannot provide an
-executable. `RunnerService` maps a freshly detected project to `spawn` arguments with `shell: false`.
-The static preview uses the Electron Node runtime and does not require a globally installed server.
+The renderer never imports Electron, Node.js filesystem APIs, shell APIs, `node-pty`, or provider
+SDKs. The preload exposes only named methods. Main-process handlers validate payloads, re-check
+trusted workspace state, and delegate to a service with a narrow responsibility.
 
-`PreviewService` proxies only loopback origins. Its injected bridge reports console, basic Fetch
-activity, and selected DOM metadata through browser `postMessage`; it receives no privileged preload
-API. Deployment uses a separate service because it is a remote side effect: it plans fixed provider
-commands, verifies confirmation in the main process, runs the build first, redacts output, and writes a
-bounded history.
+## Runtime boundaries
 
-## Responsabilidades dos pacotes
+| Boundary        | Responsibility                                                      | Must not do                                                      |
+| --------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Renderer        | Render UI, collect intent, keep non-secret view state               | Read secrets, execute commands, trust its own path checks        |
+| Preload         | Translate typed renderer calls to named IPC                         | Expose `ipcRenderer`, `shell`, `fs`, or arbitrary channel access |
+| Main IPC        | Validate payload shape and authorization                            | Forward unchecked renderer objects                               |
+| Main services   | Own filesystem, process, Git, provider, preview, and deploy effects | Return raw secrets or unsanitized logs                           |
+| Shared packages | Define reusable contracts and pure policy                           | Depend on Electron UI composition                                |
+| Landing         | Public website built separately                                     | Import desktop privileges or local APIs                          |
 
-| Pacote         | Responsabilidade                             | Não deve conhecer               |
-| -------------- | -------------------------------------------- | ------------------------------- |
-| `types`        | contratos de dados estáveis e serializáveis  | Electron, React, SDKs           |
-| `core`         | regras de domínio puras                      | UI e adapters concretos         |
-| `agents`       | lifecycle e orquestração futura              | componentes React               |
-| `providers`    | portas e catálogo de capacidades de IA       | telas e credenciais em claro    |
-| `integrations` | portas para CLI, deploy e source control     | implementação do renderer       |
-| `config`       | constantes e configuração compartilhada      | segredos                        |
-| `ui`           | componentes visuais sem regra de domínio     | filesystem e processos          |
-| `apps/desktop` | composição Electron e experiência local      | lógica específica de fornecedor |
-| `apps/landing` | presença web e comunicação pública           | APIs privilegiadas desktop      |
-| `apps/ui-docs` | catálogo leve dos componentes compartilhados | regras de domínio               |
+## Package responsibilities
 
-Fluxo de dependência permitido: `apps -> features/adapters -> ports/core -> types`. Dependências
-circulares entre pacotes são proibidas.
+| Package                      | Owns                                                                 | Does not own                       |
+| ---------------------------- | -------------------------------------------------------------------- | ---------------------------------- |
+| `@visualnscode/types`        | Stable serializable cross-package contracts                          | Electron or React types            |
+| `@visualnscode/core`         | Pure command, permission, project, and safety rules                  | Concrete OS operations             |
+| `@visualnscode/agents`       | Agent definitions, policy, workflows, and execution records          | Renderer components                |
+| `@visualnscode/providers`    | Provider contracts, catalogs, HTTP/CLI adapters, fake provider       | Credential persistence or screens  |
+| `@visualnscode/integrations` | Tool definitions, detection, command runner, deploy and VCS adapters | Renderer state                     |
+| `@visualnscode/config`       | Shared constants                                                     | Secrets                            |
+| `@visualnscode/ui`           | Reusable, unprivileged React components                              | Filesystem or provider logic       |
+| `apps/desktop`               | Electron composition and local product experience                    | Vendor-specific domain rules in UI |
+| `apps/landing`               | Public product site                                                  | Desktop IPC                        |
+| `apps/ui-docs`               | Lightweight component catalog                                        | Product state                      |
 
-## Dados e comunicação futuros
+Allowed dependency direction is `apps → adapters/features → ports/core → types`. Cycles between
+packages are not allowed and `pnpm check:structure` verifies the required monorepo shape.
 
-- IPC usa canais registrados, payloads validados em runtime; nunca um executor genérico.
-- SQLite armazena configurações e metadados, com migrations monotônicas e transações.
-- segredos ficam no keychain do sistema e chegam ao adapter somente no momento do uso.
-- WebSocket serve a eventos remotos; comunicação interna local prefere IPC do Electron.
-- respostas de IA são normalizadas em eventos canônicos antes de alcançar a UI.
+## Provider and chat path
 
-## Escalabilidade
+Chat follows `renderer → preload → validated IPC → ProviderService → AIProvider`. The main process
+retrieves a secret only while constructing the adapter. Remote context is scanned and redacted before
+the request. Canonical chunks return through one event subscription; the renderer never sees a key.
 
-A escala relevante é de integrações e fluxos, não apenas volume. Adapters isolam mudanças de SDK;
-capability discovery evita condicionais por fornecedor; processos utilitários mantêm UI responsiva;
-lazy loading reduz custo inicial; filas com cancelamento e backpressure limitam streams e agentes.
+## Files, preview, and deployment
 
-## Estratégia de testes
+Runtime actions form a closed union: install, development, build, and test. The main process detects
+the project again and maps the requested action to `spawn` arguments with `shell: false`. The preview
+proxy accepts loopback origins only. Its injected browser bridge can report console, basic Fetch
+activity, and selected DOM metadata through `postMessage`, but has no preload access.
 
-- unitários para regras de domínio, parsers, policies e registries;
-- contratos para IPC, providers e integrations;
-- integração para filesystem, SQLite, PTY e adapters mockados;
-- Playwright para jornadas críticas da landing e, depois, do Electron;
-- smoke tests de artefatos empacotados nas plataformas suportadas.
+Deployment is a separate remote-effect service. It builds a fixed plan, presents it for review,
+requires confirmation in the main process, runs the build first when required, redacts output, and
+writes bounded history.
 
-Decisões com trade-offs duradouros estão registradas em [`decisions`](./decisions/README.md).
+## State and persistence
 
-Detalhes da composição visual e seus estados estão em
-[`desktop-interface.md`](./desktop-interface.md).
-O fluxo de configuração, permissões e credenciais está em [`onboarding.md`](./onboarding.md).
-A camada de IA e o guia de extensão estão em [`providers.md`](./providers.md).
+- Zustand persists theme, interface mode, onboarding completion, and other non-secret preferences.
+- Provider settings are stored separately from encrypted credentials.
+- Electron `safeStorage` encrypts provider secrets; an unavailable encryption backend is an error.
+- Chat, checkpoint, and deploy histories are bounded local records.
+- SQLite is planned for versioned metadata persistence; the current code does not claim that migration is complete.
+
+## Scalability
+
+Adapters isolate SDK and CLI changes. Capability discovery avoids vendor conditionals in the UI.
+Cancellation, timeouts, concurrency limits, bounded histories, and workflow budgets constrain long
+operations. Heavy resources are created in the main process and only when needed.
+
+## Verification
+
+- Unit tests cover pure policies, provider normalization, agent execution, and renderer behavior.
+- Integration tests exercise main-process services with fake runners, filesystems, and providers.
+- Playwright and Axe cover landing journeys and accessibility.
+- Lighthouse CI enforces landing quality budgets.
+- Platform packaging runs only from a manually triggered release workflow.
+
+Durable trade-offs are recorded in the [ADR index](./decisions/README.md). Security invariants are
+expanded in the [security model](./security-model.md).

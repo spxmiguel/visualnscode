@@ -1,131 +1,48 @@
 # Roadmap
 
-O roadmap descreve resultados e critérios, não datas prometidas. Prioridades podem mudar após
-pesquisa com usuários e revisão de segurança.
+This roadmap describes outcomes, not promised dates. Priorities may change after user research,
+security review, and packaged-app testing.
 
-## Agora — Fundação 0.1
+## Implemented in the alpha codebase
 
-- [x] monorepo e apps separados;
-- [x] shell desktop e landing executáveis;
-- [x] limites de packages e ADRs;
-- [x] lint, typecheck, testes, build e CI.
+- [x] pnpm monorepo with separate desktop, landing, and shared packages.
+- [x] Electron security boundary, React workspace, Monaco editor, themes, tabs, and resizable panels.
+- [x] Simple and Advanced modes with onboarding and 19-tool environment detection.
+- [x] Remote API, local server, and CLI provider adapters with streaming chat and secure credentials.
+- [x] Built-in and custom agents, workflow graph, parallel stages, retries, budgets, timeout, and rollback hooks.
+- [x] Review-first AI editing, diffs, hunk selection, checkpoints, snapshots, rollback, and secret redaction.
+- [x] Safe workspace filesystem, command classification, permission gates, and constrained YOLO mode.
+- [x] Guided project creation with 13 versioned templates.
+- [x] Git and GitHub operations in Simple and Advanced language.
+- [x] Project runtime detection, process control, preview bridge, responsive sizes, and element picker.
+- [x] Confirmed deploy plans for Vercel, Firebase Hosting, Supabase, and GitHub Pages.
+- [x] Responsive landing page, accessibility tests, metadata, and Lighthouse CI.
+- [x] Cross-platform packaging configuration and manually confirmed release workflow.
 
-## Interface inicial 0.2
+## Stabilization for alpha releases
 
-- [x] tela inicial, projetos recentes e configurações;
-- [x] identidade visual própria com temas claro e escuro;
-- [x] workspace em modos simples e avançado;
-- [x] Monaco, abas e estados de interface;
-- [x] explorador, chat, preview e painéis redimensionáveis demonstrativos;
-- [x] catálogo visual de componentes reutilizáveis;
-- [x] testes de interação do workspace.
+- [ ] Test packaged desktop artifacts on macOS arm64/x64, Windows x64, and Linux x64.
+- [ ] Complete the interactive terminal surface backed by the existing constrained process boundary.
+- [ ] Add workspace-wide text search and complete keyboard-only navigation.
+- [ ] Add failure recovery tests for interrupted writes, process crashes, and partial deploys.
+- [ ] Measure coverage by security boundary and close high-risk gaps.
+- [ ] Publish the first explicitly approved alpha release.
 
-## Workspace local real — completo
+## Beta readiness
 
-- [x] abrir e gerenciar workspaces via diálogo nativo;
-- [x] filesystem IPC com proteção contra path traversal;
-- [x] salvar arquivo com Cmd/Ctrl+S;
-- [x] diff Monaco lado a lado e unificado, com seleção por arquivo/bloco e edição antes de aplicar;
-- [x] propostas de agentes sem escrita silenciosa e aceite/rejeição explícitos;
-- [x] checkpoints, snapshots, histórico, rollback e ponto de recuperação antes de desfazer;
-- [x] scanner e redação de secrets antes de providers remotos;
-- [x] isolamento por caminho real, proteção contra traversal, symlinks externos e exclusão em massa;
-- [x] classificador de comandos (safe / confirm / dangerous / blocked) e modo YOLO limitado;
-- [ ] busca de texto no workspace;
-- [ ] acessibilidade de teclado completa.
+- [ ] Migrate persistent metadata and bounded histories to versioned SQLite migrations.
+- [ ] Add code signing and notarization for macOS and code signing for Windows.
+- [ ] Add a signed update channel with rollback and alpha/beta/stable selection.
+- [ ] Run packaged Electron E2E tests on all supported operating systems.
+- [ ] Add configurable pricing metadata and cumulative session budgets.
+- [ ] Add a signed, opt-in remote template catalog.
 
-## Onboarding de ambiente 0.3
+## Stable and ecosystem
 
-- [x] assistente persistido em 12 etapas;
-- [x] detecção de runtimes, package managers, deploy e agentes;
-- [x] permissões e confirmação por ação;
-- [x] GitHub, Firebase, Vercel e Supabase por adapters;
-- [x] providers locais e cofre seguro para chaves remotas;
-- [x] testes unitários e de integração sem login real;
-- [ ] conectar ações de escrita a um workspace real validado.
+- [ ] Complete accessibility audit against WCAG 2.2 AA for desktop and landing.
+- [ ] Define a stable plugin SDK, signed manifest format, capability permissions, and revocation model.
+- [ ] Add plugin isolation and a reviewed distribution process before third-party execution is enabled.
+- [ ] Establish supported-version and migration policies for stable releases.
 
-## Integração Git e GitHub — completo
-
-- [x] git status, stage, unstage, commit;
-- [x] log de histórico visual;
-- [x] branches, checkout, criar branch;
-- [x] stash / stash pop;
-- [x] merge, diff, tags, reset seguro, revert e resolução de conflitos;
-- [x] push confirmado e pull `--ff-only`;
-- [x] autenticação, criar/clonar/forkar repositório e abrir no navegador;
-- [x] listar e criar issues, pull requests e releases, além de visualizar Actions;
-- [x] modo simples com Salvar versão, Enviar, Baixar, Backup e Histórico;
-- [x] commits, branches, checkpoints e pull requests opcionais por tarefa de agentes;
-- [x] bloqueio de push automático sem autorização específica da tarefa.
-
-## Preview e execução — completo
-
-- [x] detectar instalação, desenvolvimento, build, teste e porta para npm, pnpm, Yarn, Bun, Python
-      e sites estáticos;
-- [x] iniciar, parar e reiniciar processos com stream separado de logs e erros;
-- [x] preview integrado com resoluções desktop, tablet, mobile e personalizada;
-- [x] screenshot, refresh e abertura segura no navegador;
-- [x] element picker com contexto DOM enviado ao rascunho do chat;
-- [x] console e logs básicos de rede por ponte isolada;
-- [x] deploy confirmado para Vercel, Firebase Hosting, Supabase e GitHub Pages;
-- [x] build de validação, logs sanitizados, URL e histórico local de deploy;
-
-## Templates e criação — completo
-
-- [x] descrição em linguagem natural com sugestão local e explicável de stack, estrutura, banco,
-      autenticação, deploy e agente;
-- [x] 13 templates com React, Next.js, Electron, Node API, Express, Fastify, Firebase, Supabase,
-      Landing, Portfolio, Dashboard, Static e Empty;
-- [x] templates versionados e identificados no projeto gerado;
-- [x] pipeline guiado para arquivos, dependências, Git, primeiro commit, integração opcional,
-      execução e preview;
-- [x] confirmação separada para GitHub e serviços externos, sem push automático;
-- [x] testes de criação com executor falso, sem instalação, autenticação ou publicação real;
-- [ ] catálogo remoto assinado e opt-in.
-
-## Landing page — completo
-
-- [x] narrativa completa do produto em 14 seções;
-- [x] identidade visual própria, responsiva e sem logos de terceiros;
-- [x] temas claro e escuro com preferência persistida;
-- [x] metadata Open Graph e Twitter, favicon, sitemap e robots;
-- [x] testes Playwright de interface e Axe para acessibilidade;
-- [x] Lighthouse CI e documentação de deploy na Vercel;
-
-## Depois — Capacidades locais avançadas
-
-- [ ] terminal isolado com `node-pty`;
-- [ ] SQLite e migrations;
-- [ ] auto-update via `electron-updater`;
-- [ ] testes macOS, Windows e Linux.
-
-## Providers universais 0.4
-
-- [x] porta comum para APIs, serviços locais e CLIs;
-- [x] catálogo de 12 providers com capacidades e execução local/remota;
-- [x] streaming e cancelamento normalizados por IPC;
-- [x] configuração de modelos, limites e concorrência;
-- [x] chat com arquivos no contexto, histórico e exportação;
-- [x] logs sanitizados, cofre do sistema e testes com provider falso;
-- [ ] precificação atualizável por modelo e orçamento acumulado por sessão;
-
-## Empacotamento cross-platform
-
-- [x] `electron-builder` configurado para mac, linux e windows;
-- [x] executável `spxcode` — abrível de qualquer terminal;
-- [x] instaladores: `.pkg` (macOS), `.AppImage`+`.deb` (Linux), `.msi` (Windows);
-- [x] scripts `install.sh` e `install.ps1` detectam OS automaticamente;
-- [x] CI release em matrix macOS / Linux / Windows com GitHub Actions;
-- [ ] assinatura e notarização macOS (`CSC_*` secrets);
-- [ ] assinatura Windows (Code Signing Certificate);
-- [ ] auto-update via `electron-updater`.
-
-## Futuro — Agentes e ecossistema
-
-- [x] mock provider e primeira integração opt-in;
-- [x] contexto explícito e secrets no keychain;
-- [ ] lifecycle de agentes e ferramentas autorizadas;
-- [ ] source control, deploy e eventos remotos;
-- [ ] plugins de terceiros.
-
-Detalhes e critérios de saída: [`docs/development-plan.md`](./docs/development-plan.md).
+Implementation milestones and acceptance criteria are documented in
+[docs/development-plan.md](./docs/development-plan.md).

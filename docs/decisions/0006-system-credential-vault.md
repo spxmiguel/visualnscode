@@ -1,26 +1,24 @@
-# ADR-0006: Usar o cofre do sistema para credenciais
+# ADR-0006: Use an operating-system-backed credential vault
 
-- Estado: Aceito
-- Data: 2026-07-12
+- Status: Accepted
+- Date: 2026-07-12
 
-## Contexto
+## Context
 
-Providers e CLIs podem exigir tokens. localStorage, Zustand, SQLite sem criptografia e arquivos de
-configuração do renderer não fornecem proteção adequada e podem aparecer em logs ou backups.
+Remote providers require secrets. Local storage, Zustand, unencrypted SQLite, and renderer
+configuration files can leak through logs, backups, exports, or compromised web content.
 
-## Decisão
+## Decision
 
-Usar `safeStorage` do Electron no processo main. O arquivo contém apenas ciphertext codificado em
-base64, com permissão `0600`. O renderer recebe apenas `configured: boolean`; valores nunca são
-devolvidos. IDs são allowlisted. Em Linux, o backend `basic_text` é recusado.
+Use Electron `safeStorage` in the main process. Store only base64-encoded ciphertext in an owner-only
+file. Return only `configured: boolean` to the renderer, allowlist credential IDs, and reject Linux's
+`basic_text` backend. CLIs remain responsible for their own authentication stores; VisualnsCode does
+not copy their tokens.
 
-CLIs que gerenciam sua própria autenticação continuam responsáveis por seu credential store; o
-VisualnsCode não copia nem lê esses tokens.
+## Consequences
 
-## Consequências
-
-- segredos não entram no estado persistido da UI ou no IPC de leitura;
-- salvar/remover exige permissão de credenciais e ação explícita;
-- sistemas sem keychain/secret service precisam configurar um backend seguro antes de persistir;
-- rotação, migração e expiração de secrets precisarão de UX futura;
-- testes usam mocks e nunca credenciais reais.
+- Provider secrets do not enter persisted UI state or read IPC.
+- Save and removal require credential permission and explicit user action.
+- Systems without a secure keyring must configure one before VisualnsCode can persist a key.
+- Rotation, migration, and expiry need explicit future UX.
+- Tests inject a fake vault and never use real credentials.

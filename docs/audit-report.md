@@ -1,16 +1,19 @@
-# Audit Report — VisualnsCode 0.1.0-dev
+# Audit report — VisualnsCode 0.1.0 alpha
 
-**Date:** 2026-07-12  
-**Auditor:** Automated (Claude Sonnet 4.6) + Manual review  
-**Scope:** Full codebase — architecture, security, performance, accessibility, test coverage, documentation
-
----
+- Review date: 2026-07-20
+- Scope: architecture, security boundaries, accessibility, tests, documentation, dependencies,
+  packaging, and GitHub automation
+- Method: static source review plus the commands listed under Verification
 
 ## Executive summary
 
-The project has a solid foundation: proper monorepo structure, contextIsolation/sandbox Electron security, secret storage via `safeStorage`, and input validation on all IPC channels. The main risks are related to features that are still stubs (terminal, real file editing in the UI, full deploy flow) and to the absence of code-signing for released binaries.
+No open Critical or High source finding was identified in this review. Earlier path, deletion,
+redaction, and secret-scanner findings are covered by dedicated service tests. The remaining release
+risks are material but expected for an alpha: unsigned binaries, incomplete packaged-app testing,
+no complete interactive terminal surface, no SQLite migration, and no stable plugin sandbox.
 
----
+The repository must continue to be treated as source-first until an explicitly approved release is
+published.
 
 ## Findings
 
@@ -18,123 +21,96 @@ The project has a solid foundation: proper monorepo structure, contextIsolation/
 
 None identified.
 
----
-
 ### High
 
-| #   | File                                                   | Finding                                                                                                                   | Status                                                                                                   |
-| --- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| H1  | `apps/desktop/src/main/services/filesystem-service.ts` | Lexical path checks did not resolve symlink destinations, allowing a link inside the workspace to target an external file | Fixed — real workspace root, `realpath` containment, direct-symlink rejection and safe parent resolution |
-| H2  | `apps/desktop/src/main/ipc.ts`                         | `fs:delete` previously accepted deletion without an explicit confirmation flag                                            | Fixed — confirmation is required, workspace-root deletion is blocked, and directory size is limited      |
-| H3  | `apps/desktop/src/main/services/secret-scanner.ts`     | High-entropy base64 regex had backtracking risk                                                                           | Fixed — removed unbounded lookahead                                                                      |
-| H4  | `apps/desktop/src/main/services/provider-service.ts`   | Remote provider context was accepted without an enforced main-process redaction pass                                      | Fixed — messages and context are redacted immediately before remote streaming                            |
+None open. The following previously high-risk boundaries have implemented mitigations:
 
----
+| Boundary          | Mitigation                                                                      |
+| ----------------- | ------------------------------------------------------------------------------- |
+| Workspace paths   | Lexical and real-path containment, unsafe-symlink rejection, atomic writes      |
+| Deletion          | Explicit confirmation, workspace-root block, directory-size and proposal limits |
+| Remote AI context | Main-process sensitive-file omission and value redaction                        |
+| Secret scanning   | Bounded patterns covered by focused tests                                       |
 
 ### Medium
 
-| #   | Area          | Finding                                                                                               | Resolution                                                                              |
-| --- | ------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| M1  | Git IPC       | `git:commit` accepts arbitrary message; no Conventional Commits enforcement                           | Low-priority — UI can suggest format but enforcement is user's choice                   |
-| M2  | Runner        | Dev server stdout is streamed to renderer unescaped — XSS risk in future HTML terminal                | Issue #14 created                                                                       |
-| M3  | Preload       | `scaffold:create` is fire-and-forget (`send`); errors are reported via events but no timeout          | Issue #15 created                                                                       |
-| M4  | Tests         | Filesystem, secret, command, diff, checkpoint, and edit-application paths lacked direct service tests | Fixed — dedicated Node suites cover the security boundaries                             |
-| M5  | Accessibility | Diff review controls lacked explicit names and pressed states                                         | Fixed — block, file, view, edit, and action controls expose accessible labels and state |
-
----
+| Area                 | Finding                                                                                                  | Current control                                                         | Required follow-up                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Distribution         | macOS and Windows artifacts are unsigned; macOS hardened runtime is disabled                             | No public release and manual publish confirmation                       | Signing, hardened runtime, notarization, checksums, and provenance before stable |
+| Desktop web security | A strict production Content Security Policy is not explicitly documented in the renderer entry point     | Renderer sandbox, context isolation, no Node integration, named preload | Add and test a restrictive CSP before stable                                     |
+| Platform coverage    | Main-process services are not exercised as packaged apps on every target OS                              | Linux CI builds and mocked cross-platform service tests                 | Add packaged Electron E2E on macOS, Windows, and Linux                           |
+| Terminal             | The bottom-panel terminal is an explicit non-functional surface while provider CLIs use constrained PTYs | No generic renderer shell; command services remain named                | Complete an isolated interactive terminal and its approval UX                    |
 
 ### Low
 
-| #   | Area              | Finding                                                                                |
-| --- | ----------------- | -------------------------------------------------------------------------------------- |
-| L1  | Dependencies      | `@monaco-editor/react` bundles Monaco (~4 MB); lazy-load candidate                     |
-| L2  | ExplorerPanel     | Hidden files other than `.gitignore` and `.env.example` not shown; `.gitkeep` excluded |
-| L3  | CheckpointService | JSON format for checkpoints; large workspaces may produce large files                  |
-| L4  | RunnerService     | No child process kill timeout before SIGKILL                                           |
-| L5  | BottomPanel       | Git panel does not handle concurrent fetch clicks (race condition)                     |
-
----
+| Area          | Finding                                                                        | Follow-up                                          |
+| ------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Checkpoints   | Owner-only JSON snapshots can contain normal source code and are not encrypted | Offer encrypted high-confidentiality workspaces    |
+| Monaco        | Editor resources are a large part of the renderer bundle                       | Measure startup and lazy-load further where useful |
+| Persistence   | Several bounded histories use JSON rather than migrations                      | Move authoritative metadata to versioned SQLite    |
+| Issue tracker | Some open feature issues describe capabilities already implemented             | Close or rewrite them after maintainer review      |
+| Dependencies  | One low-severity esbuild development-server advisory remains                   | Upgrade when Vite supports the patched esbuild     |
 
 ### Improvements
 
-| #   | Area          | Suggestion                                                                                                                     |
-| --- | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| I1  | DiffViewer    | Completed — file and block selection, unified/side-by-side views, and edit-before-apply are connected to the safe edit service |
-| I2  | GitPanel      | Show branch list inline; allow checkout from UI                                                                                |
-| I3  | Templates     | Cache `pnpm create` results to speed up repeated scaffolding                                                                   |
-| I4  | RunnerService | Detect port from stdout automatically and auto-open preview                                                                    |
-| I5  | Preview       | Add element picker for sending clicked component to chat                                                                       |
+- Add coverage instrumentation and thresholds by security boundary.
+- Add an SBOM, artifact attestations, and documented checksum verification.
+- Add a dependency-license policy alongside Dependabot and dependency review.
+- Complete a manual WCAG 2.2 AA audit for both desktop and landing.
 
----
+## Security posture
 
-## Security checklist
+| Control                                                 | Status                                       |
+| ------------------------------------------------------- | -------------------------------------------- |
+| `contextIsolation` and renderer sandbox                 | Enabled                                      |
+| `nodeIntegration`                                       | Disabled                                     |
+| Named preload surface and validated IPC                 | Implemented                                  |
+| OS-backed provider credential encryption                | Implemented; insecure Linux backend rejected |
+| Secret scanning and remote-context redaction            | Implemented                                  |
+| Traversal and unsafe-symlink rejection                  | Implemented                                  |
+| Command risk classes and constrained YOLO mode          | Implemented                                  |
+| Confirmation for remote mutations and production deploy | Implemented                                  |
+| Repository secret audit before push                     | Implemented through Husky                    |
+| Binary signing and notarization                         | Not implemented                              |
 
-| Check                               | Result                                                |
-| ----------------------------------- | ----------------------------------------------------- |
-| Electron contextIsolation           | ✅ Enabled                                            |
-| Electron sandbox                    | ✅ Enabled                                            |
-| `nodeIntegration` disabled          | ✅                                                    |
-| All IPC inputs validated            | ✅                                                    |
-| Credentials via `safeStorage`       | ✅                                                    |
-| Logs sanitised                      | ✅                                                    |
-| Secret scanner on file context      | ✅                                                    |
-| Path traversal blocked              | ✅                                                    |
-| Command classification              | ✅                                                    |
-| No `.env` committed                 | ✅                                                    |
-| No hardcoded secrets                | ✅                                                    |
-| Binary code-signing                 | ⏳ Planned (requires Apple Dev cert, Windows EV cert) |
-| Content Security Policy in renderer | ⚠️ Default CSP — tighten before 1.0                   |
+## Test organization
 
----
+- Unit suite: packages, renderer behavior, and shared edit model.
+- Integration suite: filesystem, edits, secrets, Git/GitHub, scaffold, runner, preview, and deployment
+  services using temporary directories and fake executors.
+- E2E suite: landing behavior and automated Axe checks in Chromium.
+- Lighthouse: built landing page against checked-in budgets.
 
-## Test coverage summary
+The project does not claim a percentage coverage figure because the coverage provider and enforced
+threshold are not configured.
 
-| Package / app                                        | Tests                  | Coverage (est.)                                                      |
-| ---------------------------------------------------- | ---------------------- | -------------------------------------------------------------------- |
-| `@visualnscode/integrations`                         | 11                     | ~65%                                                                 |
-| `@visualnscode/providers`                            | 8                      | ~60%                                                                 |
-| `@visualnscode/agents`                               | 6                      | ~55%                                                                 |
-| `@visualnscode/desktop` (renderer)                   | 12                     | ~40%                                                                 |
-| `@visualnscode/desktop` (security and edit services) | 35+ focused assertions | Paths, symlinks, secrets, commands, diffs, checkpoints, and rollback |
-| `@visualnscode/ui`                                   | 4                      | ~50%                                                                 |
-| `apps/landing`                                       | 0                      | —                                                                    |
+The dependency audit has no Critical, High, or Moderate finding after applying patched transitive
+DOMPurify and UUID overrides. One Low development-server advisory remains.
 
----
+## Verification
 
-## Build status
+The documented release gate is:
 
-| Target           | Status               |
-| ---------------- | -------------------- |
-| Lint             | ✅ 0 warnings        |
-| TypeScript       | ✅ No errors         |
-| Unit tests       | ✅ Pass              |
-| Desktop build    | ✅ (dev mode)        |
-| Landing build    | ✅                   |
-| E2E (Playwright) | ✅ Smoke test passes |
+```bash
+pnpm docs:check
+pnpm format:check
+pnpm check:structure
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
+pnpm test:lighthouse
+pnpm security:audit
+```
 
----
+Run results belong in the pull request or release record; this report does not treat a historical pass
+as proof for a later commit.
 
-## Known risks
+## Next security milestones
 
-1. **No code signing** — macOS Gatekeeper will block the `.pkg` until the app is signed and notarised. Linux and Windows are unaffected.
-2. **No auto-update** — users must manually download new versions until `electron-updater` is integrated.
-3. **Terminal is a stub** — the terminal panel shows static text; `node-pty` integration is planned.
-4. **Checkpoint confidentiality** — checkpoints use owner-only file permissions but are not encrypted; normal source files can be present in local snapshot JSON.
-
----
-
-## Issues created from this audit
-
-- [#14] Runner: sanitise stdout before renderer display
-- [#15] Scaffold: add timeout and error propagation to fire-and-forget create flow
-- [#16] Add unit tests for filesystem, git, runner, and scaffold services
-- [#17] Accessibility: aria-labels on DiffViewer and GitPanel interactive elements
-
----
-
-## Next steps
-
-1. Add node-pty terminal execution through the command policy.
-2. Add platform CI coverage for filesystem path behavior on Windows and Linux.
-3. Sign and notarise macOS builds with Apple Developer Program credentials.
-4. Consider encrypted checkpoint storage for high-confidentiality workspaces.
+1. Add a strict production CSP and packaged-app security test.
+2. Enable hardened runtime, signing, notarization, checksums, and provenance.
+3. Exercise packaged artifacts on every supported architecture.
+4. Complete terminal isolation and SQLite migrations.
+5. Threat-model and approve the plugin host in a new ADR before loading third-party code.

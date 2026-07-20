@@ -24,6 +24,7 @@
     "dev:desktop": "pnpm --filter @visualnscode/desktop dev",
     "dev:landing": "pnpm --filter @visualnscode/landing dev",
     "dev:ui": "pnpm --filter @visualnscode/ui-docs dev",
+    "docs:check": "node scripts/check-docs.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",

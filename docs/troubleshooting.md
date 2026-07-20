@@ -3,10 +3,13 @@
 ## App doesn't start
 
 - Ensure Node.js ≥ 20.18 and pnpm ≥ 9 are installed.
-- Run `pnpm install` from the repository root.
+- Run `corepack enable` and `pnpm install --frozen-lockfile` from the repository root.
 - Run `pnpm dev` and check the terminal for errors.
 
 ## `spxcode` command not found after install
+
+No public installer exists yet. The following checks apply only to a locally packaged build or a
+future artifact downloaded from the official Releases page.
 
 **macOS:**
 
@@ -60,27 +63,28 @@ Reinstall using the `.msi` — it registers PATH automatically.
 
 ## File changes not saved
 
-- VisualnsCode saves files when you click **Accept** in the diff viewer.
-- The Monaco editor does NOT auto-save to disk — changes in the editor are staged until accepted.
-- Use Cmd/Ctrl+S to save the active file directly.
+- Manual editor changes are saved with Command+S on macOS or Control+S on Windows and Linux.
+- AI changes are different: **Accept** in Diff applies only the selected files and hunks after creating
+  a checkpoint. Closing or rejecting a proposal writes nothing.
+- There is no automatic save. Confirm the workspace is trusted and the active tab is a real file.
 
 ## Checkpoints are not rolling back correctly
 
-Checkpoints store file content at the time they are created. If you delete files after the checkpoint, restore restores their content but does not re-create deleted directories automatically.
+Checkpoints store file content and whether each file existed. Restore uses the safe writer, which can
+re-create required parent directories. A checkpoint belongs to one real workspace path and cannot be
+applied to another workspace.
 
-## Logs
+## Diagnostics
 
-Application logs are written to:
-
-- **macOS:** `~/Library/Logs/VisualnsCode/`
-- **Linux:** `~/.config/VisualnsCode/logs/`
-- **Windows:** `%APPDATA%\VisualnsCode\logs\`
+Development-process and deploy output appears in the relevant VisualnsCode panel after sanitization.
+When running from source, Electron/Vite startup errors appear in the terminal that launched
+`pnpm dev`. The alpha does not claim a separate persistent application log directory.
 
 ## Reporting a bug
 
 Open an issue at [github.com/spxmiguel/visualnscode/issues](https://github.com/spxmiguel/visualnscode/issues) with:
 
 1. OS and version
-2. App version (`spxcode --version`)
+2. Desktop package version from `apps/desktop/package.json`
 3. Steps to reproduce
 4. Relevant log output

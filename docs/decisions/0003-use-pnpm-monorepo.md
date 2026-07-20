@@ -1,23 +1,23 @@
-# ADR-0003: Usar monorepo com pnpm workspaces
+# ADR-0003: Use a pnpm workspace monorepo
 
-- Estado: Aceito
-- Data: 2026-07-11
+- Status: Accepted
+- Date: 2026-07-11
 
-## Contexto
+## Context
 
-Desktop, landing, UI e integrações evoluem em ritmos diferentes, mas compartilham contratos e
-ferramentas. Repositórios separados aumentariam coordenação e poderiam produzir versões
-incompatíveis logo no início.
+Desktop, landing, shared UI, providers, agents, and integrations evolve at different rates but share
+contracts and tooling. Separate repositories would increase coordination and permit incompatible
+versions during early development.
 
-## Decisão
+## Decision
 
-Manter apps e pacotes em um único repositório gerenciado por pnpm workspaces. Configurações de
-TypeScript, lint e formatação vivem na raiz; cada workspace mantém scripts e dependências próprios.
+Keep applications and packages in one repository managed by pnpm workspaces. Root configuration owns
+the common TypeScript, lint, formatting, test, Changesets, and CI policy; each workspace keeps its own
+runtime dependencies and scripts.
 
-## Consequências
+## Consequences
 
-- mudanças atômicas podem atravessar contratos, apps e testes;
-- instalação deduplicada e rápida;
-- CI pode validar todo o grafo com um lockfile;
-- fronteiras precisam ser fiscalizadas para evitar um “monólito distribuído”;
-- releases independentes poderão exigir versionamento automatizado no futuro.
+- One change can update a contract, implementation, consumers, tests, and documentation atomically.
+- A single lockfile improves reproducibility and dependency review.
+- Boundaries require enforcement to avoid an accidental distributed monolith.
+- Changesets record version impact across private application packages.
