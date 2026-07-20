@@ -83,6 +83,11 @@ describe('command policy', () => {
     expect(classifyCommand(command)).toBe('dangerous'),
   );
 
+  it.each(['git pull', 'git checkout feature', 'git merge main', 'git stash pop'])(
+    'exige confirmação para comando Git que pode alterar o workspace: %s',
+    (command) => expect(classifyCommand(command)).toBe('confirm'),
+  );
+
   it('YOLO elimina confirmação apenas da classe confirm', () => {
     const policy = { globallyAllowed: true, yoloEnabled: true, explicitAcknowledgement: true };
     expect(assessCommand('pnpm install', policy)).toMatchObject({

@@ -192,12 +192,17 @@ describe('AgentService', () => {
     ) as { memory: string[] };
     expect(sameWorkspacePayload.memory).toContain('Workspace one memory.');
 
-    workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'visualnscode-agent-workspace-two-'));
+    const firstWorkspace = workspace;
+    const secondWorkspace = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'visualnscode-agent-workspace-two-'),
+    );
+    workspace = secondWorkspace;
     await run('agent-memory-three');
     const otherWorkspacePayload = JSON.parse(
       providers.inputs.at(-1)!.messages.find(({ role }) => role === 'user')!.content,
     ) as { memory: string[] };
     expect(otherWorkspacePayload.memory).toEqual([]);
-    await fs.rm(workspace, { recursive: true, force: true });
+    workspace = firstWorkspace;
+    await fs.rm(secondWorkspace, { recursive: true, force: true });
   });
 });
