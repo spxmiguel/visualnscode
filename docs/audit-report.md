@@ -148,8 +148,8 @@ remain functional through constrained PTYs.
 
 | Suite       | Files | Tests | Statements | Branches | Functions |  Lines |
 | ----------- | ----: | ----: | ---------: | -------: | --------: | -----: |
-| Unit        |    16 |    57 |     50.09% |   42.28% |    43.94% | 50.00% |
-| Integration |    12 |    89 |     63.62% |   52.85% |    68.11% | 66.81% |
+| Unit        |    21 |    84 |     53.79% |   45.71% |    47.25% | 53.66% |
+| Integration |    12 |    92 |     63.97% |   53.13% |    69.06% | 67.31% |
 
 Coverage is reported separately because unit tests run in jsdom while main-service integration tests
 run in Node. High-value filesystem, edit, secret, runner, scaffold, preview, Git, GitHub, deploy, and
@@ -164,7 +164,8 @@ Electron credential wrapper remain the most important gaps.
 - Five deprecated transitive utilities remain in packaging/tooling trees; none introduces a separate
   audit advisory.
 - macOS arm64/x64, Windows x64, and Linux x64 targets are configured. Linux arm64 AppImage is also
-  configured, but packaged execution has not been proven on the full matrix.
+  configured. A local macOS arm64 directory package now passes a native `node-pty` plus Claude Code
+  smoke test; packaged execution has not been proven on the rest of the matrix.
 - Source and service logic avoid shell parsing and use Node path APIs, `windowsHide`, platform
   executable detection, and portable pnpm commands. Packaging verification remains M-05.
 

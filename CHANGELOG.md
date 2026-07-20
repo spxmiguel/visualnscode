@@ -58,6 +58,9 @@ All notable changes are documented here. The format follows
   event listener before launching the process.
 - Local project and integration processes now discover tools in standard Homebrew, pnpm, npm, Bun,
   Volta, asdf, and NVM locations while continuing to exclude credentials from the child environment.
+- Electron is now a desktop build dependency rather than a packaged runtime dependency. A local
+  macOS arm64 directory package includes the rebuilt `node-pty` module and passes a packaged Claude
+  Code PTY smoke test.
 - Light and dark theme controls are now directly available from both workspace modes, not only Home
   and Settings.
 - Documentation now matches the result-oriented Simple mode, current terminal limitation, measured
