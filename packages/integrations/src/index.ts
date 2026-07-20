@@ -2,6 +2,7 @@ export { GenericToolIntegration } from './generic-integration';
 export { FirebaseIntegration } from './firebase-integration';
 export { GitHubIntegration } from './github-integration';
 export { PermissionManager } from './permissions';
+export { createSafeProcessEnvironment } from './process-environment';
 export { SystemCommandRunner } from './command-runner';
 export { SupabaseIntegration } from './supabase-integration';
 export { VercelIntegration } from './vercel-integration';

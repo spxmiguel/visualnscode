@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { createSafeProcessEnvironment } from '@visualnscode/integrations';
 import type {
   ProjectCommand,
   ProjectCreationOptions,
@@ -38,7 +39,7 @@ class ExecProjectCommandRunner implements ProjectCommandRunner {
   async run(command: ProjectCommand, cwd: string): Promise<ProjectCommandResult> {
     const result = await execAsync(command.executable, [...command.args], {
       cwd,
-      env: { ...process.env, CI: '1', FORCE_COLOR: '0' },
+      env: createSafeProcessEnvironment(process.env, { CI: '1', FORCE_COLOR: '0' }),
       maxBuffer: 2_000_000,
       timeout: 10 * 60 * 1000,
     });

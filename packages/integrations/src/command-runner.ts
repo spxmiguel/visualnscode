@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { createSafeProcessEnvironment } from './process-environment';
 import type { CommandResult, CommandRunner, CommandSpec } from './types';
 
 const execFileAsync = promisify(execFile);
@@ -28,7 +29,7 @@ export class SystemCommandRunner implements CommandRunner {
       const { stdout, stderr } = await execFileAsync(command.executable, [...command.args], {
         cwd: command.cwd,
         encoding: 'utf8',
-        env: this.safeEnvironment(),
+        env: createSafeProcessEnvironment(),
         maxBuffer: 64 * 1024,
         timeout: command.timeoutMs ?? 15_000,
         windowsHide: true,
@@ -47,22 +48,5 @@ export class SystemCommandRunner implements CommandRunner {
         stderr: failure.stderr?.trim() || failure.message || 'O comando não pôde ser concluído.',
       };
     }
-  }
-
-  private safeEnvironment(): NodeJS.ProcessEnv {
-    const allowed = [
-      'PATH',
-      'HOME',
-      'USERPROFILE',
-      'APPDATA',
-      'LOCALAPPDATA',
-      'SHELL',
-      'TMPDIR',
-      'TEMP',
-      'LANG',
-    ];
-    return Object.fromEntries(
-      allowed.flatMap((key) => (process.env[key] ? [[key, process.env[key]]] : [])),
-    );
   }
 }

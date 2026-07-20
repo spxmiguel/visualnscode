@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { createSafeProcessEnvironment } from '@visualnscode/integrations';
 import type {
   DeployEvent,
   DeployPlan,
@@ -47,7 +48,7 @@ export class SystemDeploymentCommandRunner implements DeploymentCommandRunner {
       const { stdout, stderr } = await execFileAsync(executable, [...args], {
         cwd,
         encoding: 'utf8',
-        env: process.env,
+        env: createSafeProcessEnvironment(),
         maxBuffer: 2 * 1024 * 1024,
         timeout: 15 * 60_000,
         windowsHide: true,

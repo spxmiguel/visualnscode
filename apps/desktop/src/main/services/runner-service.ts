@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { createSafeProcessEnvironment } from '@visualnscode/integrations';
 import type {
   PackageManager,
   ProjectRuntime,
@@ -92,11 +93,10 @@ export class RunnerService {
 
     const child = spawn(spec.executable, [...spec.args], {
       cwd: workspacePath,
-      env: {
-        ...process.env,
+      env: createSafeProcessEnvironment(process.env, {
         FORCE_COLOR: '1',
-        ...(runtime.kind === 'static' ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
-      },
+        ELECTRON_RUN_AS_NODE: runtime.kind === 'static' ? '1' : undefined,
+      }),
       shell: false,
       windowsHide: true,
     });

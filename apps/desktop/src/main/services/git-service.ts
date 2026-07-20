@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { createSafeProcessEnvironment } from '@visualnscode/integrations';
 import type {
   GitBranch,
   GitConflict,
@@ -25,7 +26,7 @@ export class SystemVersionControlRunner implements VersionControlCommandRunner {
     const { stdout } = await execAsync(executable, [...args], {
       cwd,
       encoding: 'utf8',
-      env: process.env,
+      env: createSafeProcessEnvironment(),
       maxBuffer: 4_000_000,
       timeout: 120_000,
       windowsHide: true,
