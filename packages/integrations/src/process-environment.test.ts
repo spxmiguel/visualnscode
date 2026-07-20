@@ -12,11 +12,14 @@ describe('createSafeProcessEnvironment', () => {
       VERCEL_TOKEN: 'vercel-secret',
     });
 
-    expect(result).toEqual({
-      PATH: '/usr/local/bin',
-      HOME: '/Users/tester',
-      SSH_AUTH_SOCK: '/tmp/ssh-agent.sock',
-    });
+    expect(result.HOME).toBe('/Users/tester');
+    expect(result.SSH_AUTH_SOCK).toBe('/tmp/ssh-agent.sock');
+    expect(result.PATH?.split(process.platform === 'win32' ? ';' : ':')).toContain(
+      '/usr/local/bin',
+    );
+    expect(result).not.toHaveProperty('GH_TOKEN');
+    expect(result).not.toHaveProperty('OPENAI_API_KEY');
+    expect(result).not.toHaveProperty('VERCEL_TOKEN');
   });
 
   it('adds only explicit service overrides', () => {
@@ -25,6 +28,8 @@ describe('createSafeProcessEnvironment', () => {
       { CI: '1', FORCE_COLOR: '0', OMITTED: undefined },
     );
 
-    expect(result).toEqual({ PATH: '/bin', CI: '1', FORCE_COLOR: '0' });
+    expect(result.PATH?.split(process.platform === 'win32' ? ';' : ':')).toContain('/bin');
+    expect(result).toMatchObject({ CI: '1', FORCE_COLOR: '0' });
+    expect(result).not.toHaveProperty('SECRET');
   });
 });

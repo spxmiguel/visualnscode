@@ -11,6 +11,7 @@ export class SystemCommandRunner implements CommandRunner {
       const locator = process.platform === 'win32' ? 'where' : 'which';
       const { stdout } = await execFileAsync(locator, [command], {
         encoding: 'utf8',
+        env: createSafeProcessEnvironment(),
         timeout: 5_000,
       });
       return (
