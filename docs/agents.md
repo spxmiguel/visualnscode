@@ -23,6 +23,10 @@ Defaults use Ollama's `default` model, a USD 2 run budget, a three-minute timeou
 with at most 20 entries, and workspace-relative folders. Users can override these values or create a
 custom agent in the Agents panel.
 
+Custom definitions use the same complete form as built-ins. The panel edits provider, model, system
+prompt, tools, folders, autonomy, terminal/edit permissions, cost, timeout, and memory scope. Removing
+a custom definition also removes its nodes and connections from the active team.
+
 ## Autonomy levels
 
 - **Ask:** every action waits for approval.
@@ -56,11 +60,36 @@ previous results, changed files, errors, and relevant key/value context. Runs en
 cost, time, step, retry, and cancellation limits. Events make active work, file access, proposed
 commands, elapsed time, and spend visible to the UI.
 
+Timeout is active cancellation, not only a UI status: the workflow aborts the running attempt and the
+main service forwards cancellation to the provider request. Retry creates a fresh abort scope. User
+cancellation stops queued work and active provider streams.
+
 ## Team templates
 
 The visual workflow panel includes Full Stack App, Landing Page, Bug Fix, Code Review, Test Generator,
 Documentation, and Deploy templates. Nodes can be dragged and connected into a directed acyclic graph.
 Cycles and missing agent references are rejected before execution.
+
+The builder shows queued, running, completed, and failed nodes. Each completed node exposes output,
+attempts, duration, steps, estimated cost, files read, proposed files, commands, actions, and errors.
+Connections can be removed without deleting agents. Run history is bounded and expandable; rollback
+is available when the workflow requested it and a rollback hook exists.
+
+## Action execution and memory
+
+Provider text is untrusted. Structured actions are parsed in the main process and checked against the
+agent definition, autonomy policy, global command classifier, and active workspace. A model-supplied
+risk label is never authoritative.
+
+- Read actions use the workspace filesystem service.
+- Edit actions become pending review proposals even after action approval; they do not write files.
+- Command actions are tokenized without a shell and may use only the agent command allowlist.
+- Tool actions remain approved intents until a dedicated integration handles them.
+- Approval events never expose proposed file content to the renderer.
+
+Project memory is keyed by a hash of the real workspace path so two projects cannot share entries.
+Run memory is discarded after the run; `none` disables memory. History and memory are bounded,
+sanitized, owner-only local JSON records written through temporary files and atomic rename.
 
 ## Version-control options
 

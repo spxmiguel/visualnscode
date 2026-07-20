@@ -24,7 +24,8 @@ pnpm dev
 ## First launch
 
 1. Read the welcome and security summary.
-2. Choose Simple or Advanced mode; it can be changed later.
+2. Choose Simple or Advanced mode; it can be changed later. Simple is a guided project/preview
+   experience, while Advanced contains the full IDE.
 3. Review detected development tools and ignore any you do not need.
 4. Grant permissions only when a named action needs them.
 5. Optionally connect one provider with an encrypted API key or a local Ollama/LM Studio server.
@@ -47,8 +48,9 @@ The project is never pushed or deployed automatically. See [Project templates](.
 ## Open a project
 
 Select **Open folder** on the home screen and choose a trusted workspace. VisualnsCode validates the
-real path before reading or writing it. Open files from the Explorer; manual saves use Command+S on
-macOS or Control+S on Windows and Linux. AI-generated changes remain proposals until reviewed in Diff.
+real path before reading or writing it. Simple mode opens the project assistant and preview. Switch to
+Advanced to use Explorer, Monaco, terminal tools, agents, and Git; manual saves use Command+S on macOS
+or Control+S on Windows and Linux. AI-generated changes remain proposals until reviewed in Diff.
 
 ## Next reading
 

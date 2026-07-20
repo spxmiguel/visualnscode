@@ -7,7 +7,7 @@ from the current machine.
 ## Steps
 
 1. Welcome and safety guarantees.
-2. Simple or Advanced mode.
+2. Simple project/preview experience or the full Advanced IDE.
 3. Git.
 4. GitHub CLI, account access, repositories, and Git identity.
 5. Node.js.

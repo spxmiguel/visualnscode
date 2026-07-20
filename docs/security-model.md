@@ -131,6 +131,17 @@ containing runtime paths, locale, temporary directories, terminal metadata, and 
 socket information. API keys, CI tokens, and deploy credentials are never inherited. Authenticated
 CLIs must use their own credential store.
 
+Agent commands have an additional boundary. The main process ignores the risk class claimed by the
+model, classifies the command again, tokenizes it without a shell, rejects shell operators and paths
+outside the workspace, and permits only a small executable/subcommand catalog. Arbitrary package
+execution such as `pnpm exec`, `pnpm dlx`, and equivalent forms is rejected. An approval therefore
+authorizes only the displayed constrained command, not a shell session. Output is sanitized before it
+enters logs or history.
+
+Git operations that can change the working tree, including pull, checkout, switch, merge, rebase,
+restore, and destructive stash actions, require confirmation even if a model labels them safe.
+Extreme destructive commands remain blocked under every autonomy and YOLO setting.
+
 Workspace-writing Firebase, Vercel, and Supabase actions resolve the requested working directory to a
 real path. It must be the active workspace or one of its descendants unless the user granted the
 dedicated outside-workspace permission.

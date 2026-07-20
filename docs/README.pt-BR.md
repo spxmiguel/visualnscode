@@ -17,9 +17,9 @@
 
 ---
 
-VisualnsCode é uma IDE desktop open source que reúne provedores de IA, modelos locais, agentes,
-ferramentas de projeto, Git, preview e deploy. O modo Simples oferece um caminho guiado para quem está
-começando; o modo Avançado mantém controles detalhados para desenvolvedores experientes.
+VisualnsCode é um aplicativo desktop open source que reúne provedores de IA, modelos locais, agentes,
+ferramentas de projeto, Git, preview e deploy. O modo Simples mostra o resultado e o assistente, sem
+interface de IDE; o modo Avançado oferece a IDE completa para desenvolvedores experientes.
 
 ## Para quem é
 
@@ -33,9 +33,9 @@ começando; o modo Avançado mantém controles detalhados para desenvolvedores e
 | ---------------- | ------------------------------------------------------------------------------------------------- |
 | Providers        | OpenAI, Anthropic, Gemini, OpenRouter, Ollama, LM Studio, endpoint OpenAI compatível e cinco CLIs |
 | Chat             | Streaming, cancelar, reenviar, arquivos de contexto, consumo estimado, histórico e exportação     |
-| Agentes          | Dez papéis padrão, agentes personalizados, fluxos paralelos/sequenciais, custos, retry e timeout  |
+| Agentes          | Dez papéis, agentes personalizados, equipes visuais, ações ao vivo, custos, retry e timeout       |
 | Edição segura    | Diff lado a lado/unificado, seleção por bloco, checkpoints, snapshots, rollback e redaction       |
-| Projetos         | Sugestão local em linguagem simples e 13 templates versionados                                    |
+| Projetos         | Modo Simples sem IDE, sugestão local e 13 templates funcionais e versionados                      |
 | Git e GitHub     | Modo simples e operações avançadas, sempre sem push automático                                    |
 | Preview e deploy | Execução detectada, preview integrado, seletor de elemento e quatro destinos confirmados          |
 | Onboarding       | Detecção de 19 ferramentas, permissões separadas e credenciais protegidas pelo sistema            |
@@ -46,7 +46,7 @@ Estas capturas foram geradas diretamente pelo aplicativo Electron em execução.
 
 ![Tela inicial do VisualnsCode](./assets/home.png)
 
-![Workspace do VisualnsCode no modo simples](./assets/workspace.png)
+![Workspace de projeto do VisualnsCode](./assets/workspace.png)
 
 ![Assistente de configuração inicial](./assets/onboarding.png)
 

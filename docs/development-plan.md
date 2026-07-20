@@ -10,8 +10,9 @@ Tailwind, Vitest, Playwright, CI, governance files, and initial ADRs.
 
 ## Phase 1 — Desktop workspace (complete in alpha)
 
-Home, recent projects, settings, themes, Simple/Advanced modes, Monaco, file tabs, native folder open,
-safe file read/write, resizable panels, UI states, shortcuts, and shared component catalog.
+Home, recent projects, settings, themes, result-oriented Simple mode, full Advanced IDE, Monaco, file
+tabs, native folder open, safe file read/write, resizable panels, UI states, shortcuts, and shared
+component catalog.
 
 Remaining stabilization: workspace text search and complete keyboard-only navigation.
 
@@ -32,15 +33,17 @@ Remaining: maintained pricing metadata, cumulative session budgets, and packaged
 
 ## Phase 4 — Agents and reviewable work (complete in alpha)
 
-Built-in/custom definitions, autonomy policy, visual teams, DAG execution, parallel stages, retry,
-timeout, cancellation, budgets, step limits, history, rollback hooks, and opt-in version-control output.
+Built-in/custom definitions, autonomy policy, visual teams, DAG execution, parallel stages, approval,
+shell-free local actions, active timeout cancellation, retry, budgets, step limits, scoped memory,
+sanitized history, rollback hooks, and opt-in version-control output.
 
-Remaining: harden real provider-to-tool execution and expand recovery tests.
+Remaining: expand interrupted-persistence recovery tests and packaged provider/PTY coverage.
 
 ## Phase 5 — Projects, source control, preview, and deploy (complete in alpha)
 
-Thirteen versioned templates, guided creation, Git/GitHub operations, runtime detection, process
-controls, loopback preview, element context, and confirmed Vercel/Firebase/Supabase/GitHub Pages plans.
+Thirteen versioned executable templates, guided no-publish creation tests, Git/GitHub operations,
+runtime detection, process controls, loopback preview, element context, and confirmed
+Vercel/Firebase/Supabase/GitHub Pages plans.
 
 Remaining: signed remote template catalog and broader deploy failure recovery.
 

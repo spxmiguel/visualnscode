@@ -14,6 +14,10 @@ engine runs locally: it does not send the description to an AI provider and does
 6. Follow plain-language progress; expand **Technical details** to see the underlying command.
 7. Open the workspace and, when selected, start its detected development script and preview.
 
+Simple mode opens the created project as a result-oriented workspace: integrated preview and a
+plain-language project assistant, without Explorer, Monaco, terminal, or Git terminology. Switching
+to Advanced reveals the complete IDE without changing the project or restarting its process.
+
 The destination must be empty. VisualnsCode never overwrites an existing project and never pushes the
 initial commit. Creating a GitHub repository is optional, defaults to private, and has a separate
 confirmation checkbox.
@@ -51,6 +55,9 @@ Generated projects contain `.visualnscode/template.json`:
 This file makes migrations and reproducible template updates possible without silently modifying a
 project. VisualnsCode currently ships templates with the application; it does not download executable
 template definitions from a remote source.
+
+Landing Page, Portfolio, and Dashboard include distinct responsive React starters rather than the
+generic Vite screen. Every recommended agent name is validated against the built-in agent catalog.
 
 ## Pipeline behavior
 
@@ -102,7 +109,8 @@ Rules for contributions:
 4. Never invoke a shell or accept command arguments from the renderer.
 5. Include `.visualnscode/template.json` through `versionFile`.
 6. Add the template ID to the catalog test and add a creation test when behavior is specialized.
-7. Run `pnpm lint && pnpm typecheck && pnpm test`.
+7. Use the exact name of an existing built-in agent in `recommendedAgent`.
+8. Run `pnpm lint && pnpm typecheck && pnpm test`.
 
 When changing generated output, increment the template version using semantic versioning: patch for a
 compatible fix, minor for additive files or features, and major for breaking project structure.

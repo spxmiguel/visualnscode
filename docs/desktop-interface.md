@@ -1,8 +1,9 @@
 # Desktop interface
 
-The desktop app uses progressive disclosure: Simple mode emphasizes the editor, important files,
-chat, preview, Run, and Undo; Advanced mode adds terminal, Git, logs, diffs, tasks, agents, models,
-advanced settings, and permissions. Both modes use the same workspace and documents.
+The desktop app uses progressive disclosure. Simple mode is not an IDE: it presents the running
+result, preview controls, and a plain-language project assistant. Advanced mode is the IDE, with
+Explorer, Monaco, terminal, Git, logs, diffs, tasks, agents, models, settings, and permissions. Both
+modes use the same trusted workspace and running process.
 
 ## Navigation
 
@@ -21,9 +22,17 @@ flowchart LR
 The home screen opens folders, begins guided creation, starts a confirmed GitHub clone, and lists
 recent projects. Settings controls theme, interface mode, providers, permissions, and onboarding.
 
-## Workspace composition
+## Simple project experience
 
-- Explorer with important-file filtering in Simple mode and the full tree in Advanced mode.
+- Integrated preview as the primary surface, including run, stop, restart, responsive sizes, element
+  selection, logs, screenshots, and confirmed deployment.
+- Project assistant with provider details collapsed into a quiet status line.
+- Plain-language prompts and an explicit reminder that edits still require review.
+- One action to reveal Advanced tools; no file tree, code editor, terminal, or technical status bar.
+
+## Advanced workspace composition
+
+- Full Explorer and activity rail.
 - Monaco editor with file tabs, empty/loading/error states, and manual save.
 - Streaming chat with provider/model selection and explicit context files.
 - Preview with process controls, responsive sizes, diagnostics, screenshot, and element selection.
@@ -31,9 +40,14 @@ recent projects. Settings controls theme, interface mode, providers, permissions
 - Advanced bottom panel for terminal, tasks, logs, Git, and other tools.
 - Status bar showing workspace and runtime state.
 
-Panels use the shared `ResizeHandle` from `packages/ui`. Pointer and keyboard resizing expose separator
+Advanced panels use the shared `ResizeHandle` from `packages/ui`. Pointer and keyboard resizing expose separator
 semantics and enforce useful minimum/maximum sizes. Secondary controls collapse at smaller desktop
-window widths without replacing the editor with a mobile layout.
+window widths without replacing the editor with a mobile layout. The Simple result/assistant split
+uses a stable two-column desktop layout.
+
+The Advanced workspace is a lazy module. Opening a project in Simple mode does not initialize Monaco
+or fetch its language workers; changing mode shows a short loading state and then keeps the IDE chunk
+available for the session.
 
 ## State ownership
 
@@ -60,6 +74,7 @@ proposals are never saved by that shortcut; they remain in the dedicated review 
 Buttons, icon buttons, selects, segmented controls, surfaces, state displays, and resize handles live
 in `packages/ui`. `apps/ui-docs` is the lightweight Storybook alternative and runs with `pnpm dev:ui`.
 
-Renderer tests mock Monaco for speed and cover panel visibility, theme persistence, mode switching,
-file opening, tabs, onboarding, chat, editing, agents, preview context, and version control. The
-desktop production build validates the real Monaco integration.
+Renderer tests mock Monaco for speed and cover the no-IDE Simple surface, panel visibility, theme
+persistence, mode switching, guided project creation, file opening, tabs, onboarding, chat, editing,
+agents, preview context, and version control. The desktop production build validates the real Monaco
+integration.

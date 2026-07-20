@@ -18,6 +18,11 @@ Vitest files remain beside source as `*.test.ts` or `*.test.tsx`. Playwright spe
 
 - Provider tests use `FakeProvider`, mocked Fetch, or fake PTY behavior; they never need an API key.
 - Integration tests inject fake command executors and do not authenticate, install, push, or deploy.
+- Agent service tests use fake providers, command runners, filesystems, and edit services. They cover
+  approval ordering, constrained command execution, review-only edits, sanitized persistence, and
+  workspace-isolated memory without a real model or command.
+- Project creation tests use a fake runner and fake renderer bridge. They create only temporary local
+  files and prove that GitHub remains disabled unless separately confirmed.
 - Filesystem tests use temporary directories and cover traversal, real paths, symlinks, sensitive
   files, atomic writes, checkpoints, and rollback.
 - Renderer tests stub the typed `window.visualnscode` bridge rather than starting privileged services.

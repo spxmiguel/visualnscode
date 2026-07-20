@@ -21,7 +21,7 @@ email or the wrong maintainer identity. A restrictive desktop Content Security P
 The codebase is credible as an alpha source distribution, not as a stable binary release. The largest
 remaining risks are unsigned artifacts, missing packaged-desktop E2E and accessibility gates, direct
 JSON persistence for credentials and settings, incomplete preview-message validation, and 0% direct
-integration coverage in three privileged services. Every open Medium and Low finding has a linked
+integration coverage in two privileged services. Every open Medium and Low finding has a linked
 GitHub issue.
 
 ## Finding summary
@@ -58,7 +58,7 @@ and unknown permission identifiers are rejected.
 | ID   | Area                  | Finding                                                                                                    | Status and issue                                                                                           |
 | ---- | --------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | M-01 | Distribution          | macOS and Windows artifacts are unsigned; macOS hardened runtime remains disabled.                         | Open: [#8 — signing and notarization](https://github.com/spxmiguel/visualnscode/issues/8).                 |
-| M-02 | Security coverage     | `agent-service`, `provider-service`, and `secure-storage` have 0% direct integration coverage.             | Open: [#22 — privileged-service coverage](https://github.com/spxmiguel/visualnscode/issues/22).            |
+| M-02 | Security coverage     | `provider-service` and `secure-storage` have 0% direct integration coverage; agent coverage is now 68.3%.  | Open: [#22 — privileged-service coverage](https://github.com/spxmiguel/visualnscode/issues/22).            |
 | M-03 | Credential durability | Credential, settings, memory, and history JSON writes are not uniformly atomic or recoverable.             | Open: [#21 — atomic persistence and recovery](https://github.com/spxmiguel/visualnscode/issues/21).        |
 | M-04 | Preview trust         | The iframe source is verified, but bridge payload fields and total sizes are not completely bounded.       | Open: [#24 — preview bridge validation](https://github.com/spxmiguel/visualnscode/issues/24).              |
 | M-05 | Platform/a11y         | CI builds desktop targets but does not run packaged Electron or Axe/keyboard checks across supported OSes. | Open: [#25 — packaged E2E and desktop accessibility](https://github.com/spxmiguel/visualnscode/issues/25). |
@@ -123,7 +123,8 @@ not exist; users must build from source and keep independent backups.
 
 ## Performance, accessibility, and UX
 
-- Desktop production renderer: approximately 396 kB JavaScript, 113 kB gzip.
+- Desktop initial renderer: approximately 316 kB JavaScript, 93 kB gzip. The 191 kB/48 kB gzip
+  Advanced workspace and Monaco workers load only after the user opens the IDE.
 - Landing production bundle: approximately 229 kB JavaScript, 71 kB gzip.
 - Lighthouse CI passes the checked-in performance, accessibility, best-practices, and SEO budgets.
 - Landing Playwright runs Axe in desktop and mobile journeys. No automated violation is open.
@@ -140,13 +141,14 @@ remain functional through constrained PTYs.
 
 | Suite       | Files | Tests | Statements | Branches | Functions |  Lines |
 | ----------- | ----: | ----: | ---------: | -------: | --------: | -----: |
-| Unit        |    15 |    53 |     44.96% |   36.88% |    40.25% | 44.43% |
-| Integration |    10 |    76 |     53.94% |   47.38% |    56.48% | 56.74% |
+| Unit        |    16 |    57 |     50.46% |   42.95% |    44.35% | 50.17% |
+| Integration |    12 |    89 |     63.62% |   52.85% |    68.11% | 66.81% |
 
 Coverage is reported separately because unit tests run in jsdom while main-service integration tests
 run in Node. High-value filesystem, edit, secret, runner, scaffold, preview, Git, GitHub, deploy, and
-environment boundaries have direct tests. Agent composition, provider composition, and the Electron
-credential wrapper are the most important gaps.
+environment boundaries have direct tests. Agent composition, approval, local actions, review-only
+edits, persistence, and workspace-scoped memory now have direct tests. Provider composition and the
+Electron credential wrapper remain the most important gaps.
 
 ## Dependencies and compatibility
 

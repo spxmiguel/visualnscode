@@ -69,6 +69,18 @@ Chat follows `renderer → preload → validated IPC → ProviderService → AIP
 retrieves a secret only while constructing the adapter. Remote context is scanned and redacted before
 the request. Canonical chunks return through one event subscription; the renderer never sees a key.
 
+## Agent execution path
+
+Agent work follows `renderer → validated IPC → AgentService → workflow engine → provider and narrow
+action adapters`. The pure engine owns graph ordering, parallel stages, retries, budgets, steps,
+timeouts, cancellation, and execution records. `AgentService` owns provider composition, approval,
+workspace-scoped memory, sanitized history, and optional version-control hooks.
+
+An approved action does not become arbitrary system access. Reads use `FilesystemService`; edits
+enter `FileEditService` as review proposals; commands pass through a shell-free, allowlisted agent
+runner; provider cancellation is forwarded when a run or timeout aborts. The renderer receives
+status and metadata, never secret content or an edit body in an approval event.
+
 ## Files, preview, and deployment
 
 Runtime actions form a closed union: install, development, build, and test. The main process detects
@@ -89,7 +101,8 @@ execution requires HTTPS except for loopback development endpoints.
 - Zustand persists theme, interface mode, onboarding completion, and other non-secret preferences.
 - Provider settings are stored separately from encrypted credentials.
 - Electron `safeStorage` encrypts provider secrets; an unavailable encryption backend is an error.
-- Chat, checkpoint, and deploy histories are bounded local records.
+- Chat, agent, checkpoint, and deploy histories are bounded local records. Agent history and memory
+  use owner-only atomic JSON writes and project memory is isolated by a hashed workspace key.
 - SQLite is planned for versioned metadata persistence; the current code does not claim that migration is complete.
 
 ## Scalability
@@ -97,6 +110,8 @@ execution requires HTTPS except for loopback development endpoints.
 Adapters isolate SDK and CLI changes. Capability discovery avoids vendor conditionals in the UI.
 Cancellation, timeouts, concurrency limits, bounded histories, and workflow budgets constrain long
 operations. Heavy resources are created in the main process and only when needed.
+The Simple workspace does not import Monaco: the complete Advanced IDE, editor integration, language
+workers, and diff UI are loaded through a separate dynamic chunk only after the mode changes.
 
 ## Verification
 

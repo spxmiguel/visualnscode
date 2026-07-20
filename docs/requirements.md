@@ -4,7 +4,7 @@
 
 VisualnsCode centralizes editing, AI, agents, CLIs, source control, preview, and deployment without
 showing the full complexity of a traditional IDE on first contact. The same domain capabilities power
-a guided Simple mode and a detailed Advanced mode.
+a guided, result-oriented Simple mode without IDE chrome and a detailed Advanced IDE.
 
 ## Functional requirements
 

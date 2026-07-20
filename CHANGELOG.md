@@ -8,6 +8,13 @@ All notable changes are documented here. The format follows
 
 ### Added
 
+- Complete agent orchestration with ten built-in roles, custom definitions, visual team DAGs,
+  sequential/parallel stages, approvals, live cost/step/file/command telemetry, retries, active
+  timeout cancellation, scoped memory, sanitized history, cancellation, and rollback hooks.
+- Guided project creation now validates recommended agent roles and gives Landing Page, Portfolio,
+  and Dashboard templates distinct responsive starters, with a renderer journey test that never
+  publishes or authenticates.
+
 - Final alpha audit with severity-ranked findings, measured coverage and duplication, dependency and
   compatibility results, release recommendation, and linked follow-up issues.
 - Separate V8 coverage reports for unit and main-service integration suites.
@@ -30,6 +37,13 @@ All notable changes are documented here. The format follows
   tests, and Lighthouse CI.
 
 ### Changed
+
+- Simple mode is now a result-oriented preview and project-assistant experience without IDE chrome;
+  Monaco, Explorer, terminal, Git internals, diffs, agents, and technical panels live in Advanced.
+- Approved agent commands are independently classified, parsed without a shell, workspace-bound,
+  executable-allowlisted, and sanitized; approved edits still become review proposals.
+- The Advanced workspace and Monaco integration now load on demand, reducing the Simple-mode initial
+  renderer to about 316 kB JavaScript (93 kB gzip).
 
 - Desktop and landing now share a restrained `V/` identity, warm neutral surfaces, a copper signal
   color, denser layouts, flatter controls, and role-specific icons instead of decorative AI motifs.
