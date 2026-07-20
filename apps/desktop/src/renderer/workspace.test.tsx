@@ -16,7 +16,9 @@ vi.mock('@monaco-editor/react', () => ({
       value={value ?? ''}
     />
   ),
+  loader: { config: vi.fn() },
 }));
+vi.mock('monaco-editor', () => ({}));
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -48,7 +50,7 @@ describe('workspace', () => {
     useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
-    expect(screen.queryByText('Meu projeto')).not.toBeNull();
+    expect(await screen.findByText('Meu projeto')).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
     expect(screen.queryByText('Meu projeto')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar explorador (⌘B)' }));
@@ -67,7 +69,7 @@ describe('workspace', () => {
     expect(screen.queryByLabelText('Mock Monaco editor')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Resultado do projeto' })).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Avançado' }));
-    expect(screen.queryByRole('navigation', { name: 'Ferramentas avançadas' })).not.toBeNull();
+    expect(await screen.findByRole('navigation', { name: 'Ferramentas avançadas' })).not.toBeNull();
     expect(useAppStore.getState().mode).toBe('advanced');
   });
 
@@ -76,7 +78,7 @@ describe('workspace', () => {
     useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
-    await user.click(screen.getByRole('button', { name: 'styles.css' }));
+    await user.click(await screen.findByRole('button', { name: 'styles.css' }));
     expect(useWorkspaceStore.getState().activeFileId).toBe('styles');
     expect(screen.queryByRole('tab', { name: 'styles.css' })).not.toBeNull();
   });
@@ -86,7 +88,7 @@ describe('workspace', () => {
     useAppStore.setState({ mode: 'advanced' });
     render(<WorkspaceScreen />);
 
-    await user.click(screen.getByRole('button', { name: 'README.md' }));
+    await user.click(await screen.findByRole('button', { name: 'README.md' }));
     expect(useWorkspaceStore.getState().openTabs).toEqual(['app', 'readme']);
     await user.click(screen.getByRole('button', { name: 'Fechar README.md' }));
     expect(useWorkspaceStore.getState().openTabs).toEqual(['app']);
