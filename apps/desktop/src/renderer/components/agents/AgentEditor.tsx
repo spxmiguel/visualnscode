@@ -38,10 +38,12 @@ const newAgent = (): AgentDefinition => ({
 export function AgentEditor({
   agent,
   onClose,
+  onDelete,
   onSave,
 }: {
   readonly agent: AgentDefinition | null;
   readonly onClose: () => void;
+  readonly onDelete?: (agentId: string) => void;
   readonly onSave: (agent: AgentDefinition) => void;
 }) {
   const [draft, setDraft] = useState<AgentDefinition>(agent ?? newAgent());
@@ -197,6 +199,37 @@ export function AgentEditor({
             />{' '}
             Memória ativa
           </label>
+          <label className="text-xs">
+            Escopo da memória
+            <select
+              className={field}
+              disabled={!draft.memory.enabled}
+              onChange={(event) =>
+                update('memory', {
+                  ...draft.memory,
+                  scope: event.target.value as AgentDefinition['memory']['scope'],
+                })
+              }
+              value={draft.memory.scope}
+            >
+              <option value="run">Somente esta execução</option>
+              <option value="project">Projeto atual</option>
+            </select>
+          </label>
+          <label className="text-xs">
+            Entradas de memória
+            <input
+              className={field}
+              disabled={!draft.memory.enabled}
+              max="100"
+              min="1"
+              onChange={(event) =>
+                update('memory', { ...draft.memory, maxEntries: Number(event.target.value) })
+              }
+              type="number"
+              value={draft.memory.maxEntries}
+            />
+          </label>
           <div className="sm:col-span-2">
             <p className="mb-2 text-xs">Ferramentas permitidas</p>
             <div className="flex flex-wrap gap-2">
@@ -223,19 +256,41 @@ export function AgentEditor({
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-[rgb(var(--border))] p-4">
-          <Button onClick={onClose} variant="ghost">
-            Cancelar
-          </Button>
-          <Button
-            disabled={!draft.name.trim() || !draft.model.trim()}
-            onClick={() => {
-              onSave(draft);
-              onClose();
-            }}
-          >
-            Salvar agente
-          </Button>
+        <div className="flex justify-between gap-2 border-t border-[rgb(var(--border))] p-4">
+          <div>
+            {agent && !agent.builtIn && onDelete ? (
+              <Button
+                onClick={() => {
+                  if (window.confirm(`Excluir o agente “${agent.name}”?`)) onDelete(agent.id);
+                }}
+                variant="danger"
+              >
+                Excluir agente
+              </Button>
+            ) : null}
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={onClose} variant="ghost">
+              Cancelar
+            </Button>
+            <Button
+              disabled={
+                !draft.name.trim() ||
+                !draft.model.trim() ||
+                draft.allowedFolders.length === 0 ||
+                draft.costLimitUsd < 0 ||
+                draft.timeoutMs < 1000 ||
+                draft.memory.maxEntries < 1 ||
+                draft.memory.maxEntries > 100
+              }
+              onClick={() => {
+                onSave(draft);
+                onClose();
+              }}
+            >
+              Salvar agente
+            </Button>
+          </div>
         </div>
       </div>
     </div>

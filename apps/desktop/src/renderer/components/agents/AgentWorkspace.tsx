@@ -8,22 +8,32 @@ import {
   RotateCw,
   Square,
   Trash2,
+  Unlink2,
 } from 'lucide-react';
-import type { AgentDefinition } from '@visualnscode/agents/browser';
+import type { AgentDefinition, AgentRunRecord } from '@visualnscode/agents/browser';
 import { Button } from '@visualnscode/ui';
 import { agentApi } from '../../agent-api';
 import type { AgentVersionControlOptions } from '../../../shared/version-control';
-import { resolvedAgents, useAgentStore } from '../../agent-store';
+import { resolvedAgents, useAgentStore, type AgentNodeRunState } from '../../agent-store';
 import { useWorkspaceStore } from '../../workspace-store';
 import { AgentEditor } from './AgentEditor';
 
-const statusColor = (status: 'running' | 'complete' | 'idle' | 'error') =>
+const statusColor = (status: 'running' | 'queued' | 'complete' | 'idle' | 'error') =>
   ({
     running: 'border-amber-500/60 shadow-amber-500/10',
+    queued: 'border-sky-500/40',
     complete: 'border-emerald-500/50 shadow-emerald-500/10',
     error: 'border-red-500/50 shadow-red-500/10',
     idle: 'border-[rgb(var(--border))]',
   })[status];
+
+const isCompletedRun = (run: AgentNodeRunState | undefined): run is AgentRunRecord =>
+  typeof run === 'object' && 'output' in run;
+
+const runDuration = (startedAt: string, completedAt: string): string => {
+  const milliseconds = Math.max(0, Date.parse(completedAt) - Date.parse(startedAt));
+  return milliseconds < 1000 ? `${milliseconds}ms` : `${(milliseconds / 1000).toFixed(1)}s`;
+};
 
 const VERSION_CONTROL_CHOICES: ReadonlyArray<readonly [keyof AgentVersionControlOptions, string]> =
   [
@@ -56,6 +66,7 @@ export function AgentWorkspace() {
   const history = useAgentStore((state) => state.history);
   const selectedAgentId = useAgentStore((state) => state.selectedAgentId);
   const connectFrom = useAgentStore((state) => state.connectFrom);
+  const workflowNotice = useAgentStore((state) => state.workflowNotice);
   const files = useWorkspaceStore((state) => state.files);
   const openTabs = useWorkspaceStore((state) => state.openTabs);
   const agents = useMemo(
@@ -66,6 +77,9 @@ export function AgentWorkspace() {
     selectedAgentId === '__new__'
       ? null
       : (agents.find(({ id }) => id === selectedAgentId) ?? null);
+  const completedRuns = Object.values(nodeRuns).filter(isCompletedRun);
+  const liveCost = completedRuns.reduce((total, run) => total + run.costUsd, 0);
+  const liveSteps = completedRuns.reduce((total, run) => total + run.steps, 0);
 
   useEffect(() => agentApi.onEvent((event) => useAgentStore.getState().handleEvent(event)), []);
   useEffect(() => {
@@ -129,10 +143,28 @@ export function AgentWorkspace() {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex min-h-12 flex-wrap items-center justify-between gap-2 border-b border-[rgb(var(--border))] bg-[rgb(var(--surface))] px-4 py-2">
           <div>
-            <h1 className="text-sm font-semibold">{currentWorkflow.name}</h1>
-            <p className="text-[10px] text-[rgb(var(--text-muted))]">
-              {currentWorkflow.description}
-            </p>
+            <h1 className="sr-only">{currentWorkflow.name}</h1>
+            <input
+              aria-label="Nome da equipe"
+              className="block w-full bg-transparent text-sm font-semibold outline-none focus:text-[rgb(var(--accent))]"
+              onChange={(event) =>
+                useAgentStore
+                  .getState()
+                  .updateWorkflow({ ...currentWorkflow, name: event.target.value.slice(0, 100) })
+              }
+              value={currentWorkflow.name}
+            />
+            <input
+              aria-label="Descrição da equipe"
+              className="block min-w-[320px] bg-transparent text-[10px] text-[rgb(var(--text-muted))] outline-none"
+              onChange={(event) =>
+                useAgentStore.getState().updateWorkflow({
+                  ...currentWorkflow,
+                  description: event.target.value.slice(0, 1000),
+                })
+              }
+              value={currentWorkflow.description}
+            />
           </div>
           <div className="flex items-center gap-2 text-[9px] text-[rgb(var(--text-muted))]">
             <label>
@@ -221,11 +253,13 @@ export function AgentWorkspace() {
               const status =
                 run === 'running'
                   ? 'running'
-                  : typeof run === 'object'
-                    ? run.status === 'completed'
+                  : run === 'queued'
+                    ? 'queued'
+                    : isCompletedRun(run)
                       ? 'complete'
-                      : 'error'
-                    : 'idle';
+                      : typeof run === 'object'
+                        ? 'error'
+                        : 'idle';
               return (
                 <article
                   className={`absolute w-[180px] cursor-grab rounded-md border bg-[rgb(var(--surface))] p-3 shadow-[var(--shadow-panel)] ${statusColor(status)} ${connectFrom === node.id ? 'ring-1 ring-[rgb(var(--accent))]' : ''}`}
@@ -273,9 +307,13 @@ export function AgentWorkspace() {
                     >
                       {status === 'running'
                         ? 'Executando…'
-                        : status === 'complete'
-                          ? 'Concluído'
-                          : agent.autonomy}
+                        : status === 'queued'
+                          ? 'Na fila'
+                          : status === 'complete'
+                            ? 'Concluído'
+                            : status === 'error'
+                              ? 'Falhou'
+                              : agent.autonomy}
                     </span>
                     <button
                       aria-label={`Conectar ${agent.name}`}
@@ -306,6 +344,11 @@ export function AgentWorkspace() {
       <aside className="flex w-[340px] shrink-0 flex-col border-l border-[rgb(var(--border))] bg-[rgb(var(--surface))]">
         <div className="border-b border-[rgb(var(--border))] p-3">
           <h2 className="text-xs font-semibold">Executar equipe</h2>
+          {workflowNotice ? (
+            <p className="mt-1 text-[9px] text-[rgb(var(--text-muted))]" role="status">
+              {workflowNotice}
+            </p>
+          ) : null}
           <textarea
             aria-label="Tarefa da equipe"
             className="mt-2 h-20 w-full resize-none rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] p-2 text-xs outline-none"
@@ -367,6 +410,43 @@ export function AgentWorkspace() {
               </div>
             ) : null}
           </details>
+          <details className="mt-2 rounded-lg border border-[rgb(var(--border))] p-2">
+            <summary className="cursor-pointer text-[10px] font-semibold text-[rgb(var(--text-muted))]">
+              Execução e rollback
+            </summary>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[9px] text-[rgb(var(--text-muted))]">
+              <label>
+                Retries
+                <input
+                  aria-label="Tentativas adicionais por agente"
+                  className="ml-1 w-10 rounded bg-[rgb(var(--surface-sunken))] px-1.5 py-1"
+                  max="5"
+                  min="0"
+                  onChange={(event) =>
+                    useAgentStore.getState().updateWorkflow({
+                      ...currentWorkflow,
+                      retries: Number(event.target.value),
+                    })
+                  }
+                  type="number"
+                  value={currentWorkflow.retries}
+                />
+              </label>
+              <label className="flex items-center gap-1.5">
+                <input
+                  checked={currentWorkflow.rollbackOnFailure}
+                  onChange={(event) =>
+                    useAgentStore.getState().updateWorkflow({
+                      ...currentWorkflow,
+                      rollbackOnFailure: event.target.checked,
+                    })
+                  }
+                  type="checkbox"
+                />
+                Rollback na falha
+              </label>
+            </div>
+          </details>
           <div className="mt-2 flex gap-2">
             {activeRunId ? (
               <Button onClick={() => void agentApi.cancel(activeRunId)} size="sm" variant="danger">
@@ -401,13 +481,11 @@ export function AgentWorkspace() {
           </div>
           <div className="border-x border-[rgb(var(--border))] p-2">
             <CircleDollarSign className="mx-auto size-3.5 text-[rgb(var(--accent))]" />
-            <p className="mt-1 text-[10px]">${(currentResult?.costUsd ?? 0).toFixed(2)}</p>
+            <p className="mt-1 text-[10px]">${(currentResult?.costUsd ?? liveCost).toFixed(2)}</p>
           </div>
           <div className="p-2">
             <Activity className="mx-auto size-3.5 text-[rgb(var(--accent))]" />
-            <p className="mt-1 text-[10px]">
-              {currentResult?.steps ?? Object.keys(nodeRuns).length} passos
-            </p>
+            <p className="mt-1 text-[10px]">{currentResult?.steps ?? liveSteps} passos</p>
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-3">
@@ -418,6 +496,9 @@ export function AgentWorkspace() {
             >
               <p className="text-[10px] font-semibold text-amber-500">{agentId} pede aprovação</p>
               <p className="mt-1 text-xs">{action.description}</p>
+              <p className="mt-1 text-[9px] text-[rgb(var(--text-muted))]">
+                Risco: {action.risk} · {action.decisionReason}
+              </p>
               {action.path ? (
                 <p className="mt-1 font-mono text-[9px]">Arquivo: {action.path}</p>
               ) : null}
@@ -452,25 +533,81 @@ export function AgentWorkspace() {
                     <span>
                       {run === 'running'
                         ? 'executando'
-                        : typeof run === 'object'
-                          ? run.status
-                          : 'aguardando'}
+                        : run === 'queued'
+                          ? 'na fila'
+                          : isCompletedRun(run)
+                            ? run.status
+                            : typeof run === 'object'
+                              ? 'falhou'
+                              : 'aguardando'}
                     </span>
                   </div>
-                  {typeof run === 'object' ? (
+                  {isCompletedRun(run) ? (
                     <div className="mt-2 space-y-1 text-[9px] text-[rgb(var(--text-muted))]">
                       <p>{run.output}</p>
+                      <p>
+                        {runDuration(run.startedAt, run.completedAt)} · ${run.costUsd.toFixed(3)} ·{' '}
+                        {run.steps} passo(s) · tentativa {run.attempt}
+                      </p>
                       {run.filesRead.length ? <p>Lendo: {run.filesRead.join(', ')}</p> : null}
                       {run.filesChanged.length ? (
                         <p>Alterou: {run.filesChanged.join(', ')}</p>
                       ) : null}
                       {run.commands.length ? <p>Comandos: {run.commands.join(', ')}</p> : null}
+                      {run.actions.map((action) => (
+                        <p key={action.id}>
+                          {action.status}: {action.description}
+                          {action.path ? ` · ${action.path}` : ''}
+                          {action.command ? ` · $ ${action.command}` : ''}
+                        </p>
+                      ))}
+                      {run.errors.map((error) => (
+                        <p className="text-red-400" key={error}>
+                          {error}
+                        </p>
+                      ))}
                     </div>
+                  ) : typeof run === 'object' ? (
+                    <p className="mt-2 text-[9px] text-red-400">
+                      {run.message} · tentativa {run.attempt}
+                    </p>
                   ) : null}
                 </div>
               );
             })}
           </div>
+          {currentWorkflow.edges.length ? (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider text-[rgb(var(--text-subtle))]">
+                Conexões ({currentWorkflow.edges.length})
+              </summary>
+              <div className="mt-2 space-y-1">
+                {currentWorkflow.edges.map((edge) => {
+                  const sourceNode = currentWorkflow.nodes.find(({ id }) => id === edge.source);
+                  const targetNode = currentWorkflow.nodes.find(({ id }) => id === edge.target);
+                  const source = agents.find(({ id }) => id === sourceNode?.agentId);
+                  const target = agents.find(({ id }) => id === targetNode?.agentId);
+                  return (
+                    <div
+                      className="flex items-center gap-2 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1.5 text-[9px]"
+                      key={edge.id}
+                    >
+                      <span className="min-w-0 flex-1 truncate">
+                        {source?.name ?? edge.source} → {target?.name ?? edge.target}
+                      </span>
+                      <button
+                        aria-label={`Remover conexão de ${source?.name ?? edge.source} para ${target?.name ?? edge.target}`}
+                        onClick={() => useAgentStore.getState().removeEdge(edge.id)}
+                        type="button"
+                      >
+                        <Unlink2 className="size-3 text-[rgb(var(--text-subtle))]" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          ) : null}
           {logs.length ? (
             <>
               <h3 className="mb-2 mt-4 text-[10px] font-semibold uppercase tracking-wider text-[rgb(var(--text-subtle))]">
@@ -505,13 +642,20 @@ export function AgentWorkspace() {
                 Histórico
               </h3>
               {history.slice(0, 5).map((run) => (
-                <div
-                  className="mb-1 flex justify-between rounded-md px-2 py-1.5 text-[9px] hover:bg-[rgb(var(--surface-hover))]"
+                <details
+                  className="mb-1 rounded-md px-2 py-1.5 text-[9px] hover:bg-[rgb(var(--surface-hover))]"
                   key={run.id}
                 >
-                  <span className="truncate">{run.task}</span>
-                  <span>{run.status}</span>
-                </div>
+                  <summary className="flex cursor-pointer justify-between gap-2">
+                    <span className="truncate">{run.task}</span>
+                    <span>{run.status}</span>
+                  </summary>
+                  <p className="mt-1 text-[rgb(var(--text-muted))]">
+                    {runDuration(run.startedAt, run.completedAt)} · ${run.costUsd.toFixed(3)} ·{' '}
+                    {run.steps} passo(s) · {run.agentRuns.length} agente(s)
+                  </p>
+                  {run.error ? <p className="mt-1 text-red-400">{run.error}</p> : null}
+                </details>
               ))}
             </>
           ) : null}
@@ -522,6 +666,7 @@ export function AgentWorkspace() {
         <AgentEditor
           agent={selectedAgent}
           onClose={() => useAgentStore.getState().setSelectedAgent(null)}
+          onDelete={(agentId) => useAgentStore.getState().removeCustomAgent(agentId)}
           onSave={(agent: AgentDefinition) => {
             if (selectedAgentId === '__new__') useAgentStore.getState().addCustomAgent(agent);
             else useAgentStore.getState().updateAgent(agent);

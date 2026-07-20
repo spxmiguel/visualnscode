@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import {
   builtInAgents,
   teamTemplates,
+  workflowStages,
   type AgentAction,
   type AgentDefinition,
   type AgentRunRecord,
@@ -18,24 +19,35 @@ export interface PendingAgentAction {
   readonly action: AgentAction;
 }
 
+export interface AgentNodeFailure {
+  readonly status: 'failed';
+  readonly message: string;
+  readonly attempt: number;
+}
+
+export type AgentNodeRunState = AgentRunRecord | AgentNodeFailure | 'running' | 'queued';
+
 interface AgentWorkspaceState {
   readonly currentWorkflow: TeamWorkflow;
   readonly customAgents: readonly AgentDefinition[];
   readonly overrides: Readonly<Record<string, AgentDefinition>>;
   readonly activeRunId: string | null;
   readonly currentResult: WorkflowRunResult | null;
-  readonly nodeRuns: Readonly<Record<string, AgentRunRecord | 'running' | 'queued'>>;
+  readonly nodeRuns: Readonly<Record<string, AgentNodeRunState>>;
   readonly pendingActions: readonly PendingAgentAction[];
   readonly logs: readonly string[];
   readonly history: readonly WorkflowRunResult[];
   readonly selectedAgentId: string | null;
   readonly connectFrom: string | null;
+  readonly workflowNotice: string | null;
   readonly addCustomAgent: (agent: AgentDefinition) => void;
   readonly applyTemplate: (templateId: string) => void;
   readonly addNode: (agentId: string, x: number, y: number) => void;
   readonly connect: (source: string, target: string) => void;
   readonly handleEvent: (event: WorkflowEvent) => void;
   readonly moveNode: (nodeId: string, x: number, y: number) => void;
+  readonly removeCustomAgent: (agentId: string) => void;
+  readonly removeEdge: (edgeId: string) => void;
   readonly removeNode: (nodeId: string) => void;
   readonly resolveAction: (actionId: string) => void;
   readonly setConnectFrom: (nodeId: string | null) => void;
@@ -69,20 +81,28 @@ export const useAgentStore = create<AgentWorkspaceState>()(
       history: [],
       selectedAgentId: null,
       connectFrom: null,
+      workflowNotice: null,
       addCustomAgent: (agent) =>
         set((state) => ({
           customAgents: [...state.customAgents.filter(({ id }) => id !== agent.id), agent],
         })),
       applyTemplate: (templateId) =>
-        set({ currentWorkflow: cloneTemplate(templateId), nodeRuns: {}, currentResult: null }),
+        set({
+          currentWorkflow: cloneTemplate(templateId),
+          nodeRuns: {},
+          currentResult: null,
+          workflowNotice: null,
+        }),
       addNode: (agentId, x, y) =>
         set((state) => {
           const id = `${agentId}-${Date.now()}`;
           return {
             currentWorkflow: {
               ...state.currentWorkflow,
+              builtIn: false,
               nodes: [...state.currentWorkflow.nodes, { id, agentId, position: { x, y } }],
             },
+            workflowNotice: null,
           };
         }),
       connect: (source, target) =>
@@ -93,13 +113,25 @@ export const useAgentStore = create<AgentWorkspaceState>()(
               (edge) => edge.source === source && edge.target === target,
             )
           )
-            return { connectFrom: null };
+            return { connectFrom: null, workflowNotice: 'Essa conexão já existe ou é inválida.' };
+          const edge = { id: `edge-${Date.now()}`, source, target };
+          const nextWorkflow = {
+            ...state.currentWorkflow,
+            builtIn: false,
+            edges: [...state.currentWorkflow.edges, edge],
+          };
+          try {
+            workflowStages(nextWorkflow);
+          } catch {
+            return {
+              connectFrom: null,
+              workflowNotice: 'Conexão recusada: equipes não podem ter ciclos.',
+            };
+          }
           return {
-            currentWorkflow: {
-              ...state.currentWorkflow,
-              edges: [...state.currentWorkflow.edges, { id: `edge-${Date.now()}`, source, target }],
-            },
+            currentWorkflow: nextWorkflow,
             connectFrom: null,
+            workflowNotice: 'Agentes conectados.',
           };
         }),
       handleEvent: (event) =>
@@ -116,13 +148,33 @@ export const useAgentStore = create<AgentWorkspaceState>()(
               nodeRuns: { ...state.nodeRuns, [event.nodeId]: 'running' as const },
               logs: [...state.logs, `${event.agentId} iniciou a tentativa ${event.attempt}.`],
             };
+          if (event.type === 'stage-started')
+            return {
+              nodeRuns: Object.fromEntries([
+                ...Object.entries(state.nodeRuns),
+                ...event.nodeIds.map((nodeId) => [
+                  nodeId,
+                  state.nodeRuns[nodeId] ?? ('queued' as const),
+                ]),
+              ]),
+            };
           if (event.type === 'agent-completed')
             return {
               nodeRuns: { ...state.nodeRuns, [event.record.nodeId]: event.record },
               logs: [...state.logs, ...event.record.logs],
             };
           if (event.type === 'agent-failed')
-            return { logs: [...state.logs, `${event.agentId}: ${event.message}`] };
+            return {
+              nodeRuns: {
+                ...state.nodeRuns,
+                [event.nodeId]: {
+                  status: 'failed' as const,
+                  message: event.message,
+                  attempt: event.attempt,
+                },
+              },
+              logs: [...state.logs, `${event.agentId}: ${event.message}`],
+            };
           if (event.type === 'action-requested')
             return {
               pendingActions: [
@@ -160,6 +212,7 @@ export const useAgentStore = create<AgentWorkspaceState>()(
         set((state) => ({
           currentWorkflow: {
             ...state.currentWorkflow,
+            builtIn: false,
             nodes: state.currentWorkflow.nodes.map((node) =>
               node.id === nodeId
                 ? { ...node, position: { x: Math.max(0, x), y: Math.max(0, y) } }
@@ -171,11 +224,45 @@ export const useAgentStore = create<AgentWorkspaceState>()(
         set((state) => ({
           currentWorkflow: {
             ...state.currentWorkflow,
+            builtIn: false,
             nodes: state.currentWorkflow.nodes.filter(({ id }) => id !== nodeId),
             edges: state.currentWorkflow.edges.filter(
               ({ source, target }) => source !== nodeId && target !== nodeId,
             ),
           },
+          workflowNotice: 'Agente removido da equipe.',
+        })),
+      removeCustomAgent: (agentId) =>
+        set((state) => {
+          const removedNodeIds = new Set(
+            state.currentWorkflow.nodes
+              .filter(({ agentId: nodeAgentId }) => nodeAgentId === agentId)
+              .map(({ id }) => id),
+          );
+          return {
+            customAgents: state.customAgents.filter(({ id }) => id !== agentId),
+            currentWorkflow: {
+              ...state.currentWorkflow,
+              builtIn: false,
+              nodes: state.currentWorkflow.nodes.filter(
+                ({ agentId: nodeAgentId }) => nodeAgentId !== agentId,
+              ),
+              edges: state.currentWorkflow.edges.filter(
+                (edge) => !removedNodeIds.has(edge.source) && !removedNodeIds.has(edge.target),
+              ),
+            },
+            selectedAgentId: state.selectedAgentId === agentId ? null : state.selectedAgentId,
+            workflowNotice: 'Agente personalizado excluído.',
+          };
+        }),
+      removeEdge: (edgeId) =>
+        set((state) => ({
+          currentWorkflow: {
+            ...state.currentWorkflow,
+            builtIn: false,
+            edges: state.currentWorkflow.edges.filter(({ id }) => id !== edgeId),
+          },
+          workflowNotice: 'Conexão removida.',
         })),
       resolveAction: (actionId) =>
         set((state) => ({
@@ -185,14 +272,22 @@ export const useAgentStore = create<AgentWorkspaceState>()(
       setHistory: (history) => set({ history }),
       setSelectedAgent: (selectedAgentId) => set({ selectedAgentId }),
       startRun: (activeRunId) =>
-        set({ activeRunId, currentResult: null, pendingActions: [], nodeRuns: {}, logs: [] }),
+        set({
+          activeRunId,
+          currentResult: null,
+          pendingActions: [],
+          nodeRuns: {},
+          logs: [],
+          workflowNotice: null,
+        }),
       updateAgent: (agent) =>
         set((state) =>
           agent.builtIn
             ? { overrides: { ...state.overrides, [agent.id]: agent } }
             : { customAgents: [...state.customAgents.filter(({ id }) => id !== agent.id), agent] },
         ),
-      updateWorkflow: (currentWorkflow) => set({ currentWorkflow }),
+      updateWorkflow: (currentWorkflow) =>
+        set({ currentWorkflow: { ...currentWorkflow, builtIn: false }, workflowNotice: null }),
     }),
     {
       name: 'visualnscode-agent-workspace',

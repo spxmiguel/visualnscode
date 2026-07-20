@@ -21,6 +21,7 @@ beforeEach(() => {
     history: [],
     selectedAgentId: null,
     connectFrom: null,
+    workflowNotice: null,
   });
   useWorkspaceStore.setState({ activeFileId: 'app', openTabs: ['app'] });
 });
@@ -76,6 +77,49 @@ describe('sistema visual de agentes', () => {
           (edge) => edge.source === source.id && edge.target === added.id,
         ),
     ).toBe(true);
+  });
+
+  it('impede ciclos e permite remover conexões visualmente', async () => {
+    const user = userEvent.setup();
+    useAgentStore.getState().applyTemplate('code-review');
+    const [reviewer, security] = useAgentStore.getState().currentWorkflow.nodes;
+    useAgentStore.getState().connect(reviewer!.id, security!.id);
+    useAgentStore.getState().connect(security!.id, reviewer!.id);
+
+    expect(useAgentStore.getState().currentWorkflow.edges).toHaveLength(1);
+    expect(useAgentStore.getState().workflowNotice).toMatch(/ciclos/i);
+
+    render(<AgentWorkspace />);
+    await user.click(screen.getByText(/Conexões \(1\)/));
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Remover conexão de Reviewer para Security Auditor',
+      }),
+    );
+    expect(useAgentStore.getState().currentWorkflow.edges).toHaveLength(0);
+  });
+
+  it('registra fila e falha por nó com mensagem visível', () => {
+    const node = useAgentStore.getState().currentWorkflow.nodes[0]!;
+    useAgentStore.getState().handleEvent({
+      type: 'stage-started',
+      runId: 'run-status',
+      nodeIds: [node.id],
+    });
+    expect(useAgentStore.getState().nodeRuns[node.id]).toBe('queued');
+
+    useAgentStore.getState().handleEvent({
+      type: 'agent-failed',
+      runId: 'run-status',
+      nodeId: node.id,
+      agentId: node.agentId,
+      message: 'Provider indisponível.',
+      attempt: 2,
+    });
+    expect(useAgentStore.getState().nodeRuns[node.id]).toMatchObject({
+      status: 'failed',
+      attempt: 2,
+    });
   });
 
   it('exige autorizações separadas antes de permitir PR automático', async () => {
