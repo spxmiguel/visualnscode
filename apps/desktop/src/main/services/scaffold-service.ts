@@ -178,6 +178,9 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
         '--no-src-dir',
         '--import-alias',
         '@/*',
+        '--use-pnpm',
+        '--skip-install',
+        '--disable-git',
         '--yes',
       ],
     },
@@ -434,6 +437,7 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
       },
       { path: 'main.js', content: "console.log('{{name}} pronto');\n" },
     ],
+    runCommand: 'VisualnsCode static preview',
   },
   {
     id: 'empty',

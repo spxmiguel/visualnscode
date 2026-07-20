@@ -67,6 +67,7 @@ const initialFiles: readonly WorkspaceFile[] = [
 interface WorkspaceState {
   readonly activeFileId: string | null;
   readonly activeTool: WorkspaceTool;
+  readonly autoStartPreview: boolean;
   readonly bottomPanel: BottomPanel;
   readonly files: readonly WorkspaceFile[];
   readonly isBottomOpen: boolean;
@@ -76,6 +77,8 @@ interface WorkspaceState {
   readonly rightPanel: RightPanel;
   readonly closeTab: (fileId: string) => void;
   readonly openFile: (fileId: string) => void;
+  readonly consumePreviewStart: () => void;
+  readonly requestPreviewStart: () => void;
   readonly resetActiveFile: () => void;
   readonly setActiveTool: (tool: WorkspaceTool) => void;
   readonly setBottomPanel: (panel: BottomPanel) => void;
@@ -89,6 +92,7 @@ interface WorkspaceState {
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   activeFileId: 'app',
   activeTool: 'files',
+  autoStartPreview: false,
   bottomPanel: 'terminal',
   files: initialFiles,
   isBottomOpen: true,
@@ -111,6 +115,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
       activeFileId: fileId,
       openTabs: state.openTabs.includes(fileId) ? state.openTabs : [...state.openTabs, fileId],
     })),
+  consumePreviewStart: () => set({ autoStartPreview: false }),
+  requestPreviewStart: () =>
+    set({ autoStartPreview: true, rightPanel: 'preview', isRightOpen: true }),
   resetActiveFile: () =>
     set((state) => ({
       files: state.files.map((file) =>

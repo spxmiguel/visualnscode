@@ -162,6 +162,37 @@ describe('ScaffoldService', () => {
     expect(runner.calls.at(-1)?.args).not.toContain('--push');
   });
 
+  it('keeps Next.js dependency installation and Git initialization under user control', async () => {
+    const result = await service.create(
+      options(root, {
+        templateId: 'nextjs',
+        projectName: 'next-project',
+        installDependencies: false,
+        initializeGit: false,
+      }),
+    );
+
+    expect(result.success).toBe(true);
+    expect(runner.calls).toHaveLength(1);
+    expect(runner.calls[0]?.args).toEqual(
+      expect.arrayContaining(['--skip-install', '--disable-git', '--use-pnpm']),
+    );
+  });
+
+  it('requests the built-in preview for a static project', async () => {
+    const result = await service.create(
+      options(root, {
+        templateId: 'static-site',
+        projectName: 'static-project',
+        startAfterCreate: true,
+      }),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.previewRequested).toBe(true);
+    expect(result.runCommand).toBe('VisualnsCode static preview');
+  });
+
   it('refuses external creation without explicit confirmation before creating files', async () => {
     const result = await service.create(
       options(root, {

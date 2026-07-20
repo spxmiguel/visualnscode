@@ -100,6 +100,8 @@ function PanelTab({
 }
 
 export function PreviewPanel() {
+  const autoStartPreview = useWorkspaceStore((state) => state.autoStartPreview);
+  const consumePreviewStart = useWorkspaceStore((state) => state.consumePreviewStart);
   const [device, setDevice] = useState<DeviceMode>('desktop');
   const [customSize, setCustomSize] = useState<readonly [number, number]>([1280, 720]);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
@@ -162,7 +164,7 @@ export function PreviewPanel() {
     return () => window.removeEventListener('message', receive);
   }, []);
 
-  const start = async () => {
+  const start = useCallback(async () => {
     const detected = await window.visualnscode?.runner.detect();
     setRuntime(detected ?? null);
     if (!detected?.commands.dev) {
@@ -175,7 +177,13 @@ export function PreviewPanel() {
     setBrowserLogs([]);
     setPreviewUrl(null);
     window.visualnscode?.runner.start(PROCESS_ID, 'dev');
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!autoStartPreview) return;
+    consumePreviewStart();
+    void start();
+  }, [autoStartPreview, consumePreviewStart, start]);
 
   const restart = async () => {
     await window.visualnscode?.runner.restart(PROCESS_ID, 'dev');

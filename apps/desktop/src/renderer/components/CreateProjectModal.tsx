@@ -19,6 +19,7 @@ import type {
   ProjectTemplate,
 } from '../../shared/project-creation';
 import { useAppStore } from '../store';
+import { useWorkspaceStore } from '../workspace-store';
 
 interface Props {
   readonly initialDescription?: string;
@@ -140,6 +141,7 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
 
   const openCreatedProject = () => {
     if (!result?.success) return;
+    if (result.previewRequested) useWorkspaceStore.getState().requestPreviewStart();
     openProject({
       id: result.path,
       name: projectName,
@@ -147,11 +149,6 @@ export function CreateProjectModal({ initialDescription = '', onClose }: Props) 
       lastOpened: 'Agora',
       color: '#ae5128',
     });
-    if (result.runCommand) {
-      window.setTimeout(() => {
-        window.visualnscode?.runner.start('workspace-dev-server', 'dev');
-      }, 250);
-    }
     onClose();
   };
 

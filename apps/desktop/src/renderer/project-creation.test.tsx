@@ -10,6 +10,7 @@ import type {
 } from '../shared/project-creation';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { useAppStore } from './store';
+import { useWorkspaceStore } from './workspace-store';
 
 const dashboard: ProjectTemplate = {
   id: 'dashboard',
@@ -37,6 +38,7 @@ describe('guided project creation', () => {
     start.mockReset();
     progressListener = undefined;
     useAppStore.setState({ activeProject: null, mode: 'simple', screen: 'home' });
+    useWorkspaceStore.setState({ autoStartPreview: false, rightPanel: 'chat' });
     create.mockImplementation(async (options) => {
       progressListener?.({
         step: 'dependencies',
@@ -125,6 +127,8 @@ describe('guided project creation', () => {
     expect(useAppStore.getState().activeProject?.path).toBe('/projects/controlar-notas-escolares');
     expect(useAppStore.getState().screen).toBe('workspace');
     expect(close).toHaveBeenCalledOnce();
-    await waitFor(() => expect(start).toHaveBeenCalledWith('workspace-dev-server', 'dev'));
+    expect(useWorkspaceStore.getState().autoStartPreview).toBe(true);
+    expect(useWorkspaceStore.getState().rightPanel).toBe('preview');
+    expect(start).not.toHaveBeenCalled();
   });
 });
