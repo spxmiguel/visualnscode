@@ -54,13 +54,9 @@ describe('workspace', () => {
     expect(screen.queryByText('Meu projeto')).not.toBeNull();
 
     await user.click(screen.getByRole('button', { name: 'Avançado' }));
-    expect(
-      screen.queryByText('Terminal demonstrativo — comandos locais ainda estão desativados.'),
-    ).not.toBeNull();
+    expect(screen.queryByText('Terminal via node-pty chegará na próxima fase.')).not.toBeNull();
     await user.click(screen.getByRole('button', { name: 'Alternar painel inferior (⌘J)' }));
-    expect(
-      screen.queryByText('Terminal demonstrativo — comandos locais ainda estão desativados.'),
-    ).toBeNull();
+    expect(screen.queryByText('Terminal via node-pty chegará na próxima fase.')).toBeNull();
   });
 
   it('alterna entre os modos simples e avançado', async () => {
