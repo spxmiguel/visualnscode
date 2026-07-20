@@ -95,6 +95,43 @@ const viteCommand: ProjectCommand = {
   args: ['create', 'vite', '.', '--template', 'react-ts'],
 };
 
+const productStarterFiles = (
+  id: 'landing-page' | 'portfolio' | 'dashboard',
+): readonly TemplateFile[] => {
+  const content = {
+    'landing-page': {
+      eyebrow: 'Produto / 01',
+      title: 'Uma proposta clara, sem distrações.',
+      body: 'Explique o valor do produto, mostre a prova e conduza a pessoa até a próxima ação.',
+      action: 'Conhecer o produto',
+    },
+    portfolio: {
+      eyebrow: 'Portfolio / 2026',
+      title: 'Trabalho com produto, interface e código.',
+      body: 'Uma base direta para apresentar projetos, processo e formas de contato.',
+      action: 'Ver projetos',
+    },
+    dashboard: {
+      eyebrow: 'Resumo / agora',
+      title: 'Tudo importante em uma leitura.',
+      body: 'Organize indicadores, ações recentes e próximos passos sem perder contexto.',
+      action: 'Adicionar registro',
+    },
+  }[id];
+  return [
+    versionFile(id),
+    {
+      path: 'src/App.tsx',
+      content: `const records = ['Visão geral', 'Atividade recente', 'Próximos passos'];\n\nexport default function App() {\n  return (\n    <main>\n      <nav><strong>{{name}}</strong><span>Feito com clareza.</span></nav>\n      <section className="hero">\n        <p className="eyebrow">${content.eyebrow}</p>\n        <h1>${content.title}</h1>\n        <p className="lede">${content.body}</p>\n        <button type="button">${content.action}</button>\n      </section>\n      <section className="grid" aria-label="Conteúdo inicial">\n        {records.map((record, index) => <article key={record}><small>0{index + 1}</small><h2>{record}</h2><p>Edite este bloco para contar a história do seu projeto.</p></article>)}\n      </section>\n    </main>\n  );\n}\n`,
+    },
+    {
+      path: 'src/index.css',
+      content:
+        '*{box-sizing:border-box}body{margin:0;background:#f2f0ea;color:#1d1c19;font-family:Inter,system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:24px}nav{display:flex;justify-content:space-between;border-bottom:1px solid #c9c5ba;padding:12px 0;font-size:14px}nav span,.lede,article p{color:#666159}.hero{padding:12vh 0 9vh;max-width:780px}.eyebrow,small{font:11px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.14em;color:#9b4d27}h1{font-size:clamp(48px,8vw,92px);line-height:.94;letter-spacing:-.055em;margin:20px 0}.lede{font-size:18px;line-height:1.6;max-width:620px}button{margin-top:18px;border:0;border-radius:4px;background:#1d1c19;color:#fff;padding:12px 16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #c9c5ba}.grid article{padding:24px 24px 24px 0;border-right:1px solid #c9c5ba}.grid article+article{padding-left:24px}h2{font-size:17px}@media(max-width:720px){main{padding:18px}.hero{padding:10vh 0}.grid{grid-template-columns:1fr}.grid article,.grid article+article{padding:20px 0;border-right:0;border-bottom:1px solid #c9c5ba}}\n',
+    },
+  ];
+};
+
 export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
   {
     id: 'react-vite',
@@ -126,7 +163,7 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
     database: 'A definir',
     authentication: 'A definir',
     deployment: 'Vercel',
-    recommendedAgent: 'Full Stack Developer',
+    recommendedAgent: 'Architect',
     manager: 'pnpm',
     create: {
       executable: 'pnpm',
@@ -300,7 +337,7 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
     database: 'Cloud Firestore',
     authentication: 'Firebase Authentication',
     deployment: 'Firebase Hosting',
-    recommendedAgent: 'Full Stack Developer',
+    recommendedAgent: 'Architect',
     manager: 'pnpm',
     create: viteCommand,
     files: [
@@ -322,7 +359,7 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
     database: 'PostgreSQL (Supabase)',
     authentication: 'Supabase Auth',
     deployment: 'Vercel',
-    recommendedAgent: 'Full Stack Developer',
+    recommendedAgent: 'Architect',
     manager: 'pnpm',
     create: viteCommand,
     files: [versionFile('supabase-app')],
@@ -366,7 +403,7 @@ export const PROJECT_TEMPLATES: readonly TemplateDefinition[] = [
     recommendedAgent: agent as string,
     manager: 'pnpm' as const,
     create: viteCommand,
-    files: [versionFile(id as string)],
+    files: productStarterFiles(id as 'landing-page' | 'portfolio' | 'dashboard'),
     runCommand: 'pnpm run dev',
   })),
   {
@@ -428,6 +465,7 @@ const STOP_WORDS = new Set([
   'para',
   'meu',
   'minha',
+  'minhas',
   'site',
   'app',
   'aplicativo',
@@ -468,7 +506,15 @@ export const suggestProject = (description: string): ProjectSuggestion => {
     .slice(0, 4);
   const name = (words.length ? words.join('-') : 'novo-projeto').slice(0, 48);
   const structure =
-    template.category === 'backend' ? ['src/', 'src/index.ts'] : ['src/', 'public/'];
+    template.category === 'backend'
+      ? ['src/', 'src/index.ts', 'package.json']
+      : template.id === 'electron'
+        ? ['main.js', 'index.html', 'package.json']
+        : template.id === 'static-site'
+          ? ['index.html', 'style.css', 'main.js']
+          : template.id === 'empty'
+            ? ['README.md']
+            : ['src/', 'src/App.tsx', 'public/'];
 
   return {
     name,

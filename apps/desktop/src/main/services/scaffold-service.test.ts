@@ -3,6 +3,7 @@ import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { builtInAgents } from '@visualnscode/agents';
 import type { ProjectCreationOptions } from '../../shared/project-creation';
 import {
   PROJECT_TEMPLATES,
@@ -61,6 +62,7 @@ describe('project recommendations and templates', () => {
     for (const template of PROJECT_TEMPLATES) {
       expect(template.version).toMatch(/^\d+\.\d+\.\d+$/u);
       expect(template.schemaVersion).toBe(1);
+      expect(builtInAgents.some(({ name }) => name === template.recommendedAgent)).toBe(true);
     }
   });
 
@@ -116,6 +118,24 @@ describe('ScaffoldService', () => {
     expect(runner.calls).toHaveLength(0);
     expect(progress).toContain('Publicação no GitHub deixada para depois.');
   });
+
+  it.each(['landing-page', 'portfolio', 'dashboard'])(
+    'creates a distinct functional %s starter instead of the generic Vite screen',
+    async (templateId) => {
+      const result = await service.create(
+        options(root, { templateId, projectName: `test-${templateId}` }),
+      );
+
+      expect(result.success).toBe(true);
+      const app = await fs.readFile(path.join(result.path, 'src/App.tsx'), 'utf8');
+      expect(app).toContain(`test-${templateId}`);
+      expect(app).toContain('Conteúdo inicial');
+      expect(app).toContain('export default function App');
+      expect(runner.calls).toEqual([
+        expect.objectContaining({ executable: 'pnpm', args: expect.arrayContaining(['vite']) }),
+      ]);
+    },
+  );
 
   it('uses only injected commands for dependencies, Git and confirmed GitHub creation', async () => {
     const result = await service.create(
