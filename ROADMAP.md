@@ -25,10 +25,12 @@ pesquisa com usuários e revisão de segurança.
 - [x] abrir e gerenciar workspaces via diálogo nativo;
 - [x] filesystem IPC com proteção contra path traversal;
 - [x] salvar arquivo com Cmd/Ctrl+S;
-- [x] diff viewer Monaco (aceitar / rejeitar / editar antes de aplicar);
-- [x] checkpoints e rollback;
-- [x] scanner e redação de secrets;
-- [x] classificador de comandos (safe / confirm / dangerous / blocked);
+- [x] diff Monaco lado a lado e unificado, com seleção por arquivo/bloco e edição antes de aplicar;
+- [x] propostas de agentes sem escrita silenciosa e aceite/rejeição explícitos;
+- [x] checkpoints, snapshots, histórico, rollback e ponto de recuperação antes de desfazer;
+- [x] scanner e redação de secrets antes de providers remotos;
+- [x] isolamento por caminho real, proteção contra traversal, symlinks externos e exclusão em massa;
+- [x] classificador de comandos (safe / confirm / dangerous / blocked) e modo YOLO limitado;
 - [ ] busca de texto no workspace;
 - [ ] acessibilidade de teclado completa.
 

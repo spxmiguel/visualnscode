@@ -8,6 +8,14 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Added
 
+- fluxo de propostas de edição por IA sem escrita automática: seleção por arquivo e bloco, diff
+  lado a lado ou unificado, edição antes de aplicar, rejeição e aceite parcial;
+- histórico real de checkpoints com snapshots de arquivos novos/existentes, rollback e snapshot de
+  segurança antes de desfazer;
+- modo YOLO persistente com permissão global separada, confirmação explícita, banner ativo e
+  invariantes que continuam exigindo aprovação ou bloqueando comandos destrutivos;
+- testes de serviços para traversal, symlinks externos, credenciais, exclusão em massa, redaction,
+  comandos, diffs, aplicação parcial e rollback;
 - sistema de edição segura com diff viewer lado a lado (Monaco `DiffEditor`), fluxo propor → revisar → aceitar/rejeitar → checkpoint → gravar;
 - `FilesystemService`: operações de arquivo isoladas ao workspace, proteção contra path traversal e symlinks externos;
 - `SecretScanner`: detecção de API keys, tokens, chaves privadas, URLs de banco com credenciais — redação automática antes de enviar ao contexto de IA;
@@ -33,6 +41,10 @@ Todas as mudanças relevantes serão registradas neste arquivo. O formato segue
 
 ### Changed
 
+- `FilesystemService` agora valida o caminho lexical e o destino real, rejeita symlinks inseguros,
+  grava atomicamente e protege arquivos de credenciais contra leitura e sobrescrita;
+- providers remotos recebem mensagens e arquivos de contexto redigidos no processo principal;
+- o runner aceita somente scripts detectados no projeto e inicia processos sem shell;
 - landing page completa: hero, IDE mockup, integrations ticker, features, modos, agentes, segurança, roadmap, FAQ, CTA e footer;
 - identidade visual própria: novo AppMark SVG (ícone terminal `>_`) substituindo Sparkles genérico;
 - `electron-builder.yml`: empacotamento cross-platform — `.pkg` (macOS arm64/x64), `.AppImage`+`.deb`+`.rpm` (Linux), `.msi`+`.exe` (Windows);

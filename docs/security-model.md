@@ -1,94 +1,172 @@
 # Security Model
 
-VisualnsCode is designed around the principle that **AI should never act silently on your files**.
+VisualnsCode treats AI output as untrusted input. An AI provider or agent can propose a file change,
+but it cannot write that change through the renderer or agent protocol. The main process keeps the
+proposal until the user reviews it.
 
-## Core principles
+## Trust boundaries
 
-1. **Propose, then apply** — every AI-generated file change goes through a diff review before being written.
-2. **Workspace isolation** — all filesystem operations are locked to the open project folder. Path traversal is blocked at the IPC layer.
-3. **Secret detection** — before any content is sent to a remote AI provider, it is scanned for API keys, tokens, private keys, and database connection strings.
-4. **Command classification** — every shell command is classified before execution: `safe`, `confirm`, `dangerous`, or `blocked`.
-5. **Credentials in the OS keychain** — API keys are stored via Electron `safeStorage` (AES-256 backed by the OS credential store). Keys are never written to disk in plain text.
-6. **Sanitized logs** — all log output is passed through a redaction filter before being displayed or persisted.
-
-## Edit flow
-
+```mermaid
+flowchart LR
+  User[User] --> Renderer[Sandboxed renderer]
+  Renderer -->|validated IPC| Main[Electron main process]
+  Main --> Policy[Security policy]
+  Policy --> Workspace[Workspace filesystem]
+  Policy --> Vault[OS-protected credential vault]
+  Policy --> Local[Local provider or CLI]
+  Policy -->|redacted context only| Remote[Remote AI provider]
 ```
-AI proposes change
-    ↓
-Secret scan on proposed content
-    ↓
-Diff viewer (side-by-side Monaco diff editor)
-    ↓
-User accepts / rejects / edits
-    ↓
-Checkpoint created (rollback point)
-    ↓
-File written to disk
+
+The renderer has `nodeIntegration` disabled, `contextIsolation` enabled, and Electron sandboxing
+enabled. Filesystem, checkpoint, command, provider, and credential operations cross an explicit
+preload API. The main process validates IPC payload size and shape again before using them.
+
+## AI edit flow
+
+```mermaid
+flowchart TD
+  Proposal[AI returns a structured edit proposal] --> Validate[Validate paths, size and secrets]
+  Validate --> Pending[Store as pending; no disk write]
+  Pending --> Review[User reviews files and blocks]
+  Review --> Choice{User decision}
+  Choice -->|Reject| Discard[Close proposal without writing]
+  Choice -->|Edit first| Manual[Edit proposed content in Monaco]
+  Choice -->|Accept selected| Snapshot[Create checkpoint]
+  Manual --> Snapshot
+  Snapshot --> Atomic[Apply selected changes with atomic writes]
+  Atomic --> History[Record checkpoint in history]
+  History --> Rollback[Optional rollback with redo snapshot]
 ```
+
+Review supports:
+
+- side-by-side Monaco diff;
+- unified diff;
+- file selection;
+- block selection;
+- editing the proposed version before applying;
+- accept selected or reject all;
+- persistent checkpoint history and rollback.
+
+Agent autonomy does not bypass this flow. An agent `edit` action must include a relative path and
+the full proposed content. Ask or Guided autonomy may require an action approval first; after that,
+the content still becomes a pending visual proposal. It is not written automatically.
+
+## Workspace isolation
+
+Every path must be relative to the open workspace. `FilesystemService` performs both checks:
+
+1. lexical resolution rejects absolute paths, null bytes, and `..` traversal outside the root;
+2. real-path resolution verifies the existing target or nearest existing parent remains under the
+   real workspace root.
+
+Direct symbolic-link targets are rejected. A path that enters a symlinked parent is resolved with
+`realpath`; if the destination is outside the workspace, the operation is rejected. File writes use
+a temporary file in the same directory followed by an atomic rename, and will not overwrite a
+symlink.
+
+Directory deletion requires explicit confirmation. The workspace root cannot be deleted, and a
+single directory operation is blocked when it contains more than 20 entries. AI proposals can
+request at most three file deletions and 25 changed files at once.
+
+## Sensitive files and secret redaction
+
+These paths are protected from renderer reads, AI proposals, and overwrites:
+
+- `.env` variants, except `.env.example`;
+- `.ssh` content and common private-key names such as `id_rsa` and `id_ed25519`;
+- `.netrc`, `.npmrc`, `.pypirc`, credential and service-account JSON files;
+- PEM, KEY, P12, PFX, JKS, keystore, CRT, and CER files;
+- Firebase Admin service-account files.
+
+Content scanning detects common OpenAI, Anthropic, Google, AWS, and GitHub credentials, bearer
+tokens, credential assignments, private-key headers, and database URLs with embedded passwords.
+
+Before a remote provider receives a request:
+
+- message text is redacted;
+- sensitive context files are replaced with `[SENSITIVE FILE OMITTED]`;
+- detected values in normal files are replaced with `[REDACTED]`;
+- only the redacted copies leave the main process.
+
+Local providers and CLIs do not require remote redaction, but their access is still constrained by
+their configured permissions. Provider logs use a separate recursive sanitizer and never include
+stored API keys.
 
 ## Command classification
 
-| Class | Examples | Behavior |
-|---|---|---|
-| `safe` | `ls`, `echo`, `cat` | Executed immediately |
-| `confirm` | `npm install`, `git push`, `rm` | Requires explicit user confirmation |
-| `dangerous` | `sudo`, `git push --force`, `npm publish` | Shown with warning, requires typed confirmation |
-| `blocked` | `rm -rf`, `dd if=`, `diskpart`, `format` | Rejected outright, never executed |
+| Class       | Examples                                                                                                  | Default behavior                             |
+| ----------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `safe`      | read-only local commands                                                                                  | allowed                                      |
+| `confirm`   | dependency installation, regular Git push, deletion, network download                                     | explicit confirmation                        |
+| `dangerous` | administrative commands, force push, package publication, external file upload, write to an absolute path | reinforced confirmation; YOLO cannot skip it |
+| `blocked`   | `rm -rf`, `del /s`, `format`, `diskpart`, `mkfs`, destructive `dd`, `shutdown`                            | rejected; cannot be overridden               |
+
+The integrated project runner accepts only the development, build, or test commands detected from
+the current project. It starts the executable without a shell, which prevents a renderer payload
+from appending shell operators.
 
 ## YOLO mode
 
-YOLO mode reduces confirmation dialogs for `safe` and `confirm` commands. It:
+YOLO mode is disabled globally by default. Enabling it requires two separate states:
 
-- Must be explicitly enabled in Settings → Permissions.
-- Shows a persistent banner while active.
-- Cannot override `dangerous` or `blocked` classifications.
-- Can be disabled globally from any screen.
+1. allow YOLO on the current device;
+2. accept the warning shown when activating it.
 
-## Secret detection
+While active, a persistent workspace banner provides a one-click disable action. YOLO may skip
+confirmation only for the `confirm` class. It does not skip reinforced confirmation for
+`dangerous` commands and cannot override `blocked` commands. Disabling the global permission also
+turns off the active state and clears the acknowledgement.
 
-The scanner checks for:
+## Checkpoints and snapshots
 
-- OpenAI API keys (`sk-…`)
-- Anthropic API keys (`sk-ant-…`)
-- AWS access keys (`AKIA…`)
-- GitHub tokens (`ghp_…`)
-- Bearer tokens in `Authorization` headers
-- PEM private keys
-- Database connection strings with embedded credentials
+Before applying accepted files, VisualnsCode stores their previous content and whether each file
+already existed. Checkpoint files are placed under `~/.visualnscode/checkpoints`, the directory is
+restricted to mode `0700`, and each JSON file uses mode `0600` where the operating system supports
+POSIX modes. A workspace keeps the newest 50 checkpoints.
 
-**Sensitive file names** (`.env`, `.env.local`, `credentials.json`, `.netrc`, `id_rsa`, `*.pem`, `*.key`) are fully redacted before being passed to any AI context.
+A checkpoint is bound to the real workspace path. Restoring an ID created for another workspace is
+rejected. Rollback first creates a new snapshot of the current state, so the user retains a redo
+point. Files created by the original proposal are removed during rollback; files that existed are
+restored through the same safe-write path.
 
-## Path security
-
-The `FilesystemService` resolves every relative path against the workspace root and verifies the resolved path still begins with the workspace root. Paths that escape the workspace (`../../../etc/passwd`) are rejected with an error at the service layer, before any IPC response is sent.
-
-## Symlink handling
-
-The filesystem service uses `fs.stat()` (which follows symlinks) and then checks the resolved path. Symlinks pointing outside the workspace are rejected by the path check.
+Checkpoints are not encrypted. Sensitive files cannot enter the AI edit flow, but normal source
+code may be present in checkpoints. Users with stronger local-storage requirements should protect
+their OS account and home directory.
 
 ## Credential storage
 
+API credentials are encrypted with Electron `safeStorage` and stored only when the platform reports
+an encryption backend. Linux `basic_text` is explicitly rejected. Encrypted store files use mode
+`0600`; decrypted values remain in the main process and are passed directly to the selected
+provider adapter.
+
+## Security tests
+
+The unit and interface suites cover:
+
+- traversal and absolute paths;
+- direct and parent-directory symlink escapes;
+- sensitive filename detection;
+- multiple secret formats and remote-context redaction;
+- safe, confirmation, dangerous, and blocked command classes;
+- YOLO invariants;
+- multi-block diff calculation and partial application;
+- no-write-before-review behavior;
+- checkpoint creation, new-file rollback, and workspace ownership;
+- reject-all and visual rollback confirmation.
+
+Run the security-focused tests with the normal test suite:
+
+```bash
+pnpm test
 ```
-User enters API key
-    ↓
-IPC: environment:store-secret
-    ↓
-Main process: SecureStorage.set()
-    ↓
-Electron safeStorage.encryptString()
-    ↓
-Encrypted bytes written to user-data directory
+
+Before every push, the repository hook also runs:
+
+```bash
+pnpm security:audit
 ```
 
-Keys are retrieved in the main process only, decrypted in memory, and passed to the provider adapter. They are never sent to the renderer process.
-
-## Network
-
-Remote AI providers are contacted only when:
-
-1. A provider is configured and enabled.
-2. The user initiates a chat or agent task.
-3. The content has been secret-scanned and redacted.
-
-No telemetry or analytics requests are made.
+This scan checks tracked files and Git history for known credential formats. It complements runtime
+redaction; it does not replace secret rotation after an accidental exposure.
