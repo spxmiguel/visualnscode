@@ -8,6 +8,8 @@ All notable changes are documented here. The format follows
 
 ### Added
 
+- Provider-aware brand icons for Ollama, Claude, Codex, Gemini, OpenAI, OpenRouter, LM Studio, and
+  OpenCode across chat and model settings, with a lightweight CLI fallback.
 - Complete agent orchestration with ten built-in roles, custom definitions, visual team DAGs,
   sequential/parallel stages, approvals, live cost/step/file/command telemetry, retries, active
   timeout cancellation, scoped memory, sanitized history, cancellation, and rollback hooks.
@@ -38,6 +40,8 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- Light and dark theme controls are now directly available from both workspace modes, not only Home
+  and Settings.
 - Documentation now matches the result-oriented Simple mode, current terminal limitation, measured
   coverage, and installer-specific `PATH` behavior.
 - Documentation validation now checks local anchors, required README sections, all six Mermaid flows,

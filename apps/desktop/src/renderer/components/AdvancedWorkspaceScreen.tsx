@@ -10,11 +10,13 @@ import {
   Eye,
   FileCode2,
   MessageSquare,
+  Moon,
   PanelBottom,
   PanelLeft,
   PanelRight,
   Play,
   RotateCcw,
+  Sun,
 } from 'lucide-react';
 import {
   Button,
@@ -55,6 +57,7 @@ export function AdvancedWorkspaceScreen() {
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
   const theme = useAppStore((state) => state.theme);
+  const toggleTheme = useAppStore((state) => state.toggleTheme);
   const yoloEnabled = useAppStore((state) => state.yoloEnabled);
   const setYoloEnabled = useAppStore((state) => state.setYoloEnabled);
   const activeFileId = useWorkspaceStore((state) => state.activeFileId);
@@ -189,6 +192,12 @@ export function AdvancedWorkspaceScreen() {
             </IconButton>
           ) : null}
         </div>
+        <IconButton
+          label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </IconButton>
         <Button onClick={runPreview} size="sm">
           <Play className="size-3.5 fill-current" /> Executar
         </Button>

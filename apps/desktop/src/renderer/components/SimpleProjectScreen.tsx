@@ -1,5 +1,5 @@
-import { ArrowLeft, Check, Settings2, SlidersHorizontal } from 'lucide-react';
-import { Button, SegmentedControl } from '@visualnscode/ui';
+import { ArrowLeft, Check, Moon, Settings2, SlidersHorizontal, Sun } from 'lucide-react';
+import { Button, IconButton, SegmentedControl } from '@visualnscode/ui';
 import { useAppStore } from '../store';
 import { AppMark } from './AppMark';
 import { ChatPanel } from './chat/ChatPanel';
@@ -9,6 +9,8 @@ export function SimpleProjectScreen() {
   const activeProject = useAppStore((state) => state.activeProject);
   const navigate = useAppStore((state) => state.navigate);
   const setMode = useAppStore((state) => state.setMode);
+  const theme = useAppStore((state) => state.theme);
+  const toggleTheme = useAppStore((state) => state.toggleTheme);
 
   return (
     <div className="flex h-screen min-w-[720px] flex-col overflow-hidden bg-[rgb(var(--background))] text-[rgb(var(--text))]">
@@ -25,6 +27,12 @@ export function SimpleProjectScreen() {
         <Button onClick={() => navigate('settings')} size="sm" variant="ghost">
           <Settings2 className="size-3.5" /> Configurações
         </Button>
+        <IconButton
+          label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </IconButton>
         <SegmentedControl
           label="Modo da interface"
           onChange={setMode}

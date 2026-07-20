@@ -4,7 +4,6 @@ import {
   Eye,
   ExternalLink,
   Inspect,
-  MessageSquare,
   Monitor,
   Play,
   RefreshCw,
@@ -33,6 +32,7 @@ import { useChatStore } from '../chat-store';
 import { buildPreviewPrompt } from '../preview-context';
 import { useWorkspaceStore } from '../workspace-store';
 import { ChatPanel } from './chat/ChatPanel';
+import { ProviderIcon } from './providers/ProviderIcon';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile' | 'custom';
 const DEFAULT_SIZES: Record<Exclude<DeviceMode, 'custom'>, readonly [number, number]> = {
@@ -54,12 +54,13 @@ const isBridgeMessage = (
 export function RightWorkspacePanel() {
   const rightPanel = useWorkspaceStore((state) => state.rightPanel);
   const setRightPanel = useWorkspaceStore((state) => state.setRightPanel);
+  const selectedProviderId = useChatStore((state) => state.selectedProviderId);
   return (
     <aside className="flex h-full min-w-0 flex-col border-l border-[rgb(var(--border))] bg-[rgb(var(--surface))]">
       <div className="flex h-9 shrink-0 border-b border-[rgb(var(--border))] p-1">
         <PanelTab
           active={rightPanel === 'chat'}
-          icon={<MessageSquare className="size-3.5" />}
+          icon={<ProviderIcon className="size-3.5" providerId={selectedProviderId} />}
           label="Chat"
           onClick={() => setRightPanel('chat')}
         />

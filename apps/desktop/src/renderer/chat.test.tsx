@@ -28,6 +28,7 @@ describe('chat do workspace', () => {
     expect(screen.getByText('App.tsx')).not.toBeNull();
     const input = await screen.findByRole('textbox', { name: 'Mensagem para o chat' });
     await waitFor(() => expect((input as HTMLTextAreaElement).disabled).toBe(false));
+    expect(document.querySelector('[data-provider-icon="ollama"]')).not.toBeNull();
     await user.type(input, 'Explique este arquivo');
     await user.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
 

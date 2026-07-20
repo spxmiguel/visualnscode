@@ -5,6 +5,7 @@ import { Button } from '@visualnscode/ui';
 import { useChatStore } from '../../chat-store';
 import { providerApi } from '../../provider-api';
 import { useWorkspaceStore } from '../../workspace-store';
+import { ProviderIcon } from '../providers/ProviderIcon';
 
 export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
   const [providers, setProviders] = useState<readonly ProviderSummary[]>([]);
@@ -128,36 +129,46 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-1.5 border-b border-[rgb(var(--border))] px-2 py-1.5">
         {simple ? (
-          <div className="min-w-0 flex-1 px-1 py-1">
-            <p className="truncate text-[11px] font-medium text-[rgb(var(--text))]">
-              Assistente do projeto
-            </p>
-            <p className="truncate text-[9px] text-[rgb(var(--text-subtle))]">
-              {selected
-                ? `${selected.settings.alias || selected.name} · ${selectedModel}`
-                : 'Configure um provider para conversar'}
-            </p>
+          <div className="flex min-w-0 flex-1 items-center gap-2 px-1 py-1">
+            <ProviderIcon
+              className="size-4 text-[rgb(var(--text-muted))]"
+              providerId={selected?.id}
+            />
+            <div className="min-w-0">
+              <p className="truncate text-[11px] font-medium text-[rgb(var(--text))]">
+                Assistente do projeto
+              </p>
+              <p className="truncate text-[9px] text-[rgb(var(--text-subtle))]">
+                {selected
+                  ? `${selected.settings.alias || selected.name} · ${selectedModel}`
+                  : 'Configure um provider para conversar'}
+              </p>
+            </div>
           </div>
         ) : (
           <>
-            <select
-              aria-label="Provider do chat"
-              className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
-              onChange={(event) => {
-                const next = enabledProviders.find(({ id }) => id === event.target.value);
-                if (next) useChatStore.getState().setSelection(next.id, next.settings.defaultModel);
-              }}
-              value={selected?.id ?? ''}
-            >
-              {enabledProviders.length === 0 ? (
-                <option value="">Configure um provider</option>
-              ) : null}
-              {enabledProviders.map((provider) => (
-                <option key={provider.id} value={provider.id}>
-                  {provider.settings.alias || provider.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md bg-[rgb(var(--surface-sunken))] pl-2">
+              <ProviderIcon className="size-3.5" providerId={selected?.id} />
+              <select
+                aria-label="Provider do chat"
+                className="min-w-0 flex-1 bg-transparent py-1 pr-1 text-[10px] outline-none"
+                onChange={(event) => {
+                  const next = enabledProviders.find(({ id }) => id === event.target.value);
+                  if (next)
+                    useChatStore.getState().setSelection(next.id, next.settings.defaultModel);
+                }}
+                value={selected?.id ?? ''}
+              >
+                {enabledProviders.length === 0 ? (
+                  <option value="">Configure um provider</option>
+                ) : null}
+                {enabledProviders.map((provider) => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.settings.alias || provider.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <input
               aria-label="Modelo do chat"
               className="min-w-0 flex-1 rounded-md bg-[rgb(var(--surface-sunken))] px-2 py-1 text-[10px] outline-none"
@@ -217,7 +228,10 @@ export function ChatPanel({ simple = false }: { readonly simple?: boolean }) {
               className={`border-l pl-3 ${message.role === 'user' ? 'ml-8 border-[rgb(var(--border-strong))]' : 'border-[rgb(var(--accent))]'}`}
               key={message.id}
             >
-              <p className="mb-1 font-mono text-[9px] uppercase tracking-wider text-[rgb(var(--text-subtle))]">
+              <p className="mb-1 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-[rgb(var(--text-subtle))]">
+                {message.role === 'assistant' ? (
+                  <ProviderIcon className="size-2.5" providerId={message.providerId} />
+                ) : null}
                 {message.role === 'user' ? 'Você' : 'Assistente'}
               </p>
               <div className="min-w-0 text-xs leading-5 text-[rgb(var(--text-muted))]">

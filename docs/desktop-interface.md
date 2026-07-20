@@ -24,6 +24,8 @@ flowchart LR
 
 The home screen opens folders, begins guided creation, starts a confirmed GitHub clone, and lists
 recent projects. Settings controls theme, interface mode, providers, permissions, and onboarding.
+The light/dark theme switch remains available in both Simple and Advanced workspace headers; the
+persisted preference updates every application surface and the Monaco theme.
 
 ## Simple project experience
 

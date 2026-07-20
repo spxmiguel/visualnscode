@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@lobehub/icons-static-svg": "1.94.0",
     "@monaco-editor/react": "^4.7.0",
     "@visualnscode/agents": "workspace:^",
     "@visualnscode/config": "workspace:*",

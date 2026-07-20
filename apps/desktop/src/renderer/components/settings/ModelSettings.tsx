@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Cloud, Cpu, KeyRound, LoaderCircle, Play, Save, Terminal } from 'lucide-react';
+import { Check, KeyRound, LoaderCircle, Play, Save } from 'lucide-react';
 import type { AIModel, ProviderSettings, ProviderSummary } from '@visualnscode/providers/browser';
 import { Button, Surface } from '@visualnscode/ui';
 import { environmentApi } from '../../environment-api';
 import { providerApi } from '../../provider-api';
+import { ProviderIcon } from '../providers/ProviderIcon';
 
 const fieldClass =
   'mt-1.5 w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--surface-sunken))] px-3 py-2 text-xs outline-none focus:border-[rgb(var(--accent))]';
@@ -82,8 +83,6 @@ export function ModelSettings() {
     }
   };
 
-  const TypeIcon = selected.type === 'cli' ? Terminal : selected.type === 'local' ? Cpu : Cloud;
-
   return (
     <Surface className="overflow-hidden" elevated>
       <div className="border-b border-[rgb(var(--border))] p-5">
@@ -101,13 +100,7 @@ export function ModelSettings() {
               onClick={() => setSelectedId(provider.id)}
               type="button"
             >
-              {provider.type === 'cli' ? (
-                <Terminal className="size-3.5" />
-              ) : provider.type === 'local' ? (
-                <Cpu className="size-3.5" />
-              ) : (
-                <Cloud className="size-3.5" />
-              )}
+              <ProviderIcon className="size-3.5" providerId={provider.id} />
               <span className="min-w-0 flex-1 truncate">{provider.name}</span>
               <span
                 aria-label={provider.available ? 'Disponível' : 'Indisponível'}
@@ -121,7 +114,7 @@ export function ModelSettings() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex gap-3">
               <span className="flex size-8 items-center justify-center border border-[rgb(var(--border))] text-[rgb(var(--text-muted))]">
-                <TypeIcon className="size-4" />
+                <ProviderIcon className="size-4" providerId={selected.id} />
               </span>
               <div>
                 <h3 className="text-sm font-semibold">{selected.name}</h3>

@@ -107,4 +107,18 @@ describe('tema', () => {
     expect(useAppStore.getState().theme).toBe('light');
     expect(window.localStorage.getItem('visualnscode-preferences')).toContain('light');
   });
+
+  it('mantém a troca de tema disponível nos dois modos do workspace', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Usar tema claro' }));
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(useAppStore.getState().theme).toBe('light');
+    expect(screen.getByRole('button', { name: 'Usar tema escuro' })).not.toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Avançado' }));
+    await user.click(await screen.findByRole('button', { name: 'Usar tema escuro' }));
+    expect(document.documentElement.dataset.theme).toBe('dark');
+  });
 });
